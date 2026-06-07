@@ -1,7 +1,8 @@
 course-docs*
 stimuli*
 project-resources*
-
+Screenshot*
+No*
 
 src/main/resources/application-local.properties
 .env

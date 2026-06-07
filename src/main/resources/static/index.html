@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ideophone Arena</title>
+    <link rel="stylesheet" href="/arena.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar" aria-label="Session">
+        <div>
+          <h1>Ideophone Arena</h1>
+          <p id="session-meta" class="muted">Signed out</p>
+        </div>
+        <button id="logout-button" class="secondary hidden" type="button">Logout</button>
+      </section>
+
+      <section id="auth-panel" class="panel auth-panel" aria-label="Authentication">
+        <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+          <button id="register-tab" class="tab active" type="button">Register</button>
+          <button id="login-tab" class="tab" type="button">Login</button>
+        </div>
+
+        <form id="auth-form" class="form-grid">
+          <label>
+            Username
+            <input id="username-input" name="username" autocomplete="username" required minlength="3" maxlength="50">
+          </label>
+          <label id="email-field">
+            Email
+            <input id="email-input" name="email" autocomplete="email" type="email">
+          </label>
+          <label>
+            Password
+            <input id="password-input" name="password" autocomplete="current-password" required type="password" minlength="8">
+          </label>
+          <button id="auth-submit" class="primary" type="submit">Register</button>
+        </form>
+      </section>
+
+      <section id="start-panel" class="panel hidden" aria-label="Start game">
+        <div class="form-grid two-columns">
+          <label>
+            Condition
+            <select id="condition-select">
+              <option value="CONDITION_1_SOKUON">Condition 1 Sokuon</option>
+              <option value="CONDITION_2_SOKUON">Condition 2 Sokuon</option>
+              <option value="CONDITION_3_SOKUON">Condition 3 Sokuon</option>
+            </select>
+          </label>
+          <label>
+            Difficulty
+            <input id="difficulty-input" type="number" min="1" value="1">
+          </label>
+        </div>
+        <button id="start-button" class="primary" type="button">Start Game</button>
+      </section>
+
+      <section id="trial-panel" class="trial-panel hidden" aria-live="polite">
+        <div id="fixation-stage" class="fixation-stage hidden">
+          <span class="fixation-cross">+</span>
+        </div>
+
+        <div id="round-stage" class="round-stage hidden">
+          <div class="translations">
+            <p>One means <strong id="target-translation"></strong></p>
+            <p>The other means <strong id="other-translation"></strong></p>
+          </div>
+
+          <div class="stimulus-grid" aria-label="Ideophone stimuli">
+            <article id="left-card" class="stimulus-card" aria-label="Left ideophone">
+              <video id="left-media" class="media" playsinline preload="auto"></video>
+              <button id="left-play" class="media-play hidden" type="button">Play</button>
+              <div class="kana" id="left-kana"></div>
+              <div class="romaji" id="left-romaji"></div>
+            </article>
+            <article id="right-card" class="stimulus-card" aria-label="Right ideophone">
+              <video id="right-media" class="media" playsinline preload="auto"></video>
+              <button id="right-play" class="media-play hidden" type="button">Play</button>
+              <div class="kana" id="right-kana"></div>
+              <div class="romaji" id="right-romaji"></div>
+            </article>
+          </div>
+
+          <div id="choice-stage" class="choice-stage hidden">
+            <p class="question">Which one means <strong id="choice-target"></strong>?</p>
+            <div class="choice-grid">
+              <button id="left-choice" class="choice-button" type="button"></button>
+              <button id="right-choice" class="choice-button" type="button"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="feedback-panel" class="panel feedback-panel hidden" aria-live="polite">
+        <h2 id="feedback-title"></h2>
+        <dl class="feedback-grid">
+          <dt>Selected</dt>
+          <dd id="selected-kana"></dd>
+          <dt>Correct</dt>
+          <dd id="correct-kana"></dd>
+          <dt>Score</dt>
+          <dd id="score-line"></dd>
+        </dl>
+        <button id="next-button" class="primary" type="button">Next</button>
+      </section>
+
+      <p id="status-line" class="status-line" role="status"></p>
+    </main>
+
+    <script src="/arena.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+﻿display,meaning-prompt,word-answer,word-a,word-b,meaning-a,meaning-b,modality,pairing
+instructions,,,,,,,,
+practice,"softly, gently",p0hu-sotto.mp4,p0hu-sotto.mp4,p0kd-gataN.mp4,"softly, gently",with a bang,auditory,p0
+practice,"suddenly, in a flash",p1kd-paQ.mp4,p1hu-zitto.mp4,p1kd-paQ.mp4,"motionless, fixedly","suddenly, in a flash",visual,p1
+practice,"clanging, banging",p2kd-gaNgaN.mp4,p2hu-sorosoro.mp4,p2kd-gaNgaN.mp4,"slowly, quietly","clanging, banging",auditory,p2
+practice,"exactly alike, spitting image",p3hu-sokkuri.mp4,p3hu-sokkuri.mp4,p3kd-garari.mp4,"exactly alike, spitting image","completely, totally changed",visual,p3
+begin-trials,,,,,,,,
+trial,with a rustling sound,a0hu-gosogoso.mp4,a0hu-gosogoso.mp4,a0kd-katakata.mp4,with a rustling sound,"clattering, rattling",auditory,a0
+trial,splashing,a1kd-batyabatya.mp4,a1hu-sitosito.mp4,a1kd-batyabatya.mp4,drizzling,splashing,auditory,a1
+trial,noisily gushing,a2hu-zyaazyaa.mp4,a2hu-zyaazyaa.mp4,a2kd-potapota.mp4,noisily gushing,"dripping, trickling",auditory,a2
+trial,"crisp, crunchy",a3kd-syakisyaki.mp4,a3hu-ziriziri.mp4,a3kd-syakisyaki.mp4,"sizzling, oozing","crisp, crunchy",auditory,a3
+trial,with a slurp,a4hu-zuruzuru.mp4,a4hu-zuruzuru.mp4,a4kd-poripori.mp4,with a slurp,"munching, crunching",auditory,a4
+trial,"noisily, with heavy feet",a5kd-dotabata.mp4,a5hu-sororisorori.mp4,a5kd-dotabata.mp4,slowly and quietly,"noisily, with heavy feet",auditory,a5
+trial,with a thud,a6hu-dosari.mp4,a6hu-dosari.mp4,a6kd-katiQ.mp4,with a thud,"click, snap",auditory,a6
+trial,"with a creak, squeak",a7kd-gisigisi.mp4,a7hu-dosidosi.mp4,a7kd-gisigisi.mp4,"tramping, stomping","with a creak, squeak",auditory,a7
+trial,"in a whisper, in a murmur",a8hu-bosori.mp4,a8hu-bosori.mp4,a8kd-kyaakyaa.mp4,"in a whisper, in a murmur","shrieking, squealing",auditory,a8
+trial,with a crunch,a9kd-sakuQ.mp4,a9hu-mogomogo.mp4,a9kd-sakuQ.mp4,"mumbling, chewing",with a crunch,auditory,a9
+trial,"clearly, distinctly, sharply",v0hu-kukkiri.mp4,v0hu-kukkiri.mp4,v0kd-tiratira.mp4,"clearly, distinctly, sharply","flickering, fluttering",visual,v0
+trial,"jagged, serrated",v1kd-gizagiza.mp4,v1hu-kurikuri.mp4,v1kd-gizagiza.mp4,big and round,"jagged, serrated",visual,v1
+trial,"dark, gloomy",v2hu-doNyori.mp4,v2hu-doNyori.mp4,v2kd-kirakira.mp4,"dark, gloomy","glittering, sparkling",visual,v2
+trial,"fluttering, dangling",v3kd-hirahira.mp4,v3hu-pitari.mp4,v3kd-hirahira.mp4,"tightly connected, no space in between","fluttering, dangling",visual,v3
+trial,"closely lined up, densely",v4hu-bissiri.mp4,v4hu-bissiri.mp4,v4kd-barabara.mp4,"closely lined up, densely","scattered, in pieces",visual,v4
+trial,"smilingly, with a grin",v5kd-nikoniko.mp4,v5hu-busuri.mp4,v5kd-nikoniko.mp4,"poutingly, displeasure","smilingly, with a grin",visual,v5
+trial,"gently, airily, fluffy",v6hu-huNwari.mp4,v6hu-huNwari.mp4,v6kd-gotugotu.mp4,"gently, airily, fluffy","rugged, scragged, angular",visual,v6
+trial,"crisp appearance, stiffly",v7kd-kiriQ.mp4,v7hu-boNyari.mp4,v7kd-kiriQ.mp4,"dim, faint, indistinct","crisp appearance, stiffly",visual,v7
+trial,"plump, rotund, chubby",v8hu-marumaru.mp4,v8hu-marumaru.mp4,v8kd-garigari.mp4,"plump, rotund, chubby","very skinny, emaciated",visual,v8
+trial,"ruffled, disheveled",v9kd-bosabosa.mp4,v9hu-mukumuku.mp4,v9kd-bosabosa.mp4,"billowing, plump","ruffled, disheveled",visual,v9
+trial,"boredom, tedious, fed up with",i0hu-uNzari.mp4,i0hu-uNzari.mp4,i0kd-wakuwaku.mp4,"boredom, tedious, fed up with","excitement, nervous",interoceptive,i0
+trial,"ravenously, greedily",i1kd-gatugatu.mp4,i1hu-geNnari.mp4,i1kd-gatugatu.mp4,"weary, fed up, dejected","ravenously, greedily",interoceptive,i1
+trial,"downhearted, dejected",i2hu-syoboN.mp4,i2hu-syoboN.mp4,i2kd-ruNruN.mp4,"downhearted, dejected","happy, elated, euphoric",interoceptive,i2
+trial,"to get irritated, annoyed",i3kd-iraira.mp4,i3hu-sukkiri.mp4,i3kd-iraira.mp4,"refreshingly, with a feeling fo relief","to get irritated, annoyed",interoceptive,i3
+trial,"attentive, proper attitude",i4hu-tyaNto.mp4,i4hu-tyaNto.mp4,i4kd-dogimagi.mp4,"attentive, proper attitude","flurried, nervous",interoceptive,i4
+trial,"anxious, nervous",i5kd-harahara.mp4,i5hu-nobinobi.mp4,i5kd-harahara.mp4,"comfortable, peaceful","anxious, nervous",interoceptive,i5
+trial,"at leisure, in a relaxed manner",i6hu-noNbiri.mp4,i6hu-noNbiri.mp4,i6kd-girigiri.mp4,"at leisure, in a relaxed manner","just barely, at the last moment",interoceptive,i6
+trial,"shivering, feeling chilly",i7kd-zokuzoku.mp4,i7hu-hokkori.mp4,i7kd-zokuzoku.mp4,"feeling warm and fluffy, soft","shivering, feeling chilly",interoceptive,i7
+trial,with a feeling of relief,i8hu-hoQ.mp4,i8hu-hoQ.mp4,i8kd-dokiri.mp4,with a feeling of relief,"being startled, getting a shock",interoceptive,i8
+trial,with a rapid heartbeat,i9kd-dokidoki.mp4,i9hu-yuttari.mp4,i9kd-dokidoki.mp4,"comfortable, calm, relaxed",with a rapid heartbeat,interoceptive,i9
+end-trials,,,,,,,,
