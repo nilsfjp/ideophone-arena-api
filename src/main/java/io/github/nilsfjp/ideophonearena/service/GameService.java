@@ -20,6 +20,7 @@ import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,8 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GameService {
 
-    private static final int DEFAULT_DIFFICULTY_LEVEL = 1;
-    private static final ConditionName DEFAULT_CONDITION_NAME = ConditionName.CONDITION_1_SOKUON;
+    private static final int SUPPORTED_DIFFICULTY_LEVEL = 1;
+    private static final Set<ConditionName> SUPPORTED_CONDITION_NAMES = EnumSet.of(
+            ConditionName.CONDITION_1_SOKUON,
+            ConditionName.CONDITION_2_SOKUON,
+            ConditionName.CONDITION_3_SOKUON
+    );
     private static final String SESSION_COMPLETE_MESSAGE = "Game session is complete";
 
     private final AppUserRepository appUserRepository;
@@ -53,16 +58,10 @@ public class GameService {
     @Transactional
     public GameSessionResponse startSession(UserDetails userDetails, StartSessionRequest request) {
         AppUser user = getCurrentUser(userDetails);
-        int difficultyLevel = request.getDifficultyLevel() == null
-                ? DEFAULT_DIFFICULTY_LEVEL
-                : request.getDifficultyLevel();
-        ConditionName conditionName = request.getConditionName() == null
-                ? DEFAULT_CONDITION_NAME
-                : request.getConditionName();
+        Integer difficultyLevel = request.getDifficultyLevel();
+        ConditionName conditionName = request.getConditionName();
 
-        if (difficultyLevel != DEFAULT_DIFFICULTY_LEVEL) {
-            throw new BadRequestException("Only difficulty level 1 is supported for the current demo");
-        }
+        validateSupportedStartRequest(conditionName, difficultyLevel);
 
         GameSession session = new GameSession(user, conditionName, difficultyLevel);
         return gameMapper.toSessionResponse(gameSessionRepository.save(session));
@@ -139,6 +138,24 @@ public class GameService {
     private AppUser getCurrentUser(UserDetails userDetails) {
         return appUserRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+    }
+
+    private void validateSupportedStartRequest(ConditionName conditionName, Integer difficultyLevel) {
+        if (difficultyLevel == null) {
+            throw new BadRequestException("difficultyLevel is required");
+        }
+        if (difficultyLevel != SUPPORTED_DIFFICULTY_LEVEL) {
+            throw new BadRequestException("Only difficulty level 1 is supported for the current demo");
+        }
+        if (conditionName == null) {
+            throw new BadRequestException("conditionName is required");
+        }
+        if (!SUPPORTED_CONDITION_NAMES.contains(conditionName)) {
+            throw new BadRequestException(
+                    "Unsupported conditionName: " + conditionName
+                            + ". Supported values are CONDITION_1_SOKUON, CONDITION_2_SOKUON, CONDITION_3_SOKUON"
+            );
+        }
     }
 
     private GameSession getOwnedSession(AppUser user, String sessionUuid) {
