@@ -95,6 +95,41 @@ class GameServiceTests {
     }
 
     @Test
+    void startSessionRejectsUnsupportedCondition() {
+        StartSessionRequest request = new StartSessionRequest();
+        request.setConditionName(ConditionName.TEXT_ONLY);
+        request.setDifficultyLevel(1);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> gameService.startSession(userDetails, request)
+        );
+
+        assertEquals(
+                "Unsupported conditionName: TEXT_ONLY. Supported values are CONDITION_1_SOKUON, CONDITION_2_SOKUON, CONDITION_3_SOKUON",
+                exception.getMessage()
+        );
+        verify(gameSessionRepository, never()).save(org.mockito.ArgumentMatchers.any(GameSession.class));
+    }
+
+    @Test
+    void startSessionCreatesSupportedConditionWithoutDefaulting() {
+        StartSessionRequest request = new StartSessionRequest();
+        request.setConditionName(ConditionName.CONDITION_2_SOKUON);
+        request.setDifficultyLevel(1);
+        when(gameSessionRepository.save(org.mockito.ArgumentMatchers.any(GameSession.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        gameService.startSession(userDetails, request);
+
+        ArgumentCaptor<GameSession> sessionCaptor = ArgumentCaptor.forClass(GameSession.class);
+        verify(gameSessionRepository).save(sessionCaptor.capture());
+        GameSession savedSession = sessionCaptor.getValue();
+        assertEquals(ConditionName.CONDITION_2_SOKUON, savedSession.getConditionName());
+        assertEquals(1, savedSession.getDifficultyLevel());
+    }
+
+    @Test
     void getNextRoundReturnsFirstUnansweredRoundForSession() {
         ArenaRound answeredRound = round(
                 100L,
