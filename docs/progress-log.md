@@ -434,3 +434,29 @@ None.
 
 Next single task:
 Add ownership, duplicate-answer, CORS preflight, and recent-attempt authentication tests before implementing Script Lab UI.
+
+## 2026-06-10
+
+Session goal:
+Make script display data, not code: add `display_form`/`canonical_form` to `ideophones` as the single source of truth for displayed kana, and switch stimulus references from per-condition mp4 video to one shared per-word audio file.
+
+Changed:
+Added NOT NULL `display_form` and `canonical_form` columns to `ideophones` and dropped the `stimulus_file` UNIQUE constraint (three condition rows per word now share one audio file). Regenerated all 180 seed rows through `scripts/generate_seed_sql.py`, which now derives both forms from the stimulus filename prefix ground truth (pos3 = canonical script, pos4 = displayed script; u/d rows reuse the canonical form) and fixes the gloss typo "feeling fo relief" (ids 47/107/167). The two long-vowel words use the chouonpu forms the stimulus PNGs actually rendered (zyaazyaa: じゃーじゃー/ジャージャー, kyaakyaa: きゃーきゃー/キャーキャー), which differ from the `kana` lemma column; documented in the contract. Extracted 60 per-word audio files with `ffmpeg -vn -c:a copy` from the audio-only `hu`/`kd` mp4 variants (bit-identical AAC, all 1.216 s) into `../ideophone-arena-web/stimuli/audio/` plus a `dist/stimuli/audio/` copy; seed `stimulus_file` now points at `audio/<p1><p2><p3>-<romaji>.m4a` for all three rows of each word; mp4s kept as legacy assets. Pre-existing per-word mp3s were rejected as audio source because their duration (0.984 s) does not match the mp4 audio track. Extended `Ideophone`, `IdeophoneChoiceResponse`, and `GameMapper` to ship `displayForm`/`canonicalForm`. Added `IdeophoneSeedIntegrityTests` (7 tests, parses the seed SQL, no DB) asserting per row: well-formed `canonical_script`, audio filename agreement with romaji/modality/canonical script, `canonical_form` script family matches pos3, `display_form` script family matches pos4 (or equals `canonical_form` for u/d), one shared audio file per word across exactly three rows, and gloss typo absence. Allowed `HEAD` next to `GET` on `/stimuli/**` in `SecurityConfig` so media HEAD proofs return 200. Updated `docs/backend-contract.md`, `docs/demo-runbook.md`, `docs/backend-grading-checklist.md`, and the punch list.
+
+Proof:
+`./mvnw test`
+`mysql < src/main/resources/db/init/ideophone_arena.sql` followed by `./mvnw spring-boot:run` with `ddl-auto=validate`
+Live curl: register/login, `POST /api/game/sessions` (`CONDITION_3_SOKUON`), `GET /api/game/sessions/<uuid>/rounds/next`
+`curl -I http://localhost:8081/stimuli/audio/a0h-gosogoso.m4a`
+
+Result:
+Passing: 31 tests including the 7 new seed-integrity tests. App started cleanly against the reseeded schema with `ddl-auto=validate`. The condition-3 round returned left (HK) `displayForm` ゴソゴソ / `canonicalForm` ごそごそ and right (KH) `displayForm` かたかた / `canonicalForm` カタカタ with `stimulusUrl` `/stimuli/audio/a0h-gosogoso.m4a` and `/stimuli/audio/a0k-katakata.m4a`. HEAD and GET on the audio URL both returned `200` with `Content-Type: audio/mp4` (28902 bytes).
+
+Commit:
+Not committed.
+
+Blocker:
+None.
+
+Next single task:
+Migrate the frontend to render `displayForm`/`canonicalForm` and play the per-word audio, removing its runtime script derivation from `canonicalScript`.

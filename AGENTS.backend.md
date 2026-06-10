@@ -79,9 +79,11 @@ When endpoints, DTOs, ports, auth, CORS, or completion behavior change, update
 `docs/backend-contract.md`, `docs/backend-grading-checklist.md`, `docs/demo-runbook.md`.
 
 ## Current punch list (June 2026)
-- [ ] S1: `display_form` column + seed regeneration (fix gloss typo "feeling fo relief",
-      ids 47/107/167); mapper ships display string; switch stimulus assets to per-word audio;
-      remove per-condition mp4 dependency; update contract docs.
+- [x] S1 (done 2026-06-10): `display_form`/`canonical_form` columns + seed regeneration
+      (gloss typo fixed, ids 47/107/167); mapper ships `displayForm`/`canonicalForm`;
+      stimulus assets switched to per-word audio (`audio/<p1><p2><p3>-<romaji>.m4a`,
+      ffmpeg stream-copy from u/d mp4s); per-condition mp4 dependency removed from the
+      seed; `IdeophoneSeedIntegrityTests` guards the invariants; contract docs updated.
 - [ ] S1: `ddl-auto=validate` in local profile; JWT secret fail-fast.
 - [ ] S3: complete Bean Validation coverage; consolidate mapping into `GameMapper`;
       409 on duplicate-answer race; score counts scoped to session (contract already warns

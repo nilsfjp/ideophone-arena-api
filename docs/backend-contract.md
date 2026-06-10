@@ -81,6 +81,8 @@ translations.target
 translations.other
 left.ideophoneId
 left.kana
+left.displayForm
+left.canonicalForm
 left.romaji
 left.stimulusFile
 left.stimulusUrl
@@ -88,6 +90,8 @@ left.modality
 left.canonicalScript
 right.ideophoneId
 right.kana
+right.displayForm
+right.canonicalForm
 right.romaji
 right.stimulusFile
 right.stimulusUrl
@@ -97,8 +101,22 @@ timing.fixationMs
 timing.preChoiceDelayMs
 ```
 
-The current backend still serves legacy derived media through `/stimuli/**`. Script/audio/placeholder presentation
-decisions remain frontend behavior for now; no new backend `GameMode` or `PresentationMode` field exists yet.
+Script display is data, not code (2026-06-10):
+
+- `displayForm` is the exact kana string the player sees before answering. The frontend must render it verbatim and
+  must not derive the display script from `canonicalScript` or any other field.
+- `canonicalForm` is the word in its canonical script, intended for the feedback reveal.
+- `stimulusUrl` now points at one shared per-word audio file, `/stimuli/audio/<modality><pairing><h|k>-<romaji>.m4a`
+  (for example `/stimuli/audio/a0h-gosogoso.m4a`). All three condition rows of a word reference the same audio file;
+  the script manipulation never alters the audio channel. The per-condition mp4s are legacy assets and are no longer
+  referenced by the seed.
+- `kana` keeps the dictionary lemma spelling. For the two long-vowel words (`zyaazyaa`, `kyaakyaa`) the stimuli render
+  the chouonpu forms, so `displayForm`/`canonicalForm` use the long-vowel mark while `kana` does not. Render
+  `displayForm`, not `kana`.
+- `canonicalScript` remains the raw two-letter filename code (pos3+pos4, e.g. `HK`) for this session; the frontend
+  migrates off it next session.
+
+No new backend `GameMode` or `PresentationMode` field exists yet.
 
 ## Authentication
 

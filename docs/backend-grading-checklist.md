@@ -272,6 +272,8 @@ rg -n "SecurityFilterChain|requestMatchers|csrf|SessionCreationPolicy|anyRequest
 
 2026-06-04 evidence: `SecurityConfig` permits `/api/auth/**`, `/api/leaderboard`, static frontend files, and `/stimuli/**`, then uses `anyRequest().authenticated()`. CSRF is disabled with stateless sessions for JWT. Live curl proof returned `401` for unauthenticated `POST /api/game/sessions` and `200 video/mp4` for `GET /stimuli/a0hu-gosogoso.mp4`.
 
+2026-06-10 evidence: stimulus references switched to per-word audio. `SecurityConfig` now permits both `GET` and `HEAD` on `/stimuli/**`. Live curl proof returned `200` with `Content-Type: audio/mp4` for both `GET` and `HEAD` on `http://localhost:8081/stimuli/audio/a0h-gosogoso.m4a`.
+
 ### CORS
 
 - [x] CORS is configured explicitly.
@@ -359,6 +361,8 @@ curl -i http://localhost:8081/api/game/sessions/<SESSION_UUID>/rounds/next \
 ```
 
 2026-06-05 evidence: `GameService.getOwnedSession` enforces owner matching; next-round uses `RoundResponse`; `GameServiceTests.getNextRoundReturnsFirstUnansweredRoundForSession` verifies stable first-unanswered ordering and response fields; `GameServiceTests.getNextRoundReturnsCompletionResponseAfterAllRoundsAreAnswered` verifies the service marks the session complete and returns `completed:true`; `GameLoopHttpTests.nextRoundReturnsExplicitCompletionBodyAfterFinalAnswer` verifies the controller returns `200 OK` with the completion body after the final answer.
+
+2026-06-10 evidence: round responses now ship `displayForm` (exact kana shown pre-answer) and `canonicalForm` (canonical-script form for feedback reveal) per choice, mapped in `GameMapper` from the new NOT NULL `ideophones.display_form`/`canonical_form` columns; the seed derives both from the stimulus filename prefix ground truth and `IdeophoneSeedIntegrityTests` (7 tests) permanently asserts script-family agreement with pos3/pos4 for all 180 rows. Live curl of `rounds/next` for `CONDITION_3_SOKUON` showed `displayForm` ゴソゴソ vs `canonicalForm` ごそごそ (left, HK) and `displayForm` かたかた vs `canonicalForm` カタカタ (right, KH) with shared per-word `stimulusUrl` values `/stimuli/audio/a0h-gosogoso.m4a` and `/stimuli/audio/a0k-katakata.m4a`.
 
 ### Answer submission
 

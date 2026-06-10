@@ -54,19 +54,28 @@ The backend CORS config allows both `http://localhost:5173` and `http://localhos
 
 ## Media Path Proof
 
-The backend returns stimulus URLs like:
+The backend returns one shared per-word audio stimulus for all three condition rows of a word:
 
 ```text
-/stimuli/a0hu-gosogoso.mp4
+/stimuli/audio/a0h-gosogoso.m4a
 ```
 
-The frontend repo exposes the seeded media through `public/stimuli -> ../stimuli`, with root-level symlinks from
-`stimuli/<filename>.mp4` to `stimuli/final-stimuli/final-sokuon/<filename>.mp4`.
+The audio files live in the frontend repo at `stimuli/audio/` (extracted with `ffmpeg -vn -c:a copy` from the
+audio-only `hu`/`kd` mp4 variants, so they are bit-identical to the experiment audio) and are copied into
+`dist/stimuli/audio/`, which the backend serves. The legacy per-condition mp4s remain available through
+`public/stimuli -> ../stimuli` and the root-level symlinks into `stimuli/final-stimuli/final-sokuon/`, but the seed no
+longer references them.
+
+Quick proof against the running backend (GET and HEAD both return `200` with `Content-Type: audio/mp4`):
+
+```sh
+curl -I http://localhost:8081/stimuli/audio/a0h-gosogoso.m4a
+```
 
 Quick proof while Vite is running:
 
 ```sh
-curl -I http://localhost:5174/stimuli/a0hu-gosogoso.mp4
+curl -I http://localhost:5174/stimuli/audio/a0h-gosogoso.m4a
 ```
 
 ## Browser Demo Flow
