@@ -275,8 +275,12 @@ class GameLoopHttpTests {
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
         int isolatedDifficulty = Math.toIntExact(100_000L + (System.nanoTime() % 1_000_000L));
 
+        String correctKana = "完了左" + suffix.substring(suffix.length() - 6);
+        String distractorKana = "完了右" + suffix.substring(suffix.length() - 6);
         Ideophone correct = ideophoneRepository.save(new Ideophone(
-                "完了左" + suffix.substring(suffix.length() - 6),
+                correctKana,
+                correctKana,
+                correctKana,
                 "complete-left-" + suffix,
                 "completion target " + suffix,
                 "CL" + suffix.substring(suffix.length() - 8),
@@ -284,7 +288,9 @@ class GameLoopHttpTests {
                 Modality.AUDITORY
         ));
         Ideophone distractor = ideophoneRepository.save(new Ideophone(
-                "完了右" + suffix.substring(suffix.length() - 6),
+                distractorKana,
+                distractorKana,
+                distractorKana,
                 "complete-right-" + suffix,
                 "completion distractor " + suffix,
                 "CR" + suffix.substring(suffix.length() - 8),
@@ -361,8 +367,12 @@ class GameLoopHttpTests {
         String suffix = Long.toString(System.nanoTime());
         String targetTranslation = "target meaning " + suffix;
         String distractorTranslation = "distractor meaning " + suffix;
+        String correctKana = "テスト左" + suffix.substring(suffix.length() - 6);
+        String distractorKana = "テスト右" + suffix.substring(suffix.length() - 6);
         Ideophone correct = ideophoneRepository.save(new Ideophone(
-                "テスト左" + suffix.substring(suffix.length() - 6),
+                correctKana,
+                correctKana,
+                correctKana,
                 "test-left-" + suffix,
                 targetTranslation,
                 "TL" + suffix.substring(suffix.length() - 8),
@@ -370,7 +380,9 @@ class GameLoopHttpTests {
                 Modality.AUDITORY
         ));
         Ideophone distractor = ideophoneRepository.save(new Ideophone(
-                "テスト右" + suffix.substring(suffix.length() - 6),
+                distractorKana,
+                distractorKana,
+                distractorKana,
                 "test-right-" + suffix,
                 distractorTranslation,
                 "TR" + suffix.substring(suffix.length() - 8),

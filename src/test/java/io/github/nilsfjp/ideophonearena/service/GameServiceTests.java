@@ -257,7 +257,7 @@ class GameServiceTests {
     }
 
     private Ideophone ideophone(Long id, String kana, String romaji, String gloss, String stimulusFile) {
-        Ideophone ideophone = new Ideophone(kana, romaji, gloss, "HU", stimulusFile, Modality.AUDITORY);
+        Ideophone ideophone = new Ideophone(kana, kana, kana, romaji, gloss, "HU", stimulusFile, Modality.AUDITORY);
         setId(ideophone, id);
         return ideophone;
     }

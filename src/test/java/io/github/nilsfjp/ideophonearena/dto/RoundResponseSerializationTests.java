@@ -20,18 +20,22 @@ class RoundResponseSerializationTests {
         IdeophoneChoiceResponse left = new IdeophoneChoiceResponse(
                 1L,
                 "left-kana",
+                "left-display",
+                "left-canonical",
                 "left-romaji",
-                "left.mp4",
-                "/stimuli/left.mp4",
+                "audio/left.m4a",
+                "/stimuli/audio/left.m4a",
                 Modality.AUDITORY,
                 "HU"
         );
         IdeophoneChoiceResponse right = new IdeophoneChoiceResponse(
                 2L,
                 "right-kana",
+                "right-display",
+                "right-canonical",
                 "right-romaji",
-                "right.mp4",
-                "/stimuli/right.mp4",
+                "audio/right.m4a",
+                "/stimuli/audio/right.m4a",
                 Modality.AUDITORY,
                 "KD"
         );
@@ -59,6 +63,10 @@ class RoundResponseSerializationTests {
         assertTrue(roundProperties.contains("message"));
         assertFalse(choiceProperties.contains("gloss"));
         assertTrue(choiceProperties.contains("stimulusUrl"));
+        assertTrue(choiceProperties.contains("displayForm"));
+        assertTrue(choiceProperties.contains("canonicalForm"));
+        assertEquals("left-display", left.getDisplayForm());
+        assertEquals("left-canonical", left.getCanonicalForm());
     }
 
     private Set<String> beanProperties(Class<?> type) throws IntrospectionException {
