@@ -1,0 +1,307 @@
+# AGENTS.md - Ideophone Arena API
+
+## Project context
+
+This is the backend for Ideophone Arena, a small playable web app for a Spring Boot course. The course deadline is June
+5, 2026. The priority is a passing, demonstrable MVP, not a polished or expanded thesis project.
+
+The app is inspired by Japanese ideophones, script presentation, and cross-modal iconicity, but it must remain a small
+game. Do not recreate the thesis experiment.
+
+## Non-negotiable course requirements
+
+The backend must use:
+
+* Spring Boot
+* Spring Web
+* Spring Data JPA
+* Spring Security
+* MySQL
+* Explicit CORS configuration
+* Three-layer architecture
+* DTOs for API input and output
+* Clear separation of controller, service, repository, entity/model, DTO, mapper, configuration/security, and exception
+  concerns where appropriate
+
+## MVP scope
+
+Build only this core flow first:
+
+1. A visitor can register.
+2. A user can log in.
+3. A logged-in user can request a playable ideophone round.
+4. A logged-in user can choose between two options.
+5. The backend evaluates the answer immediately.
+6. The backend stores the attempt/result.
+7. A user can view either recent personal attempts or a simple leaderboard.
+
+Anything else is later.
+
+Avoid these until the MVP works:
+
+* Unlockable levels
+* Admin panels
+* Rich statistics
+* Thesis-style counterbalancing
+* Educational lore pages
+* Complex difficulty systems
+* Frontend polish
+* Overly abstract architecture
+* Docker, CI, deployment, shell tooling, or OS setup unless a concrete project-blocking error proves it is necessary
+
+## Architecture rules
+
+Controllers must stay thin. They receive HTTP requests, call services, and return `ResponseEntity`.
+
+Services contain business logic, transactions, authentication-aware decisions, scoring, round generation, and
+persistence coordination.
+
+Repositories are Spring Data JPA interfaces only unless a custom query is necessary.
+
+Entities must not be returned directly from controllers. API responses must use DTOs.
+
+Use mapper classes or clear mapping methods between entities and DTOs.
+
+Use Bean Validation on request DTOs.
+
+Use `@Valid` on controller request bodies.
+
+Use `@Transactional` in services for write operations and for read operations that need lazy-loaded relations.
+
+Use `@ControllerAdvice` or a global exception handler for structured errors.
+
+Use Spring Security with hashed passwords.
+
+Prefer JWT because the frontend is a separate React/Vite app.
+
+Configure CORS explicitly for the frontend origin, expected during development to be:
+
+```text
+http://localhost:5173
+```
+
+## Suggested package structure
+
+Use the existing base package if present. If the project is still empty, use:
+
+```text
+io.github.nilsfjp.ideophonearena
+```
+
+Suggested packages:
+
+```text
+config/
+controller/
+dto/
+entity/        or model/
+exception/
+mapper/
+repository/
+security/
+service/
+```
+
+Do not mix responsibilities across these packages.
+
+## Suggested backend domain
+
+Use the smallest domain that supports the MVP:
+
+```text
+User
+Ideophone
+Round or Prompt
+ChoiceOption
+GameAttempt or Answer
+LeaderboardEntry or score projection DTO
+```
+
+Keep it boring. Prefer simple fields over clever modeling.
+
+## Endpoint target
+
+Aim for this minimal API shape unless existing code has a better consistent pattern:
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+
+GET  /api/rounds/next
+POST /api/rounds/{roundId}/answer
+
+GET  /api/me/attempts
+GET  /api/leaderboard
+```
+
+Protected endpoints require:
+
+```text
+Authorization: Bearer <token>
+```
+
+`/api/auth/**` must be public.
+
+## Development order
+
+Backend first. Do not work on the frontend until these can be proven with curl or Postman:
+
+1. App starts.
+2. Database connection works.
+3. At least one read endpoint works through controller -> service -> repository -> DTO.
+4. Register works.
+5. Login returns a JWT.
+6. Protected endpoint rejects missing token.
+7. Protected endpoint accepts valid token.
+8. `GET /api/rounds/next` returns one prompt and two choices.
+9. `POST /api/rounds/{roundId}/answer` stores an attempt and returns feedback.
+10. Leaderboard or personal attempt history works.
+11. CORS is configured for the Vite frontend origin.
+
+## Proof commands
+
+After every meaningful backend change, provide at least one proof command.
+
+Prefer these from the repo root:
+
+```sh
+./mvnw spring-boot:run
+```
+
+If the wrapper is absent:
+
+```sh
+mvn spring-boot:run
+```
+
+Useful curl proofs:
+
+```sh
+curl -i http://localhost:8080/api/health
+```
+
+```sh
+curl -i -X POST http://localhost:8080/api/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"testuser","password":"password123"}'
+```
+
+```sh
+curl -i -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"testuser","password":"password123"}'
+```
+
+```sh
+curl -i http://localhost:8080/api/rounds/next \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+```sh
+curl -i -X POST http://localhost:8080/api/rounds/1/answer \
+  -H 'Content-Type: application/json' \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"choiceId":1}'
+```
+
+Adjust endpoint paths only if the existing project already uses a consistent different prefix.
+
+## Database rules
+
+Use MySQL. Do not switch to another database.
+
+Keep local credentials out of git. It is acceptable to commit safe defaults in `application.properties`, but keep
+secrets and local passwords in an ignored local properties file or environment variables.
+
+Prefer schema and seed files under:
+
+```text
+src/main/resources/db/
+```
+
+or a documented equivalent.
+
+Do not add Flyway or Liquibase unless the project already uses it or a concrete blocker requires it.
+
+## Security rules
+
+Use BCrypt for password hashing.
+
+Never store raw passwords.
+
+Never return password hashes in DTOs.
+
+Roles should use Spring Security-compatible names such as:
+
+```text
+ROLE_USER
+ROLE_ADMIN
+```
+
+JWT should be enough for the course MVP. Do not implement refresh tokens unless the MVP is already complete.
+
+Disable CSRF only for stateless JWT configuration.
+
+CORS must be configured explicitly. Do not rely on browser hacks or frontend proxying as the only solution.
+
+## Code style
+
+Keep Java code simple and course-level.
+
+Use constructor injection.
+
+Avoid Lombok unless it is already present.
+
+Do not introduce MapStruct, records, sealed classes, advanced generics, or unnecessary abstractions unless the existing
+project already uses them.
+
+Avoid comments unless they clarify non-obvious project logic.
+
+Use ASCII-only comments and shell snippets.
+
+## When editing existing code
+
+First inspect the current files. Do not overwrite large parts of the project.
+
+Prefer one small coherent change per pass.
+
+After a change, state:
+
+1. What changed
+2. Why it was necessary
+3. How to prove it works
+4. What the next single task is
+
+## Progress log
+
+Update this file at the end of a work session if it exists:
+
+```text
+docs/progress-log.md
+```
+
+Use this format:
+
+```text
+## YYYY-MM-DD
+
+Session goal:
+Changed:
+Proof:
+Result:
+Commit:
+Blocker:
+Next single task:
+```
+
+If the file does not exist, create it only when asked or when ending a session.
+
+## Hard rule
+
+A change is not done until there is at least one of:
+
+* app startup proof
+* curl/Postman proof
+* passing test
+* committed change
+* written blocker with exact error output

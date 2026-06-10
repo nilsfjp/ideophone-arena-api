@@ -85,8 +85,7 @@ curl -I http://localhost:5174/stimuli/a0hu-gosogoso.mp4
    - answer buttons appear below
 6. Click one ideophone answer.
 7. Confirm immediate feedback appears.
-8. Click `Next`.
-9. Confirm the next trial starts from the fixation cross.
+8. Confirm the next trial starts automatically from the fixation cross.
 
 If the browser blocks unmuted media playback, the current stimulus card shows a `Play` button. Click it once; the trial
 continues from the same left or right stimulus instead of skipping the trial.
