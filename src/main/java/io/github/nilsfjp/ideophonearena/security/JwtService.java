@@ -29,9 +29,14 @@ public class JwtService {
 
     public JwtService(
             ObjectMapper objectMapper,
-            @Value("${app.jwt.secret:ideophone-arena-development-secret-change-me}") String secret,
+            @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.expiration-ms:86400000}") long expirationMs
     ) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "app.jwt.secret must be set to a non-blank value; "
+                            + "see application-local.example.properties");
+        }
         this.objectMapper = objectMapper;
         this.signingKey = secret.getBytes(StandardCharsets.UTF_8);
         this.expirationMs = expirationMs;
@@ -56,20 +61,24 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-        Object subject = parseClaims(token).get("sub");
+        return extractSubject(parseClaims(token));
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        Map<String, Object> claims = parseClaims(token);
+        return extractSubject(claims).equals(userDetails.getUsername()) && !isExpired(claims);
+    }
+
+    private String extractSubject(Map<String, Object> claims) {
+        Object subject = claims.get("sub");
         if (!(subject instanceof String username) || username.isBlank()) {
             throw new IllegalArgumentException("JWT subject is missing");
         }
         return username;
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isExpired(token);
-    }
-
-    private boolean isExpired(String token) {
-        Object expiresAt = parseClaims(token).get("exp");
+    private boolean isExpired(Map<String, Object> claims) {
+        Object expiresAt = claims.get("exp");
         if (!(expiresAt instanceof Number expirationEpochSeconds)) {
             throw new IllegalArgumentException("JWT expiration is missing");
         }
