@@ -65,6 +65,8 @@ public class GameMapper {
         return new IdeophoneChoiceResponse(
                 ideophone.getId(),
                 ideophone.getKana(),
+                ideophone.getDisplayForm(),
+                ideophone.getCanonicalForm(),
                 ideophone.getRomaji(),
                 ideophone.getStimulusFile(),
                 STIMULUS_URL_PREFIX + ideophone.getStimulusFile(),

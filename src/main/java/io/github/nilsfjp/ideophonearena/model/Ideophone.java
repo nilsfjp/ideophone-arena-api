@@ -15,7 +15,6 @@ import jakarta.persistence.UniqueConstraint;
 @Table(
         name = "ideophones",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = "stimulus_file"),
                 @UniqueConstraint(columnNames = {"kana", "canonical_script"})
         }
 )
@@ -28,6 +27,12 @@ public class Ideophone {
     @Column(nullable = false, length = 50)
     private String kana;
 
+    @Column(name = "display_form", nullable = false, length = 50)
+    private String displayForm;
+
+    @Column(name = "canonical_form", nullable = false, length = 50)
+    private String canonicalForm;
+
     @Column(nullable = false, length = 100)
     private String romaji;
 
@@ -37,7 +42,7 @@ public class Ideophone {
     @Column(name = "canonical_script", nullable = false, length = 20)
     private String canonicalScript;
 
-    @Column(name = "stimulus_file", nullable = false, unique = true, length = 100)
+    @Column(name = "stimulus_file", nullable = false, length = 100)
     private String stimulusFile;
 
     @Enumerated(EnumType.STRING)
@@ -47,9 +52,11 @@ public class Ideophone {
     protected Ideophone() {
     }
 
-    public Ideophone(String kana, String romaji, String gloss, String canonicalScript, String stimulusFile,
-            Modality modality) {
+    public Ideophone(String kana, String displayForm, String canonicalForm, String romaji, String gloss,
+            String canonicalScript, String stimulusFile, Modality modality) {
         this.kana = kana;
+        this.displayForm = displayForm;
+        this.canonicalForm = canonicalForm;
         this.romaji = romaji;
         this.gloss = gloss;
         this.canonicalScript = canonicalScript;
@@ -67,6 +74,22 @@ public class Ideophone {
 
     public void setKana(String kana) {
         this.kana = kana;
+    }
+
+    public String getDisplayForm() {
+        return displayForm;
+    }
+
+    public void setDisplayForm(String displayForm) {
+        this.displayForm = displayForm;
+    }
+
+    public String getCanonicalForm() {
+        return canonicalForm;
+    }
+
+    public void setCanonicalForm(String canonicalForm) {
+        this.canonicalForm = canonicalForm;
     }
 
     public String getRomaji() {
