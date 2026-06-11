@@ -486,3 +486,33 @@ None.
 
 Next single task:
 S4: `GET /api/admin/stats` behind `hasRole("ADMIN")`.
+
+## 2026-06-11
+
+Session goal:
+S4: make role-aware authorization real — `GET /api/admin/stats` behind `ROLE_ADMIN`, seeded dev admin, paginated leaderboard, springdoc.
+
+Changed:
+- `scripts/generate_seed_sql.py` now emits a dev-only `arena_admin` row (`ROLE_ADMIN`, frozen BCrypt hash; throwaway password documented in the runbook); seed regenerated and re-applied.
+- `SecurityConfig`: `/api/admin/**` requires `hasRole("ADMIN")`; `/v3/api-docs/**` + `/swagger-ui/**` public (demo convenience); ERROR dispatch to `/error` permitted so `sendError` 403s are not overwritten to 401 on real Tomcat (bug found during live proof — MockMvc does not error-dispatch, so only curl exposed it).
+- New admin stats slice: `ConditionSessionCountProjection`/`ConditionAnswerStatsProjection`/`ModalityAnswerStatsProjection`, JPQL aggregates in `GameSessionRepository`/`PlayerAnswerRepository`, `Admin*Response` DTOs, `AdminStatsMapper`, `AdminStatsService`, `AdminController` (`@Tag`/`@Operation`).
+- Leaderboard pagination: `findLeaderboard` returns `Page` with explicit `countQuery` and a `username` tiebreak; `LeaderboardPageResponse` wrapper (`entries` + `page`/`size`/`totalElements`/`totalPages`); `page`/`size` params (defaults 0/10, size capped at 50, clamped); projection-to-DTO mapping moved from `ScoreService` into `GameMapper`.
+- `pom.xml`: `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3` (pre-approved; the 3.0.x line targets Spring Boot 4) + `OpenApiConfig` (bearer scheme for the Swagger Authorize button).
+- Tests: `AdminStatsHttpTests` (401/403/200 + seeded-admin login guard), `LeaderboardPaginationHttpTests` (defaults, size cap, explicit params, clamping).
+- Docs: contract (admin endpoint, paginated leaderboard, API docs, changelog), runbook ("Creating an admin", Swagger URLs, leaderboard curl), grading checklist (role-aware authorization rows + 2026-06-11 evidence), CLAUDE.md punch list.
+
+Proof:
+`python3 scripts/generate_seed_sql.py --check` -> "SQL is up to date"; `./mvnw test` -> 47 tests, 0 failures.
+Live flow against `./mvnw spring-boot:run -Dspring-boot.run.profiles=local`: login as `arena_admin` -> 200 with token; `GET /api/admin/stats` -> 200 `{"totals":{"users":16,"sessions":10,"completedSessions":1,"answers":3},...}`; same call as fresh `ROLE_USER` -> 403; unauthenticated -> 401. `GET /api/leaderboard?page=0&size=5` -> wrapper with 3 entries, `page:0,size:5,totalElements:3,totalPages:1`; `?size=500` -> `size:50`. `/swagger-ui/index.html` -> 200; `/v3/api-docs` lists all 9 paths including `/api/admin/stats`.
+
+Result:
+Role-aware authorization is enforced and proven (closes the last open course requirement); leaderboard response shape is now a wrapper — breaking for the Vite frontend until `getLeaderboard()` reads `.entries`.
+
+Commit:
+Not committed.
+
+Blocker:
+None.
+
+Next single task:
+S4 remainder: practice rounds (p-prefix stimuli).

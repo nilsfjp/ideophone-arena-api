@@ -214,13 +214,74 @@ non-breaking for clients that do.
 
 ## Leaderboard
 
-Public leaderboard:
+Public leaderboard, paginated (changed 2026-06-11; previously returned a bare array):
 
 ```text
-GET /api/leaderboard
+GET /api/leaderboard?page=0&size=10
 ```
 
+Query params: `page` (default `0`, clamped to `>= 0`) and `size` (default `10`, clamped to `1..50`). Out-of-range
+values are clamped, not rejected; the response metadata reports the effective values.
+
+Ordering is deterministic: `totalCorrect` desc, then `totalAnswered` desc, then average response time asc, then
+`username` asc as the final tiebreak.
+
+Response shape:
+
+```json
+{
+  "entries": [
+    { "username": "demo", "totalAnswered": 30, "totalCorrect": 21, "accuracy": 0.7 }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 4,
+  "totalPages": 1
+}
+```
+
+**Breaking change for the frontend:** the previous shape was the bare `entries` array. The Vite app's
+`getLeaderboard()` (`src/api/client.ts`) and the `Leaderboard` component must read `.entries` instead.
+
 This should be visible in the final demo.
+
+## Admin stats
+
+Aggregate research statistics, restricted to `ROLE_ADMIN` (`401` unauthenticated, `403` for `ROLE_USER`):
+
+```text
+GET /api/admin/stats
+```
+
+Registration always assigns `ROLE_USER`; the seed creates the dev admin `arena_admin` (see
+`docs/demo-runbook.md`, "Creating an admin").
+
+Response shape:
+
+```json
+{
+  "totals": { "users": 13, "sessions": 10, "completedSessions": 1, "answers": 3 },
+  "byCondition": [
+    { "conditionName": "CONDITION_1_SOKUON", "sessions": 5, "answers": 2, "correct": 2, "accuracy": 1.0 }
+  ],
+  "byModality": [
+    { "modality": "AUDITORY", "answers": 3, "correct": 3, "accuracy": 1.0 }
+  ]
+}
+```
+
+`byCondition` is grouped by the session's condition; `byModality` joins answers through their round's ideophones.
+Conditions with no sessions and no answers are omitted. `accuracy` is `correct / answers` (`0.0` when there are no
+answers).
+
+## API docs
+
+springdoc OpenAPI, public by design for the course demo:
+
+```text
+GET /v3/api-docs
+GET /swagger-ui/index.html
+```
 
 ## Recent attempts
 
@@ -234,6 +295,14 @@ This is enough for minimal personal progress/history.
 
 ## Changelog
 
+- 2026-06-11: `GET /api/leaderboard` is paginated and returns a wrapper object (`entries` + `page`/`size`/
+  `totalElements`/`totalPages`) instead of a bare array — **breaking for the Vite frontend** until its
+  `getLeaderboard()` reads `.entries`. Ordering gained a deterministic `username` tiebreak.
+- 2026-06-11: new `GET /api/admin/stats` behind `ROLE_ADMIN` (`/api/admin/**` requires `hasRole("ADMIN")`).
+  Seed now creates the dev admin `arena_admin`; registration still assigns `ROLE_USER` only.
+- 2026-06-11: springdoc added; `/v3/api-docs` and `/swagger-ui/**` are public (course-demo convenience).
+- 2026-06-11: security `403` responses are no longer overwritten to `401` on real Tomcat (the ERROR dispatch to
+  `/error` is now permitted in `SecurityConfig`; `sendError` re-entered the filter chain unauthenticated).
 - 2026-06-10: `totalAnswered`/`totalCorrect` in the answer response are now session-scoped (previously cumulative
   user-wide totals). Non-breaking for the Vite frontend, which keeps its own session-local counts.
 - 2026-06-10: session completion is set by the final `POST .../answers`; `GET .../rounds/next` is read-only.

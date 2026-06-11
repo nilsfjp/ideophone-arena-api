@@ -223,6 +223,12 @@ rg -n "repository|Repository" src/main/java/io/github/nilsfjp/ideophonearena/map
 - [x] Spring Security loads users from the database.
 - [x] User roles are stored with the expected `ROLE_` prefix.
 - [x] Role-aware authentication exists even if only `ROLE_USER` is currently used.
+- [x] Role-aware authorization is enforced (admin endpoints require `ROLE_ADMIN`).
+
+2026-06-11 evidence (role-aware authorization): `SecurityConfig` requires `hasRole("ADMIN")` for `/api/admin/**`;
+registration still assigns `ROLE_USER` only; the seed creates the dev admin `arena_admin` (generator-owned).
+`AdminStatsHttpTests` proves `GET /api/admin/stats` returns `401` unauthenticated, `403` for `ROLE_USER`, and `200`
+with the aggregate shape for `ROLE_ADMIN`; live curl proof reproduced `401`/`403`/`200` against the running backend.
 
 Files to inspect:
 
@@ -252,6 +258,7 @@ rg -n "BCryptPasswordEncoder|PasswordEncoder|ROLE_|Bearer|Jwt" src/main/java/io/
 - [x] `anyRequest().authenticated()` or equivalent catch-all exists.
 - [x] CSRF is disabled only because JWT/stateless authentication is used.
 - [x] Sessions are stateless if JWT is the authentication mechanism.
+- [x] Admin endpoints require `ROLE_ADMIN`.
 
 Expected contract:
 
@@ -262,8 +269,10 @@ POST /api/game/sessions          authenticated
 GET  /api/game/sessions/{uuid}/rounds/next  authenticated
 POST /api/game/sessions/{uuid}/answers      authenticated
 GET  /api/game/me/attempts       authenticated
-GET  /api/leaderboard            public
+GET  /api/leaderboard            public (paginated)
+GET  /api/admin/stats            ROLE_ADMIN
 GET  /stimuli/**                 public
+GET  /v3/api-docs, /swagger-ui/** public (demo convenience)
 ```
 
 Proof:
@@ -277,6 +286,12 @@ rg -n "SecurityFilterChain|requestMatchers|csrf|SessionCreationPolicy|anyRequest
 2026-06-10 evidence: stimulus references switched to per-word audio. `SecurityConfig` now permits both `GET` and `HEAD` on `/stimuli/**`. Live curl proof returned `200` with `Content-Type: audio/mp4` for both `GET` and `HEAD` on `http://localhost:8081/stimuli/audio/a0h-gosogoso.m4a`.
 
 2026-06-10 evidence (legacy frontend removal): the Spring-served mini-frontend (`/`, `/index.html`, `/arena.css`, `/arena.js`, `templates/`) was deleted and its permitAll entries removed from `SecurityConfig`; public surface is now OPTIONS preflight, `GET`/`HEAD` `/stimuli/**`, `/api/health`, `/api/auth/**`, and `GET /api/leaderboard`, with `anyRequest().authenticated()`. `StaticResourceHttpTests.legacyMiniFrontendIsGone` proves `/`, `/index.html`, `/arena.js`, `/arena.css` return `401`. `JwtService` no longer has a code default for `app.jwt.secret` (startup fails fast when absent or blank) and is covered by `JwtServiceTests` (round-trip, expiry, tampered payload/signature, wrong secret, blank-secret fail-fast).
+
+2026-06-11 evidence (admin authorization + API docs): `/api/admin/**` requires `hasRole("ADMIN")`; `/v3/api-docs/**`
+and `/swagger-ui/**` are deliberately public for the course demo. The ERROR dispatch to `/error` is permitted so
+`sendError` 403 responses are not overwritten to `401` on real Tomcat (live curl previously reproduced the
+overwrite; after the fix the live proof returned `401` unauthenticated, `403` for `ROLE_USER`, `200` for the seeded
+`arena_admin`). Full suite: `./mvnw test` -> 47 tests, 0 failures.
 
 ### CORS
 
