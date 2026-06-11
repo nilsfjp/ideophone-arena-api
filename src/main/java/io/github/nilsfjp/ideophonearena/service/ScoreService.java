@@ -1,12 +1,11 @@
 package io.github.nilsfjp.ideophonearena.service;
 
 import io.github.nilsfjp.ideophonearena.dto.AttemptResponse;
-import io.github.nilsfjp.ideophonearena.dto.LeaderboardEntryResponse;
+import io.github.nilsfjp.ideophonearena.dto.LeaderboardPageResponse;
 import io.github.nilsfjp.ideophonearena.exception.ResourceNotFoundException;
 import io.github.nilsfjp.ideophonearena.mapper.GameMapper;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
-import io.github.nilsfjp.ideophonearena.repository.LeaderboardEntryProjection;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ScoreService {
 
-    private static final int DEFAULT_LEADERBOARD_LIMIT = 10;
+    private static final int MAX_LEADERBOARD_PAGE_SIZE = 50;
     private static final int DEFAULT_ATTEMPT_LIMIT = 20;
 
     private final AppUserRepository appUserRepository;
@@ -32,11 +31,14 @@ public class ScoreService {
     }
 
     @Transactional(readOnly = true)
-    public List<LeaderboardEntryResponse> getLeaderboard() {
-        return playerAnswerRepository.findLeaderboard(PageRequest.of(0, DEFAULT_LEADERBOARD_LIMIT))
-                .stream()
-                .map(this::toLeaderboardEntryResponse)
-                .toList();
+    public LeaderboardPageResponse getLeaderboard(int page, int size) {
+        // Out-of-range params are clamped rather than rejected; the response
+        // metadata reports the effective values. PageRequest stays unsorted so
+        // the JPQL aggregate ordering is authoritative.
+        int effectivePage = Math.max(page, 0);
+        int effectiveSize = Math.min(Math.max(size, 1), MAX_LEADERBOARD_PAGE_SIZE);
+        return gameMapper.toLeaderboardPageResponse(
+                playerAnswerRepository.findLeaderboard(PageRequest.of(effectivePage, effectiveSize)));
     }
 
     @Transactional(readOnly = true)
@@ -51,16 +53,5 @@ public class ScoreService {
                 .stream()
                 .map(gameMapper::toAttemptResponse)
                 .toList();
-    }
-
-    private LeaderboardEntryResponse toLeaderboardEntryResponse(LeaderboardEntryProjection projection) {
-        long totalAnswered = valueOrZero(projection.getTotalAnswers());
-        long totalCorrect = valueOrZero(projection.getCorrectAnswers());
-        double accuracy = totalAnswered == 0 ? 0.0 : (double) totalCorrect / totalAnswered;
-        return new LeaderboardEntryResponse(projection.getUsername(), totalAnswered, totalCorrect, accuracy);
-    }
-
-    private long valueOrZero(Long value) {
-        return value == null ? 0L : value;
     }
 }

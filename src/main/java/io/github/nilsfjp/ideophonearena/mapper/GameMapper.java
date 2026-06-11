@@ -4,6 +4,8 @@ import io.github.nilsfjp.ideophonearena.dto.AnswerResultResponse;
 import io.github.nilsfjp.ideophonearena.dto.AttemptResponse;
 import io.github.nilsfjp.ideophonearena.dto.GameSessionResponse;
 import io.github.nilsfjp.ideophonearena.dto.IdeophoneChoiceResponse;
+import io.github.nilsfjp.ideophonearena.dto.LeaderboardEntryResponse;
+import io.github.nilsfjp.ideophonearena.dto.LeaderboardPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RoundResponse;
 import io.github.nilsfjp.ideophonearena.dto.TimingResponse;
 import io.github.nilsfjp.ideophonearena.dto.TranslationResponse;
@@ -11,6 +13,9 @@ import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
 import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
+import io.github.nilsfjp.ideophonearena.repository.LeaderboardEntryProjection;
+import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -72,6 +77,25 @@ public class GameMapper {
                 answer.isCorrect(),
                 answer.getResponseTimeMs()
         );
+    }
+
+    public LeaderboardPageResponse toLeaderboardPageResponse(Page<LeaderboardEntryProjection> page) {
+        List<LeaderboardEntryResponse> entries = page.getContent().stream()
+                .map(this::toLeaderboardEntryResponse)
+                .toList();
+        return new LeaderboardPageResponse(entries, page.getNumber(), page.getSize(), page.getTotalElements(),
+                page.getTotalPages());
+    }
+
+    private LeaderboardEntryResponse toLeaderboardEntryResponse(LeaderboardEntryProjection projection) {
+        long totalAnswered = valueOrZero(projection.getTotalAnswers());
+        long totalCorrect = valueOrZero(projection.getCorrectAnswers());
+        double accuracy = totalAnswered == 0 ? 0.0 : (double) totalCorrect / totalAnswered;
+        return new LeaderboardEntryResponse(projection.getUsername(), totalAnswered, totalCorrect, accuracy);
+    }
+
+    private long valueOrZero(Long value) {
+        return value == null ? 0L : value;
     }
 
     private TranslationResponse toTranslationResponse(ArenaRound round) {
