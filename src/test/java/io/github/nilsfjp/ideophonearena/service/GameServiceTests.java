@@ -147,7 +147,7 @@ class GameServiceTests {
                 ideophone(4L, "ばちゃばちゃ", "batyabatya", "splashing", "a1kd-batyabatya.mp4")
         );
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
-        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelOrderByIdAsc(
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
                 ConditionName.CONDITION_1_SOKUON,
                 1
         )).thenReturn(List.of(answeredRound, nextRound));
@@ -174,7 +174,7 @@ class GameServiceTests {
                 ideophone(2L, "かたかた", "katakata", "clattering, rattling", "a0kd-katakata.mp4")
         );
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
-        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelOrderByIdAsc(
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
                 ConditionName.CONDITION_1_SOKUON,
                 1
         )).thenReturn(List.of(answeredRound));
@@ -204,8 +204,8 @@ class GameServiceTests {
         when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
         when(playerAnswerRepository.countBySessionId(20L)).thenReturn(1L);
         when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(1L);
-        when(arenaRoundRepository.countByConditionNameAndDifficultyLevel(ConditionName.CONDITION_1_SOKUON, 1))
-                .thenReturn(60L);
+        when(arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
+                ConditionName.CONDITION_1_SOKUON, 1)).thenReturn(60L);
 
         AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
 
@@ -243,8 +243,8 @@ class GameServiceTests {
         when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
         when(playerAnswerRepository.countBySessionId(20L)).thenReturn(60L);
         when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(45L);
-        when(arenaRoundRepository.countByConditionNameAndDifficultyLevel(ConditionName.CONDITION_1_SOKUON, 1))
-                .thenReturn(60L);
+        when(arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
+                ConditionName.CONDITION_1_SOKUON, 1)).thenReturn(60L);
 
         AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
 
@@ -292,6 +292,104 @@ class GameServiceTests {
         verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
     }
 
+    @Test
+    void getNextRoundServesPracticeRoundsBeforeScoredRounds() {
+        session.setIncludePractice(true);
+        ArenaRound firstPractice = practiceRound(
+                900L,
+                "softly, gently",
+                ideophone(31L, "そっと", "sotto", "softly, gently", "audio/p0h-sotto.m4a"),
+                ideophone(32L, "がたん", "gataN", "with a bang", "audio/p0k-gataN.m4a")
+        );
+        ArenaRound secondPractice = practiceRound(
+                901L,
+                "suddenly, in a flash",
+                ideophone(33L, "じっと", "zitto", "motionless, fixedly", "audio/p1h-zitto.m4a"),
+                ideophone(34L, "ぱっ", "paQ", "suddenly, in a flash", "audio/p1k-paQ.m4a")
+        );
+        when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeTrueOrderByIdAsc(
+                ConditionName.CONDITION_1_SOKUON,
+                1
+        )).thenReturn(List.of(firstPractice, secondPractice));
+
+        RoundResponse response = gameService.getNextRound(userDetails, SESSION_UUID);
+
+        assertEquals(900L, response.getRoundId());
+        assertTrue(response.isPractice());
+        verify(arenaRoundRepository, never()).findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
+                ConditionName.CONDITION_1_SOKUON, 1);
+    }
+
+    @Test
+    void submitPracticeAnswerReturnsFeedbackWithoutPersistingAnswer() {
+        session.setIncludePractice(true);
+        Ideophone left = ideophone(31L, "そっと", "sotto", "softly, gently", "audio/p0h-sotto.m4a");
+        Ideophone right = ideophone(32L, "がたん", "gataN", "with a bang", "audio/p0k-gataN.m4a");
+        ArenaRound practiceRound = practiceRound(900L, "softly, gently", left, right);
+        SubmitAnswerRequest request = new SubmitAnswerRequest();
+        request.setRoundId(900L);
+        request.setSelectedIdeophoneId(31L);
+        request.setResponseTimeMs(1234);
+        when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
+        when(arenaRoundRepository.findByIdWithIdeophones(900L)).thenReturn(Optional.of(practiceRound));
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeTrueOrderByIdAsc(
+                ConditionName.CONDITION_1_SOKUON,
+                1
+        )).thenReturn(List.of(practiceRound));
+        when(playerAnswerRepository.countBySessionId(20L)).thenReturn(0L);
+        when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(0L);
+
+        AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
+
+        assertTrue(response.isPractice());
+        assertTrue(response.isCorrect());
+        assertEquals(0L, response.getTotalAnswered());
+        assertEquals(0L, response.getTotalCorrect());
+        assertEquals(1, session.getPracticeAnswered());
+        assertNull(session.getCompletedAt());
+        verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
+    }
+
+    @Test
+    void submitPracticeAnswerRejectsOutOfOrderAndRepeatedRounds() {
+        session.setIncludePractice(true);
+        ArenaRound firstPractice = practiceRound(
+                900L,
+                "softly, gently",
+                ideophone(31L, "そっと", "sotto", "softly, gently", "audio/p0h-sotto.m4a"),
+                ideophone(32L, "がたん", "gataN", "with a bang", "audio/p0k-gataN.m4a")
+        );
+        ArenaRound secondPractice = practiceRound(
+                901L,
+                "suddenly, in a flash",
+                ideophone(33L, "じっと", "zitto", "motionless, fixedly", "audio/p1h-zitto.m4a"),
+                ideophone(34L, "ぱっ", "paQ", "suddenly, in a flash", "audio/p1k-paQ.m4a")
+        );
+        when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
+        when(arenaRoundRepository.findByIdWithIdeophones(901L)).thenReturn(Optional.of(secondPractice));
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeTrueOrderByIdAsc(
+                ConditionName.CONDITION_1_SOKUON,
+                1
+        )).thenReturn(List.of(firstPractice, secondPractice));
+
+        SubmitAnswerRequest outOfOrder = new SubmitAnswerRequest();
+        outOfOrder.setRoundId(901L);
+        outOfOrder.setSelectedIdeophoneId(33L);
+        outOfOrder.setResponseTimeMs(500);
+        assertThrows(BadRequestException.class,
+                () -> gameService.submitAnswer(userDetails, SESSION_UUID, outOfOrder));
+
+        session.setPracticeAnswered(2);
+        SubmitAnswerRequest repeated = new SubmitAnswerRequest();
+        repeated.setRoundId(901L);
+        repeated.setSelectedIdeophoneId(33L);
+        repeated.setResponseTimeMs(500);
+        assertThrows(ConflictException.class,
+                () -> gameService.submitAnswer(userDetails, SESSION_UUID, repeated));
+        verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
+    }
+
     private ArenaRound round(Long id, String prompt, Ideophone left, Ideophone right) {
         ArenaRound round = new ArenaRound(
                 prompt,
@@ -300,6 +398,20 @@ class GameServiceTests {
                 left,
                 ConditionName.CONDITION_1_SOKUON,
                 1
+        );
+        setId(round, id);
+        return round;
+    }
+
+    private ArenaRound practiceRound(Long id, String prompt, Ideophone left, Ideophone right) {
+        ArenaRound round = new ArenaRound(
+                prompt,
+                left,
+                right,
+                left,
+                ConditionName.CONDITION_1_SOKUON,
+                1,
+                true
         );
         setId(round, id);
         return round;

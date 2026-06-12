@@ -30,6 +30,7 @@ public class GameMapper {
                 session.getSessionUuid(),
                 session.getDifficultyLevel(),
                 session.getConditionName(),
+                session.isIncludePractice(),
                 session.getStartedAt()
         );
     }
@@ -41,6 +42,7 @@ public class GameMapper {
                 round.getPrompt(),
                 round.getConditionName(),
                 round.getDifficultyLevel(),
+                round.isPractice(),
                 toTranslationResponse(round),
                 toIdeophoneResponse(round.getLeftIdeophone()),
                 toIdeophoneResponse(round.getRightIdeophone()),
@@ -50,7 +52,7 @@ public class GameMapper {
 
     public RoundResponse toCompletedRoundResponse(GameSession session, String message) {
         return new RoundResponse(true, message, session.getSessionUuid(), null, null,
-                session.getConditionName(), session.getDifficultyLevel(), null, null, null, null);
+                session.getConditionName(), session.getDifficultyLevel(), false, null, null, null, null);
     }
 
     public AnswerResultResponse toAnswerResultResponse(ArenaRound round, Ideophone selectedIdeophone,
@@ -60,6 +62,25 @@ public class GameMapper {
                 selectedIdeophone.getId(),
                 round.getCorrectIdeophone().getId(),
                 answer.isCorrect(),
+                false,
+                round.getPrompt(),
+                round.getCorrectIdeophone().getKana(),
+                selectedIdeophone.getKana(),
+                totalAnswered,
+                totalCorrect
+        );
+    }
+
+    // Practice answers are never persisted, so there is no PlayerAnswer to map
+    // from; totals stay the session's scored counts.
+    public AnswerResultResponse toPracticeAnswerResultResponse(ArenaRound round, Ideophone selectedIdeophone,
+            boolean correct, long totalAnswered, long totalCorrect) {
+        return new AnswerResultResponse(
+                round.getId(),
+                selectedIdeophone.getId(),
+                round.getCorrectIdeophone().getId(),
+                correct,
+                true,
                 round.getPrompt(),
                 round.getCorrectIdeophone().getKana(),
                 selectedIdeophone.getKana(),
@@ -88,10 +109,13 @@ public class GameMapper {
     }
 
     private LeaderboardEntryResponse toLeaderboardEntryResponse(LeaderboardEntryProjection projection) {
-        long totalAnswered = valueOrZero(projection.getTotalAnswers());
-        long totalCorrect = valueOrZero(projection.getCorrectAnswers());
-        double accuracy = totalAnswered == 0 ? 0.0 : (double) totalCorrect / totalAnswered;
-        return new LeaderboardEntryResponse(projection.getUsername(), totalAnswered, totalCorrect, accuracy);
+        long bestSessionCorrect = valueOrZero(projection.getBestSessionCorrect());
+        long bestSessionAnswered = valueOrZero(projection.getBestSessionAnswered());
+        double bestSessionAccuracy = bestSessionAnswered == 0
+                ? 0.0
+                : (double) bestSessionCorrect / bestSessionAnswered;
+        return new LeaderboardEntryResponse(projection.getUsername(), bestSessionCorrect, bestSessionAnswered,
+                bestSessionAccuracy);
     }
 
     private long valueOrZero(Long value) {

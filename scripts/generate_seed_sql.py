@@ -178,6 +178,7 @@ class Round:
     right_stimulus_file: str
     correct_stimulus_file: str
     condition_name: str
+    practice: bool
 
 
 def romaji_to_hiragana(romaji: str) -> str:
@@ -224,10 +225,49 @@ def parse_stimulus_file(filename: str) -> tuple[str, str, str]:
     return match.group("pairing"), match.group("script"), romaji
 
 
-def read_trial_rows(path: Path) -> list[dict[str, str]]:
+def read_display_rows(path: Path, display: str) -> list[dict[str, str]]:
     with path.open("r", encoding="utf-8-sig", newline="") as source:
         reader = csv.DictReader(source)
-        return [row for row in reader if row.get("display") == "trial"]
+        return [row for row in reader if row.get("display") == display]
+
+
+def collect_rows(
+    ideophones: OrderedDict[str, Stimulus],
+    rounds: list[Round],
+    rows: list[dict[str, str]],
+    condition_name: str,
+    path: Path,
+    practice: bool,
+) -> None:
+    for row in rows:
+        left = stimulus_from_row(row, "word-a", "meaning-a")
+        right = stimulus_from_row(row, "word-b", "meaning-b")
+        correct = stimulus_from_row(row, "word-answer", None)
+
+        if correct.stimulus_file not in {left.stimulus_file, right.stimulus_file}:
+            raise ValueError(f"Correct answer {row['word-answer']} is not one of the choices in {path.name}")
+
+        for stimulus in (left, right):
+            if stimulus.stimulus_file.startswith("p") != practice:
+                raise ValueError(
+                    f"Pairing prefix of {stimulus.stimulus_file} disagrees with display={row['display']} in {path.name}"
+                )
+            existing = ideophones.get(stimulus.stimulus_file)
+            if existing is None:
+                ideophones[stimulus.stimulus_file] = stimulus
+            elif existing != stimulus:
+                raise ValueError(f"Conflicting data for {stimulus.stimulus_file}: {existing} vs {stimulus}")
+
+        rounds.append(
+            Round(
+                prompt=row["meaning-prompt"],
+                left_stimulus_file=left.stimulus_file,
+                right_stimulus_file=right.stimulus_file,
+                correct_stimulus_file=correct.stimulus_file,
+                condition_name=condition_name,
+                practice=practice,
+            )
+        )
 
 
 def collect_data() -> tuple[OrderedDict[str, Stimulus], list[Round]]:
@@ -238,34 +278,18 @@ def collect_data() -> tuple[OrderedDict[str, Stimulus], list[Round]]:
         if not path.exists():
             raise FileNotFoundError(path)
 
-        trial_rows = read_trial_rows(path)
+        trial_rows = read_display_rows(path, "trial")
         if len(trial_rows) != 30:
             raise ValueError(f"Expected 30 trial rows in {path.name}, found {len(trial_rows)}")
+        collect_rows(ideophones, rounds, trial_rows, condition_name, path, practice=False)
 
-        for row in trial_rows:
-            left = stimulus_from_row(row, "word-a", "meaning-a")
-            right = stimulus_from_row(row, "word-b", "meaning-b")
-            correct = stimulus_from_row(row, "word-answer", None)
-
-            if correct.stimulus_file not in {left.stimulus_file, right.stimulus_file}:
-                raise ValueError(f"Correct answer {row['word-answer']} is not one of the choices in {path.name}")
-
-            for stimulus in (left, right):
-                existing = ideophones.get(stimulus.stimulus_file)
-                if existing is None:
-                    ideophones[stimulus.stimulus_file] = stimulus
-                elif existing != stimulus:
-                    raise ValueError(f"Conflicting data for {stimulus.stimulus_file}: {existing} vs {stimulus}")
-
-            rounds.append(
-                Round(
-                    prompt=row["meaning-prompt"],
-                    left_stimulus_file=left.stimulus_file,
-                    right_stimulus_file=right.stimulus_file,
-                    correct_stimulus_file=correct.stimulus_file,
-                    condition_name=condition_name,
-                )
-            )
+    # Practice pairs (p0-p3, Appendix B) are appended after all trial rows so the
+    # 180 trial ideophone ids and 90 trial round ids stay stable across the regen.
+    for _condition_number, condition_name, path in CONDITIONS:
+        practice_rows = read_display_rows(path, "practice")
+        if len(practice_rows) != 4:
+            raise ValueError(f"Expected 4 practice rows in {path.name}, found {len(practice_rows)}")
+        collect_rows(ideophones, rounds, practice_rows, condition_name, path, practice=True)
 
     validate_unique_constraints(ideophones)
     return ideophones, rounds
@@ -385,6 +409,7 @@ def render_sql(ideophones: OrderedDict[str, Stimulus], rounds: list[Round]) -> s
         "    correct_ideophone_id BIGINT NOT NULL,",
         "    condition_name VARCHAR(50) NOT NULL DEFAULT 'TEXT_ONLY',",
         "    difficulty_level INT NOT NULL DEFAULT 1,",
+        "    is_practice BOOLEAN NOT NULL DEFAULT FALSE,",
         "",
         "    PRIMARY KEY (id),",
         "",
@@ -408,6 +433,8 @@ def render_sql(ideophones: OrderedDict[str, Stimulus], rounds: list[Round]) -> s
         "    user_id BIGINT NOT NULL,",
         "    difficulty_level INT NOT NULL DEFAULT 1,",
         "    condition_name VARCHAR(50) NOT NULL DEFAULT 'TEXT_ONLY',",
+        "    include_practice BOOLEAN NOT NULL DEFAULT FALSE,",
+        "    practice_answered INT NOT NULL DEFAULT 0,",
         "    started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,",
         "    completed_at TIMESTAMP NULL,",
         "",
@@ -467,7 +494,7 @@ def render_sql(ideophones: OrderedDict[str, Stimulus], rounds: list[Round]) -> s
         )
     lines.extend(with_sql_commas(ideophone_values))
     lines.append("")
-    lines.append("INSERT INTO arena_rounds (id, prompt, left_ideophone_id, right_ideophone_id, correct_ideophone_id, condition_name, difficulty_level)")
+    lines.append("INSERT INTO arena_rounds (id, prompt, left_ideophone_id, right_ideophone_id, correct_ideophone_id, condition_name, difficulty_level, is_practice)")
     lines.append("VALUES")
 
     round_values = []
@@ -482,6 +509,7 @@ def render_sql(ideophones: OrderedDict[str, Stimulus], rounds: list[Round]) -> s
                     ideophone_ids[round_data.correct_stimulus_file],
                     round_data.condition_name,
                     1,
+                    int(round_data.practice),
                 )
             )
         )

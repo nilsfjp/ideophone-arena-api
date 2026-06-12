@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Regenerates the 60 per-word .m4a audio assets from the audio-only mp4 variants.
+# Regenerates the 68 per-word .m4a audio assets (60 trial words + 8 practice
+# words, p-prefix) from the audio-only mp4 variants.
 #
 # Provenance (progress-log S1, 2026-06-10): the seed's stimulus_file column points at
 # audio/<p1><p2><p3>-<romaji>.m4a, one shared audio file per word across all three
@@ -29,4 +30,4 @@ for mp4 in "$SRC_DIR"/[avip][0-9][hk][ud]-*.mp4; do
     count=$((count + 1))
 done
 
-echo "Extracted $count audio files into $DEST_DIR (expected 60)."
+echo "Extracted $count audio files into $DEST_DIR (expected 68)."

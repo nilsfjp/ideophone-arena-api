@@ -38,11 +38,18 @@ class IdeophoneSeedIntegrityTests {
             "v", "VISUAL",
             "i", "INTEROCEPTIVE");
 
+    private static final Pattern ROUND_ROW_PATTERN = Pattern.compile(
+            "\\((\\d+), '[^']*', (\\d+), (\\d+), (\\d+), '[^']+', \\d+, (\\d+)\\)");
+
     private record SeedRow(long id, String kana, String displayForm, String canonicalForm,
             String romaji, String gloss, String canonicalScript, String stimulusFile, String modality) {
     }
 
+    private record RoundRow(long id, long leftId, long rightId, long correctId, boolean practice) {
+    }
+
     private static List<SeedRow> rows;
+    private static List<RoundRow> roundRows;
 
     @BeforeAll
     static void parseSeed() throws IOException {
@@ -65,11 +72,28 @@ class IdeophoneSeedIntegrityTests {
                     matcher.group(8),
                     matcher.group(9)));
         }
+
+        int roundInsertStart = sql.indexOf("INSERT INTO arena_rounds");
+        int roundInsertEnd = sql.indexOf(';', roundInsertStart);
+        String roundBlock = sql.substring(roundInsertStart, roundInsertEnd);
+
+        roundRows = new ArrayList<>();
+        Matcher roundMatcher = ROUND_ROW_PATTERN.matcher(roundBlock);
+        while (roundMatcher.find()) {
+            roundRows.add(new RoundRow(
+                    Long.parseLong(roundMatcher.group(1)),
+                    Long.parseLong(roundMatcher.group(2)),
+                    Long.parseLong(roundMatcher.group(3)),
+                    Long.parseLong(roundMatcher.group(4)),
+                    !"0".equals(roundMatcher.group(5))));
+        }
     }
 
     @Test
-    void seedsAllOneHundredEightyIdeophoneRows() {
-        assertEquals(180, rows.size());
+    void seedsAllTwoHundredFourIdeophoneRows() {
+        // 60 trial words plus 8 practice words, each in three condition variants.
+        assertEquals(204, rows.size());
+        assertEquals(24, rows.stream().filter(IdeophoneSeedIntegrityTests::isPracticeRow).count());
     }
 
     @Test
@@ -86,8 +110,15 @@ class IdeophoneSeedIntegrityTests {
             Matcher matcher = AUDIO_PATTERN.matcher(row.stimulusFile());
             assertTrue(matcher.matches(),
                     rowLabel(row) + " has unexpected stimulus_file " + row.stimulusFile());
-            assertEquals(MODALITY_BY_LETTER.get(matcher.group(1)), row.modality(),
-                    rowLabel(row) + " stimulus modality letter disagrees with modality column");
+            if ("p".equals(matcher.group(1))) {
+                // Practice prefix carries no modality letter; the thesis only
+                // has auditory and visual practice pairs.
+                assertTrue("AUDITORY".equals(row.modality()) || "VISUAL".equals(row.modality()),
+                        rowLabel(row) + " practice row has unexpected modality " + row.modality());
+            } else {
+                assertEquals(MODALITY_BY_LETTER.get(matcher.group(1)), row.modality(),
+                        rowLabel(row) + " stimulus modality letter disagrees with modality column");
+            }
             assertEquals(row.canonicalScript().substring(0, 1).toLowerCase(), matcher.group(3),
                     rowLabel(row) + " stimulus pos3 disagrees with canonical_script");
             assertEquals(row.romaji(), matcher.group(4),
@@ -126,10 +157,30 @@ class IdeophoneSeedIntegrityTests {
         for (SeedRow row : rows) {
             byAudio.computeIfAbsent(row.stimulusFile(), key -> new ArrayList<>()).add(row);
         }
-        assertEquals(60, byAudio.size());
+        assertEquals(68, byAudio.size());
         for (Map.Entry<String, List<SeedRow>> entry : byAudio.entrySet()) {
             assertEquals(3, entry.getValue().size(),
                     entry.getKey() + " is not shared by exactly three condition rows");
+        }
+    }
+
+    @Test
+    void practiceRoundsAreFlaggedAndReferenceOnlyPracticeIdeophones() {
+        assertEquals(102, roundRows.size());
+        assertEquals(12, roundRows.stream().filter(RoundRow::practice).count());
+
+        Map<Long, SeedRow> rowsById = new java.util.HashMap<>();
+        for (SeedRow row : rows) {
+            rowsById.put(row.id(), row);
+        }
+        for (RoundRow round : roundRows) {
+            for (long ideophoneId : new long[] {round.leftId(), round.rightId(), round.correctId()}) {
+                SeedRow row = rowsById.get(ideophoneId);
+                assertTrue(row != null, "round " + round.id() + " references unknown ideophone " + ideophoneId);
+                assertEquals(round.practice(), isPracticeRow(row),
+                        "round " + round.id() + " practice flag disagrees with ideophone "
+                                + rowLabel(row));
+            }
         }
     }
 
@@ -139,6 +190,10 @@ class IdeophoneSeedIntegrityTests {
             assertFalse(row.gloss().contains("feeling fo relief"),
                     rowLabel(row) + " still contains the gloss typo");
         }
+    }
+
+    private static boolean isPracticeRow(SeedRow row) {
+        return row.stimulusFile().startsWith("audio/p");
     }
 
     private static boolean isInScriptFamily(String text, char scriptCode) {

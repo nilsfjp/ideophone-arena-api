@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GameService {
 
     private static final int SUPPORTED_DIFFICULTY_LEVEL = 1;
+    private static final int PRACTICE_ROUNDS_PER_SESSION = 2;
     private static final Set<ConditionName> SUPPORTED_CONDITION_NAMES = EnumSet.of(
             ConditionName.CONDITION_1_SOKUON,
             ConditionName.CONDITION_2_SOKUON,
@@ -64,7 +65,7 @@ public class GameService {
 
         validateSupportedStartRequest(conditionName, difficultyLevel);
 
-        GameSession session = new GameSession(user, conditionName, difficultyLevel);
+        GameSession session = new GameSession(user, conditionName, difficultyLevel, request.isIncludePractice());
         return gameMapper.toSessionResponse(gameSessionRepository.save(session));
     }
 
@@ -73,7 +74,14 @@ public class GameService {
         AppUser user = getCurrentUser(userDetails);
         GameSession session = getOwnedSession(user, sessionUuid);
 
-        List<ArenaRound> rounds = arenaRoundRepository.findByConditionNameAndDifficultyLevelOrderByIdAsc(
+        if (session.isIncludePractice()) {
+            List<ArenaRound> practiceRounds = practiceRoundsForSession(session);
+            if (session.getPracticeAnswered() < practiceRounds.size()) {
+                return gameMapper.toRoundResponse(session, practiceRounds.get(session.getPracticeAnswered()));
+            }
+        }
+
+        List<ArenaRound> rounds = arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
                 session.getConditionName(),
                 session.getDifficultyLevel()
         );
@@ -103,6 +111,9 @@ public class GameService {
                 || round.getDifficultyLevel() != session.getDifficultyLevel()) {
             throw new BadRequestException("Round does not belong to this session condition and difficulty");
         }
+        if (round.isPractice()) {
+            return submitPracticeAnswer(session, round, request);
+        }
         if (playerAnswerRepository.existsBySessionIdAndRoundId(session.getId(), round.getId())) {
             throw new ConflictException("This round has already been answered in this session");
         }
@@ -121,13 +132,59 @@ public class GameService {
         long totalAnswered = playerAnswerRepository.countBySessionId(session.getId());
         long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
 
-        long totalRounds = arenaRoundRepository.countByConditionNameAndDifficultyLevel(
+        long totalRounds = arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
                 session.getConditionName(), session.getDifficultyLevel());
         if (session.getCompletedAt() == null && totalAnswered == totalRounds) {
             session.complete();
         }
 
         return gameMapper.toAnswerResultResponse(round, selectedIdeophone, answer, totalAnswered, totalCorrect);
+    }
+
+    // Practice answers return feedback but are never persisted: they do not
+    // create PlayerAnswer rows and cannot affect score, completion, or the
+    // leaderboard. Only the session's practice cursor advances.
+    private AnswerResultResponse submitPracticeAnswer(GameSession session, ArenaRound round,
+            SubmitAnswerRequest request) {
+        if (!session.isIncludePractice()) {
+            throw new BadRequestException("This session was started without practice rounds");
+        }
+
+        List<ArenaRound> practiceRounds = practiceRoundsForSession(session);
+        int roundIndex = -1;
+        for (int index = 0; index < practiceRounds.size(); index++) {
+            if (practiceRounds.get(index).getId().equals(round.getId())) {
+                roundIndex = index;
+                break;
+            }
+        }
+        if (roundIndex < 0) {
+            throw new BadRequestException("This practice round is not part of this session");
+        }
+        if (roundIndex < session.getPracticeAnswered()) {
+            throw new ConflictException("This practice round has already been answered in this session");
+        }
+        if (roundIndex > session.getPracticeAnswered()) {
+            throw new BadRequestException("Practice rounds must be answered in order");
+        }
+
+        Ideophone selectedIdeophone = getSelectedIdeophone(round, request.getSelectedIdeophoneId());
+        boolean correct = isCorrectChoice(round, selectedIdeophone);
+        session.recordPracticeAnswer();
+
+        long totalAnswered = playerAnswerRepository.countBySessionId(session.getId());
+        long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
+        return gameMapper.toPracticeAnswerResultResponse(round, selectedIdeophone, correct, totalAnswered,
+                totalCorrect);
+    }
+
+    // The session serves the first PRACTICE_ROUNDS_PER_SESSION practice rounds
+    // of its condition, in seed order (p0 auditory, p1 visual).
+    private List<ArenaRound> practiceRoundsForSession(GameSession session) {
+        List<ArenaRound> practiceRounds = arenaRoundRepository
+                .findByConditionNameAndDifficultyLevelAndPracticeTrueOrderByIdAsc(
+                        session.getConditionName(), session.getDifficultyLevel());
+        return practiceRounds.subList(0, Math.min(PRACTICE_ROUNDS_PER_SESSION, practiceRounds.size()));
     }
 
     private AppUser getCurrentUser(UserDetails userDetails) {

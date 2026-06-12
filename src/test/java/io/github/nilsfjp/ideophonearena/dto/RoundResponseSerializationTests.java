@@ -45,6 +45,7 @@ class RoundResponseSerializationTests {
                 "target meaning",
                 ConditionName.CONDITION_1_SOKUON,
                 1,
+                false,
                 new TranslationResponse("target meaning", "distractor meaning"),
                 left,
                 right,
@@ -61,6 +62,8 @@ class RoundResponseSerializationTests {
         assertTrue(roundProperties.contains("prompt"));
         assertTrue(roundProperties.contains("completed"));
         assertTrue(roundProperties.contains("message"));
+        assertTrue(roundProperties.contains("practice"));
+        assertFalse(response.isPractice());
         assertFalse(choiceProperties.contains("gloss"));
         assertTrue(choiceProperties.contains("stimulusUrl"));
         assertTrue(choiceProperties.contains("displayForm"));
