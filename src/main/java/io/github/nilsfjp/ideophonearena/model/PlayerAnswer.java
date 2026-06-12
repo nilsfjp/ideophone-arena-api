@@ -36,6 +36,13 @@ public class PlayerAnswer {
     @JoinColumn(name = "selected_ideophone_id", nullable = false)
     private Ideophone selectedIdeophone;
 
+    // The seed-derived target of this round in this session, stored at
+    // answer time so analytics can aggregate per actually-served target
+    // (arena_rounds.correct_ideophone_id only documents the thesis target).
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "target_ideophone_id", nullable = false)
+    private Ideophone targetIdeophone;
+
     @Column(name = "is_correct", nullable = false)
     private boolean correct;
 
@@ -49,11 +56,12 @@ public class PlayerAnswer {
     protected PlayerAnswer() {
     }
 
-    public PlayerAnswer(GameSession session, ArenaRound round, Ideophone selectedIdeophone, Integer responseTimeMs,
-            boolean correct) {
+    public PlayerAnswer(GameSession session, ArenaRound round, Ideophone selectedIdeophone, Ideophone targetIdeophone,
+            Integer responseTimeMs, boolean correct) {
         this.session = session;
         this.round = round;
         this.selectedIdeophone = selectedIdeophone;
+        this.targetIdeophone = targetIdeophone;
         this.responseTimeMs = responseTimeMs;
         this.correct = correct;
     }
@@ -84,6 +92,14 @@ public class PlayerAnswer {
 
     public void setSelectedIdeophone(Ideophone selectedIdeophone) {
         this.selectedIdeophone = selectedIdeophone;
+    }
+
+    public Ideophone getTargetIdeophone() {
+        return targetIdeophone;
+    }
+
+    public void setTargetIdeophone(Ideophone targetIdeophone) {
+        this.targetIdeophone = targetIdeophone;
     }
 
     public boolean isCorrect() {

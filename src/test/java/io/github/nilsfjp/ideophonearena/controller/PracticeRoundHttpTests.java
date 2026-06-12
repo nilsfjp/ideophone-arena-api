@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
 import io.github.nilsfjp.ideophonearena.model.ArenaRound;
+import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
 import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
@@ -21,6 +22,8 @@ import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
+import io.github.nilsfjp.ideophonearena.service.RoundShuffler;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,6 +60,9 @@ class PracticeRoundHttpTests {
     @Autowired
     private PlayerAnswerRepository playerAnswerRepository;
 
+    @Autowired
+    private RoundShuffler roundShuffler;
+
     private record PracticeFixture(ArenaRound firstPractice, ArenaRound secondPractice, ArenaRound scoredRound,
             int difficulty) {
     }
@@ -72,17 +78,24 @@ class PracticeRoundHttpTests {
         GameSession session = gameSessionRepository.save(new GameSession(
                 user, ConditionName.TEXT_ONLY, fixture.difficulty(), true));
         String sessionUuid = session.getSessionUuid();
+        List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(session.getShuffleSeed(),
+                List.of(fixture.firstPractice(), fixture.secondPractice()));
+        DerivedRound derivedScored = roundShuffler.deriveScoredRounds(session.getShuffleSeed(),
+                List.of(fixture.scoredRound())).get(0);
 
-        // First practice round, answered correctly: feedback comes back but the
-        // scored totals stay zero and no PlayerAnswer row is written.
+        // First practice round, answered correctly (per the derived target):
+        // feedback comes back but the scored totals stay zero and no
+        // PlayerAnswer row is written.
         String firstRoundJson = getNextRound(token, sessionUuid);
         assertEquals(fixture.firstPractice().getId().longValue(),
                 ((Number) JsonPath.read(firstRoundJson, "$.roundId")).longValue());
         assertEquals(Boolean.TRUE, JsonPath.read(firstRoundJson, "$.practice"));
         assertEquals(Boolean.FALSE, JsonPath.read(firstRoundJson, "$.completed"));
+        assertEquals(derivedPractice.get(0).getTarget().getGloss(),
+                JsonPath.read(firstRoundJson, "$.targetTranslation"));
 
         String firstAnswerJson = submitAnswer(token, sessionUuid, fixture.firstPractice().getId(),
-                fixture.firstPractice().getCorrectIdeophone().getId());
+                derivedPractice.get(0).getTarget().getId());
         assertEquals(Boolean.TRUE, JsonPath.read(firstAnswerJson, "$.practice"));
         assertEquals(Boolean.TRUE, JsonPath.read(firstAnswerJson, "$.correct"));
         assertEquals(0, ((Number) JsonPath.read(firstAnswerJson, "$.totalAnswered")).intValue());
@@ -97,10 +110,7 @@ class PracticeRoundHttpTests {
                 ((Number) JsonPath.read(secondRoundJson, "$.roundId")).longValue());
         assertEquals(Boolean.TRUE, JsonPath.read(secondRoundJson, "$.practice"));
 
-        Long wrongChoice = fixture.secondPractice().getCorrectIdeophone().getId()
-                        .equals(fixture.secondPractice().getLeftIdeophone().getId())
-                ? fixture.secondPractice().getRightIdeophone().getId()
-                : fixture.secondPractice().getLeftIdeophone().getId();
+        Long wrongChoice = derivedPractice.get(1).getOther().getId();
         String secondAnswerJson = submitAnswer(token, sessionUuid, fixture.secondPractice().getId(), wrongChoice);
         assertEquals(Boolean.TRUE, JsonPath.read(secondAnswerJson, "$.practice"));
         assertEquals(Boolean.FALSE, JsonPath.read(secondAnswerJson, "$.correct"));
@@ -117,7 +127,7 @@ class PracticeRoundHttpTests {
         assertEquals(Boolean.FALSE, JsonPath.read(scoredRoundJson, "$.practice"));
 
         String scoredAnswerJson = submitAnswer(token, sessionUuid, fixture.scoredRound().getId(),
-                fixture.scoredRound().getCorrectIdeophone().getId());
+                derivedScored.getTarget().getId());
         assertEquals(Boolean.FALSE, JsonPath.read(scoredAnswerJson, "$.practice"));
         assertEquals(1, ((Number) JsonPath.read(scoredAnswerJson, "$.totalAnswered")).intValue());
         assertEquals(1, ((Number) JsonPath.read(scoredAnswerJson, "$.totalCorrect")).intValue());

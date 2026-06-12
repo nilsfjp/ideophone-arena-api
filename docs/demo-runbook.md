@@ -233,6 +233,18 @@ Practice audio proof:
 curl -I http://localhost:8081/stimuli/audio/p0h-sotto.m4a
 ```
 
+## Deterministic shuffle proofs (2026-06-12)
+
+Each session derives its round order, target identities, sides, and meaning order from `game_sessions.shuffle_seed`
+(see the contract's "Deterministic per-session shuffle" section). Two quick demos:
+
+Different sessions differ — start two sessions with the same `$TOKEN` and condition, then fetch
+`GET .../rounds/next` for each: the first rounds (and the targets for the same `roundId`) will differ.
+
+Restart continuity — play a few rounds of a session, note the next-round response verbatim, restart the backend,
+and repeat the same `GET .../rounds/next`: the response body is identical, and previously answered rounds stay
+answered (verified 2026-06-12: identical `roundId`/`targetTranslation`/`left`/`right` across a kill+restart).
+
 ## Cleaning up browser-loop test accounts
 
 Local browser automation registers throwaway `browser_loop_*` users. They are not seed rows; remove them (and their

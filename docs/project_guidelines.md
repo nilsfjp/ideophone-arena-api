@@ -29,12 +29,12 @@ public ResponseEntity<Void> delete(@PathVariable Long id) {
 }
 ```
 
-| Statuskod | Används vid |
-|---|---|
-| `200 OK` | Lyckad hämtning eller uppdatering |
-| `201 Created` | Ny resurs skapad |
-| `204 No Content` | Resurs borttagen |
-| `404 Not Found` | Resurs hittades inte |
+| Statuskod        | Används vid                       |
+| ---------------- | --------------------------------- |
+| `200 OK`         | Lyckad hämtning eller uppdatering |
+| `201 Created`    | Ny resurs skapad                  |
+| `204 No Content` | Resurs borttagen                  |
+| `404 Not Found`  | Resurs hittades inte              |
 
 </details>
 

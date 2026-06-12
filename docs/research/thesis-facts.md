@@ -20,7 +20,7 @@ Digest of the thesis for Ideophone Arena design, copy, and data work. Compiled 2
 
 - **H1 supported — above-chance guessing.** Mean Choosing accuracy ≈ 64% (19.25/30) vs 50% chance. Every participant's mean exceeded the benchmark except the single lowest (14/30 ≈ 47%, essentially at chance); best performers reached ~27/30 (≈90%).
 - **H2 supported — modality ordering.** Accuracy: Auditory 6.86 > Visual 6.42 > Interoceptive 5.97 (out of 10). Consistent with the implicational hierarchy (Dingemanse 2012; McLean 2021): unimodal sound-to-sound mappings are most transparent, internal states least.
-- **H3 not supported — orthography had negligible group-level effect on accuracy.** C1/C2/C3 performed at similar levels; predicted ranking C2 > C1 > C3 did not appear. High and low performers appeared in all three groups.
+- **H3 not supported — orthography had negligible group-level effect on accuracy.** Exact condition means (full data): Audio-Only 63.6%, Congruent 63.6%, Incongruent 65.3% — if anything, the mismatched-script group did trivially (not significantly) better. Predicted ranking C2 > C1 > C3 did not appear; high and low performers appeared in all three groups.
 - **Rating Task reversal (the thesis's most game-worthy finding).** Mean ratings by modality: Interoceptive 4.45 > Visual 4.24 > Auditory 4.08 — the *opposite* ordering from accuracy. Interoceptive words *feel* most iconic but are guessed worst. Grand mean rating 4.26/7.
 - **Script dampened felt iconicity.** Audio-Only participants rated words higher (M ≈ 4.50) than both script conditions (M ≈ 4.15) — seeing kana (congruent *or* incongruent) slightly reduced perceived iconicity for non-readers. Direction was unexpected: script acted as noise/distraction, not reinforcement.
 - **Guess–rating dissociation mirrors McLean, Dunn & Dingemanse (2023):** ratings and guessing accuracy capture different, complementary dimensions of iconicity. Showcase items: **sakutto (a9)** high on both; **dokidoki (i9)** highest-rated of all (~5.8) but only modest accuracy (~67%); **shobon (i2)** hardest to guess (36%) despite moderate (~4.0) rating.
@@ -29,7 +29,7 @@ Digest of the thesis for Ideophone Arena design, copy, and data work. Compiled 2
 
 ## 4. Per-pairing Choosing accuracy (Figure 10) — correct answers out of 36
 
-**[chart-read]** except a9 (≈94%) and i2 (36%), which the text confirms. Pairing codes match the seed stimulus prefixes (e.g. `a0h-gosogoso`).
+**Exact values, verified against the full raw dataset (n=36, 1,080 trials; 2026-06-12).** The chart-read estimates originally compiled from Figure 10 proved correct for all 30 pairs (zero deltas). Pairing codes match the seed stimulus prefixes (e.g. `a0h-gosogoso`).
 
 | Rank | Pair | Words (hira / kata) | Correct/36 | ≈% |
 |---|---|---|---|---|
@@ -68,9 +68,11 @@ Note the shape: auditory pairs cluster at the top, interoceptive at the bottom, 
 
 ## 5. Per-pairing mean iconicity ratings (Figure 14) — 7-point scale
 
-**[chart-read]** throughout. The Rating Task rated **one word of each pair** (30 rating trials). **Confirmed from raw Gorilla data (2026-06-11): the rated word is exactly the Choosing Task's target word for that pairing** — so per-pairing accuracy and rating refer to the *same word*, making the divergence stats below clean same-word comparisons.
+The Rating Task rated **one word of each pair** (30 rating trials). **Confirmed from raw Gorilla data (2026-06-11): the rated word is exactly the Choosing Task's target word for that pairing** — so per-pairing accuracy and rating refer to the *same word*, making the divergence stats below clean same-word comparisons.
 
-i9 5.8 · i5 5.0 · a4 4.95 · i3 4.9 · a3 4.85 · i8 4.8 · i7 4.75 · i4 4.7 · v0 4.65 · v7 4.6 · a1 4.5 · v5 4.45 · v3 4.4 · v8 4.35 · a5 4.3 · v2 4.15 · a2 4.1 · v6 4.1 · v9 4.05 · i2 4.0 · v1 3.95 · a7 3.9 · a9 3.85 · a0 3.8 · v4 3.8 · i6 3.7 · i1 3.6 · a6 3.3 · i0 3.25 · a8 3.2
+i9 5.81 · i5 5.00 · a4 4.97 · i3 4.92 · a3 4.86 · i8 4.78 · i7 4.75 · i4 4.67 · v0 4.64 · v7 4.58 · a1 4.53 · v5 4.42 · v3 4.39 · v8 4.36 · a5 4.28 · v2 4.14 · a2 4.11 · v6 4.11 · v9 4.06 · i2 4.03 · v1 3.94 · a7 3.89 · a9 3.86 · a0 3.78 · v4 3.78 · i6 3.72 · i1 3.58 · a6 3.28 · i0 3.25 · a8 3.22
+
+(Exact values from the full raw dataset, 2026-06-12, replacing chart-read estimates that were accurate to ±0.05.)
 
 Divergence highlights (rating rank vs accuracy rank): i9 (1st rated, 14th guessed), a9 (23rd rated, 1st guessed), a7 (22nd rated, 2nd guessed), i5 (2nd rated, 10th guessed). These are ready-made "your gut vs your reflection" stats for Rating Lab.
 
@@ -87,7 +89,7 @@ No interoceptive practice pairs existed. Practice responses were never recorded 
 
 ## 7. Fidelity notes — where the app already diverges from the thesis
 
-1. **Prompt structure:** thesis trials showed *one* target English gloss; the app shows both glosses ("One of them means X / The other means Y") plus the canonical question. Known, accepted divergence.
+1. **Prompt structure — CORRECTED 2026-06-12:** an earlier version of this doc claimed thesis trials showed only one gloss. The design-archive screenshots prove otherwise: the real trial screen showed BOTH meanings ("One of them means **X** / The other means **Y**") plus "Which one do you think means **X**?" — the app's prompt structure is a *faithful replication*, not a divergence. Furthermore, the Gorilla randomizer swapped meaning-a/meaning-b display order per participant, so the app's reserved meaning-order draw (Session B) is also thesis-faithful; wiring it into the frontend is a fidelity item, not an invention.
 2. **Feedback:** thesis gave none during the Choosing Task; the app gives immediate feedback. Accepted (it's a game).
 3. **Condition assignment:** thesis randomized/counterbalanced between subjects; the app lets players choose (Script Lab). Accepted, documented in project instructions.
 4. **Rating coverage:** thesis rated one word per pair; Rating Lab can and probably should rate both words — note this as an extension, not a replication.
@@ -113,24 +115,25 @@ Two stacked signals: modality (between floors) and per-pair accuracy (within flo
 - "The hardest word in the study: shobon (downhearted). Only 36% got it right — worse than flipping a coin."
 - Script Lab framing rule (already in project instructions): "presentation changes the experience," never "matched script helps."
 
-## 10. Raw-data verification (Gorilla exports v18–v20, analyzed 2026-06-11)
+## 10. Raw-data verification — FULL dataset (combined export, analyzed 2026-06-12)
 
-Three export versions were recovered and combined (`data_exp_220893-v18/19/20`, task `ixsq` = Choosing, `r3iq` = Rating). They contain **25 complete participants** (C1=2, C2=11, C3=12; 750 trials per task) of the thesis's 36 (C1=11, C2=13, C3=12). The missing 9 audio-only and 2 congruent participants are presumably in later exports (v21+), consistent with C1 collection resuming after the v18 audio-only display-file bug. Tidy per-trial CSVs and a per-pair stats file are archived alongside this doc.
+The complete data-collection archive (`data_exp_220893-vall`, Gorilla combined download) contains **all 36 thesis participants** (C1=11, C2=13, C3=12), every one complete with 30 Choosing + 30 Rating trials (1,080 + 1,080). The collection spanned versions 18–20 only: v18 → 1×C1 + 5×C2 + 4×C3 (C1 recruitment halted by the audio-only display-file bug), v19 → 6×C2 + 7×C3, v20 → 10×C1 + 2×C2 + 1×C3. The v18 C1 participant (13381142) is included in the thesis's 36. An earlier hypothesis in this doc that missing participants sat in "v21+ exports" was wrong — the earlier per-version zips were stale partial downloads. Tidy per-trial CSVs and the per-pair stats file regenerated from the full dataset are archived alongside this doc.
+
+**Every thesis-stated statistic replicates exactly from the raw data:** overall 64.17% (19.25/30), participant range 14–27/30, modality accuracy 6.86/6.42/5.97 (aud/vis/int, /10), rating grand mean 4.256, modality ratings 4.45/4.24/4.08 (int/vis/aud), condition ratings 4.50 audio-only vs 4.15/4.15 script. The §4 accuracy table and §5 ratings are exact values from this dataset.
 
 **Mechanisms confirmed from raw data:**
-1. **Target word is fixed per pairing and alternates by pairing parity**: even pairings (a0, a2, … i8) target the hiragana-canonical word; odd pairings (a1, a3, … i9) target the katakana-canonical word. So Figure 10's per-"ideophone" accuracy is per *target word* (e.g. v2's 83% is for guessing *donyori*, not *kirakira*).
-2. **Left/right position randomized per participant** (target Left 383 / Right 367 across the subset).
-3. **Rated word = target word** for all 30 pairings (see §5).
-4. Stimulus file scheme: `<pairing><canonical script><displayed script>-<romaji>.mp4`, displayed ∈ {h, k, u, d} where u/d are the audio-only placeholder symbols (▽/△). Matches the seed's prefix ground truth.
+1. **Target word fixed per pairing, alternating by pairing parity**: even pairings target the hiragana-canonical word, odd pairings the katakana-canonical word. Figure 10's per-"ideophone" accuracy is per *target word*.
+2. **Left/right position randomized per participant** (Gorilla "Randomise Between Columns" on word-a/word-b; the target file was pre-filled into word-a so the swap distributes it).
+3. **Meaning display order randomized per participant** (same mechanism on meaning-a/meaning-b).
+4. **Rated word = target word** for all 30 pairings (see §5).
+5. Stimulus file scheme: `<pairing><canonical><displayed>-<romaji>.mp4`, displayed ∈ {h, k, u, d}; u/d are the audio-only placeholder symbols (▽/△).
 
-**Subset replication of headline stats** (validates the chart-read tables): overall accuracy 64.9% (thesis 64%); rating grand mean 4.25 (thesis 4.26); rating modality means 4.49/4.19/4.08 interoceptive/visual/auditory (thesis 4.45/4.24/4.08); modality accuracy auditory 6.84 / visual 6.72 / interoceptive 5.92 out of 10 (thesis 6.86/6.42/5.97 — visual differs most, expected with 11 participants missing). Per-pair Spearman rank correlation between subset accuracy and chart-read Figure 10: ρ = 0.84. Condition-level C1 numbers from the subset are unusable (n=2). **The §4/§5 chart-read values remain the best estimates of the published figures until v21+ exports surface.**
-
-**New reference stats the thesis never reported** (from the subset): Choosing Task response times — median 13.2 s, mean 18.9 s, p10 8.5 s, p90 31.3 s; correct and incorrect answers took essentially the same time (medians 13.3 vs 12.9 s). Useful as a calibration baseline once the app collects its own `responseTimeMs` (expect app players to be much faster — no mandatory dual audio playback wait).
+**Reference stats the thesis never reported** (full data): Choosing RT — median 13.1 s, mean 18.4 s, p10 8.5 s, p90 31.8 s; correct and incorrect answers took essentially the same time. Largest per-pair median RT outlier: v9 (bosabosa target) at ~20.4 s. Calibration baseline for the app's `responseTimeMs`.
 
 ## 11. Remaining open items
 
-1. Locate v21+ Gorilla exports to recover the missing 11 participants and replace chart-read values with exact ones (nice-to-have; nothing on the roadmap blocks on it).
-2. Identify which audio-only display file was buggy in v18 and whether that version's single C1 participant was excluded from the thesis analysis.
+1. ~~Locate v21+ exports~~ — resolved 2026-06-12: the full combined export contains all 36 participants within v18–v20.
+2. ~~Identify the buggy v18 file~~ — resolved 2026-06-12 (author): the broken display file was `p1kd-patto.mp4`, a **practice** stimulus. Practice trials were never analyzed, so the v18 C1 participant's scored data was validly retained in N=36. The file was fixed in later versions.
 3. **Dataset provenance (corrected per author, 2026-06-11):** the "top-600" list is the NLB/BCCWJ ideophone list (includes moraic structure per word). The **perceptual-strength norms are a separate dataset** (Iida & Akita 2023, ~500+ words) and were the main source of the modality classifications — with the author's caveat that many entries are arguably not ideophones or not the claimed modality, with much cross-modal overlap; classifications were used selectively to find defensible unimodal items. The pairing pipeline (roadmap step 5) therefore needs **both** datasets joined, and its modality assignments inherit the norms' noisiness — human review per generated pair is not optional.
 
 ## 12. References the app's research notes can cite

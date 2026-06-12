@@ -44,6 +44,12 @@ public class GameSession {
     @Column(name = "practice_answered", nullable = false)
     private int practiceAnswered;
 
+    // Seeds the deterministic per-session shuffle (round order, target
+    // identity, target side, meaning order). Generated once at session
+    // creation and never exposed in player-facing DTOs.
+    @Column(name = "shuffle_seed", nullable = false)
+    private long shuffleSeed;
+
     @CreationTimestamp
     @Column(name = "started_at", nullable = false, updatable = false)
     private Instant startedAt;
@@ -59,10 +65,16 @@ public class GameSession {
     }
 
     public GameSession(AppUser user, ConditionName conditionName, int difficultyLevel, boolean includePractice) {
+        this(user, conditionName, difficultyLevel, includePractice, 0L);
+    }
+
+    public GameSession(AppUser user, ConditionName conditionName, int difficultyLevel, boolean includePractice,
+            long shuffleSeed) {
         this.user = user;
         this.conditionName = conditionName;
         this.difficultyLevel = difficultyLevel;
         this.includePractice = includePractice;
+        this.shuffleSeed = shuffleSeed;
     }
 
     public void complete() {
@@ -123,6 +135,14 @@ public class GameSession {
 
     public void setPracticeAnswered(int practiceAnswered) {
         this.practiceAnswered = practiceAnswered;
+    }
+
+    public long getShuffleSeed() {
+        return shuffleSeed;
+    }
+
+    public void setShuffleSeed(long shuffleSeed) {
+        this.shuffleSeed = shuffleSeed;
     }
 
     public Instant getStartedAt() {

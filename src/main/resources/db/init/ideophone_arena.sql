@@ -74,6 +74,7 @@ CREATE TABLE game_sessions (
     condition_name VARCHAR(50) NOT NULL DEFAULT 'TEXT_ONLY',
     include_practice BOOLEAN NOT NULL DEFAULT FALSE,
     practice_answered INT NOT NULL DEFAULT 0,
+    shuffle_seed BIGINT NOT NULL,
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP NULL,
 
@@ -89,6 +90,7 @@ CREATE TABLE player_answers (
     session_id BIGINT NOT NULL,
     round_id BIGINT NOT NULL,
     selected_ideophone_id BIGINT NOT NULL,
+    target_ideophone_id BIGINT NOT NULL,
     is_correct BOOLEAN NOT NULL,
     response_time_ms INT,
     answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -106,6 +108,10 @@ CREATE TABLE player_answers (
 
     CONSTRAINT fk_answers_selected_ideophone
         FOREIGN KEY (selected_ideophone_id)
+            REFERENCES ideophones (id),
+
+    CONSTRAINT fk_answers_target_ideophone
+        FOREIGN KEY (target_ideophone_id)
             REFERENCES ideophones (id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 

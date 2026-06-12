@@ -213,7 +213,7 @@ class LeaderboardPaginationHttpTests {
         for (int index = 0; index < answered; index++) {
             ArenaRound round = rounds.get(index);
             playerAnswerRepository.save(new PlayerAnswer(
-                    session, round, round.getCorrectIdeophone(), 500, index < correct));
+                    session, round, round.getCorrectIdeophone(), round.getCorrectIdeophone(), 500, index < correct));
         }
         return session;
     }

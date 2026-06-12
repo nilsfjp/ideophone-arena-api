@@ -10,6 +10,7 @@ import io.github.nilsfjp.ideophonearena.dto.RoundResponse;
 import io.github.nilsfjp.ideophonearena.dto.TimingResponse;
 import io.github.nilsfjp.ideophonearena.dto.TranslationResponse;
 import io.github.nilsfjp.ideophonearena.model.ArenaRound;
+import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
 import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
@@ -35,17 +36,21 @@ public class GameMapper {
         );
     }
 
-    public RoundResponse toRoundResponse(GameSession session, ArenaRound round) {
+    // The served prompt, translations, and sides all come from the session's
+    // seed-derived presentation, not from the arena_rounds row (whose prompt
+    // and correct_ideophone_id document the fixed thesis target).
+    public RoundResponse toRoundResponse(GameSession session, DerivedRound derivedRound) {
+        ArenaRound round = derivedRound.getRound();
         return new RoundResponse(
                 session.getSessionUuid(),
                 round.getId(),
-                round.getPrompt(),
+                derivedRound.getTarget().getGloss(),
                 round.getConditionName(),
                 round.getDifficultyLevel(),
                 round.isPractice(),
-                toTranslationResponse(round),
-                toIdeophoneResponse(round.getLeftIdeophone()),
-                toIdeophoneResponse(round.getRightIdeophone()),
+                new TranslationResponse(derivedRound.getTarget().getGloss(), derivedRound.getOther().getGloss()),
+                toIdeophoneResponse(derivedRound.getLeft()),
+                toIdeophoneResponse(derivedRound.getRight()),
                 new TimingResponse(FIXATION_MS, PRE_CHOICE_DELAY_MS)
         );
     }
@@ -55,16 +60,16 @@ public class GameMapper {
                 session.getConditionName(), session.getDifficultyLevel(), false, null, null, null, null);
     }
 
-    public AnswerResultResponse toAnswerResultResponse(ArenaRound round, Ideophone selectedIdeophone,
+    public AnswerResultResponse toAnswerResultResponse(DerivedRound derivedRound, Ideophone selectedIdeophone,
             PlayerAnswer answer, long totalAnswered, long totalCorrect) {
         return new AnswerResultResponse(
-                round.getId(),
+                derivedRound.getRound().getId(),
                 selectedIdeophone.getId(),
-                round.getCorrectIdeophone().getId(),
+                derivedRound.getTarget().getId(),
                 answer.isCorrect(),
                 false,
-                round.getPrompt(),
-                round.getCorrectIdeophone().getKana(),
+                derivedRound.getTarget().getGloss(),
+                derivedRound.getTarget().getKana(),
                 selectedIdeophone.getKana(),
                 totalAnswered,
                 totalCorrect
@@ -73,28 +78,30 @@ public class GameMapper {
 
     // Practice answers are never persisted, so there is no PlayerAnswer to map
     // from; totals stay the session's scored counts.
-    public AnswerResultResponse toPracticeAnswerResultResponse(ArenaRound round, Ideophone selectedIdeophone,
+    public AnswerResultResponse toPracticeAnswerResultResponse(DerivedRound derivedRound, Ideophone selectedIdeophone,
             boolean correct, long totalAnswered, long totalCorrect) {
         return new AnswerResultResponse(
-                round.getId(),
+                derivedRound.getRound().getId(),
                 selectedIdeophone.getId(),
-                round.getCorrectIdeophone().getId(),
+                derivedRound.getTarget().getId(),
                 correct,
                 true,
-                round.getPrompt(),
-                round.getCorrectIdeophone().getKana(),
+                derivedRound.getTarget().getGloss(),
+                derivedRound.getTarget().getKana(),
                 selectedIdeophone.getKana(),
                 totalAnswered,
                 totalCorrect
         );
     }
 
+    // History replays what the session actually asked: the stored derived
+    // target, not the round row's thesis target.
     public AttemptResponse toAttemptResponse(PlayerAnswer answer) {
         return new AttemptResponse(
                 answer.getAnsweredAt(),
-                answer.getRound().getPrompt(),
+                answer.getTargetIdeophone().getGloss(),
                 answer.getSelectedIdeophone().getKana(),
-                answer.getRound().getCorrectIdeophone().getKana(),
+                answer.getTargetIdeophone().getKana(),
                 answer.isCorrect(),
                 answer.getResponseTimeMs()
         );
@@ -120,14 +127,6 @@ public class GameMapper {
 
     private long valueOrZero(Long value) {
         return value == null ? 0L : value;
-    }
-
-    private TranslationResponse toTranslationResponse(ArenaRound round) {
-        String target = round.getPrompt();
-        String other = round.getLeftIdeophone().getGloss().equals(target)
-                ? round.getRightIdeophone().getGloss()
-                : round.getLeftIdeophone().getGloss();
-        return new TranslationResponse(target, other);
     }
 
     private IdeophoneChoiceResponse toIdeophoneResponse(Ideophone ideophone) {

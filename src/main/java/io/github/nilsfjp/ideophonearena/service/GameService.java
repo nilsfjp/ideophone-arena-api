@@ -12,6 +12,7 @@ import io.github.nilsfjp.ideophonearena.exception.ResourceNotFoundException;
 import io.github.nilsfjp.ideophonearena.mapper.GameMapper;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
 import io.github.nilsfjp.ideophonearena.model.ArenaRound;
+import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
 import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
@@ -20,6 +21,7 @@ import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
+import java.security.SecureRandom;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -46,15 +48,18 @@ public class GameService {
     private final ArenaRoundRepository arenaRoundRepository;
     private final PlayerAnswerRepository playerAnswerRepository;
     private final GameMapper gameMapper;
+    private final RoundShuffler roundShuffler;
+    private final SecureRandom shuffleSeedSource = new SecureRandom();
 
     public GameService(AppUserRepository appUserRepository, GameSessionRepository gameSessionRepository,
             ArenaRoundRepository arenaRoundRepository, PlayerAnswerRepository playerAnswerRepository,
-            GameMapper gameMapper) {
+            GameMapper gameMapper, RoundShuffler roundShuffler) {
         this.appUserRepository = appUserRepository;
         this.gameSessionRepository = gameSessionRepository;
         this.arenaRoundRepository = arenaRoundRepository;
         this.playerAnswerRepository = playerAnswerRepository;
         this.gameMapper = gameMapper;
+        this.roundShuffler = roundShuffler;
     }
 
     @Transactional
@@ -65,7 +70,8 @@ public class GameService {
 
         validateSupportedStartRequest(conditionName, difficultyLevel);
 
-        GameSession session = new GameSession(user, conditionName, difficultyLevel, request.isIncludePractice());
+        GameSession session = new GameSession(user, conditionName, difficultyLevel, request.isIncludePractice(),
+                shuffleSeedSource.nextLong());
         return gameMapper.toSessionResponse(gameSessionRepository.save(session));
     }
 
@@ -75,24 +81,21 @@ public class GameService {
         GameSession session = getOwnedSession(user, sessionUuid);
 
         if (session.isIncludePractice()) {
-            List<ArenaRound> practiceRounds = practiceRoundsForSession(session);
+            List<DerivedRound> practiceRounds = derivedPracticeRoundsForSession(session);
             if (session.getPracticeAnswered() < practiceRounds.size()) {
                 return gameMapper.toRoundResponse(session, practiceRounds.get(session.getPracticeAnswered()));
             }
         }
 
-        List<ArenaRound> rounds = arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
-                session.getConditionName(),
-                session.getDifficultyLevel()
-        );
+        List<DerivedRound> rounds = derivedScoredRoundsForSession(session);
         if (rounds.isEmpty()) {
             throw new ResourceNotFoundException("No rounds found for this session");
         }
 
         Set<Long> answeredRoundIds = new HashSet<>(playerAnswerRepository.findAnsweredRoundIdsBySessionId(
                 session.getId()));
-        for (ArenaRound round : rounds) {
-            if (!answeredRoundIds.contains(round.getId())) {
+        for (DerivedRound round : rounds) {
+            if (!answeredRoundIds.contains(round.getRound().getId())) {
                 return gameMapper.toRoundResponse(session, round);
             }
         }
@@ -118,9 +121,11 @@ public class GameService {
             throw new ConflictException("This round has already been answered in this session");
         }
 
+        DerivedRound derivedRound = derivedScoredRound(session, round);
         Ideophone selectedIdeophone = getSelectedIdeophone(round, request.getSelectedIdeophoneId());
-        boolean correct = isCorrectChoice(round, selectedIdeophone);
-        PlayerAnswer answer = new PlayerAnswer(session, round, selectedIdeophone, request.getResponseTimeMs(), correct);
+        boolean correct = isCorrectChoice(derivedRound, selectedIdeophone);
+        PlayerAnswer answer = new PlayerAnswer(session, round, selectedIdeophone, derivedRound.getTarget(),
+                request.getResponseTimeMs(), correct);
         try {
             // Flush now so a concurrent duplicate hits UNIQUE(session_id, round_id)
             // here instead of surfacing at commit as a 500.
@@ -138,7 +143,7 @@ public class GameService {
             session.complete();
         }
 
-        return gameMapper.toAnswerResultResponse(round, selectedIdeophone, answer, totalAnswered, totalCorrect);
+        return gameMapper.toAnswerResultResponse(derivedRound, selectedIdeophone, answer, totalAnswered, totalCorrect);
     }
 
     // Practice answers return feedback but are never persisted: they do not
@@ -150,10 +155,10 @@ public class GameService {
             throw new BadRequestException("This session was started without practice rounds");
         }
 
-        List<ArenaRound> practiceRounds = practiceRoundsForSession(session);
+        List<DerivedRound> practiceRounds = derivedPracticeRoundsForSession(session);
         int roundIndex = -1;
         for (int index = 0; index < practiceRounds.size(); index++) {
-            if (practiceRounds.get(index).getId().equals(round.getId())) {
+            if (practiceRounds.get(index).getRound().getId().equals(round.getId())) {
                 roundIndex = index;
                 break;
             }
@@ -168,23 +173,44 @@ public class GameService {
             throw new BadRequestException("Practice rounds must be answered in order");
         }
 
+        DerivedRound derivedRound = practiceRounds.get(roundIndex);
         Ideophone selectedIdeophone = getSelectedIdeophone(round, request.getSelectedIdeophoneId());
-        boolean correct = isCorrectChoice(round, selectedIdeophone);
+        boolean correct = isCorrectChoice(derivedRound, selectedIdeophone);
         session.recordPracticeAnswer();
 
         long totalAnswered = playerAnswerRepository.countBySessionId(session.getId());
         long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
-        return gameMapper.toPracticeAnswerResultResponse(round, selectedIdeophone, correct, totalAnswered,
+        return gameMapper.toPracticeAnswerResultResponse(derivedRound, selectedIdeophone, correct, totalAnswered,
                 totalCorrect);
     }
 
     // The session serves the first PRACTICE_ROUNDS_PER_SESSION practice rounds
-    // of its condition, in seed order (p0 auditory, p1 visual).
-    private List<ArenaRound> practiceRoundsForSession(GameSession session) {
+    // of its condition, in seed order (p0 auditory, p1 visual); only the
+    // per-round presentation draws come from the practice stream.
+    private List<DerivedRound> derivedPracticeRoundsForSession(GameSession session) {
         List<ArenaRound> practiceRounds = arenaRoundRepository
                 .findByConditionNameAndDifficultyLevelAndPracticeTrueOrderByIdAsc(
                         session.getConditionName(), session.getDifficultyLevel());
-        return practiceRounds.subList(0, Math.min(PRACTICE_ROUNDS_PER_SESSION, practiceRounds.size()));
+        List<ArenaRound> served = practiceRounds.subList(0,
+                Math.min(PRACTICE_ROUNDS_PER_SESSION, practiceRounds.size()));
+        return roundShuffler.derivePracticeRounds(session.getShuffleSeed(), served);
+    }
+
+    private List<DerivedRound> derivedScoredRoundsForSession(GameSession session) {
+        List<ArenaRound> rounds = arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
+                session.getConditionName(),
+                session.getDifficultyLevel()
+        );
+        return roundShuffler.deriveScoredRounds(session.getShuffleSeed(), rounds);
+    }
+
+    private DerivedRound derivedScoredRound(GameSession session, ArenaRound round) {
+        for (DerivedRound derived : derivedScoredRoundsForSession(session)) {
+            if (derived.getRound().getId().equals(round.getId())) {
+                return derived;
+            }
+        }
+        throw new BadRequestException("Round does not belong to this session condition and difficulty");
     }
 
     private AppUser getCurrentUser(UserDetails userDetails) {
@@ -223,7 +249,9 @@ public class GameService {
         throw new BadRequestException("Selected ideophone is not an option for this round");
     }
 
-    private boolean isCorrectChoice(ArenaRound round, Ideophone selectedIdeophone) {
-        return round.getCorrectIdeophone().getId().equals(selectedIdeophone.getId());
+    // Correctness is judged against the seed-derived target, never against
+    // arena_rounds.correct_ideophone_id (which documents the thesis target).
+    private boolean isCorrectChoice(DerivedRound derivedRound, Ideophone selectedIdeophone) {
+        return derivedRound.getTarget().getId().equals(selectedIdeophone.getId());
     }
 }

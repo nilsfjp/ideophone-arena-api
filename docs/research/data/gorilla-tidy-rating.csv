@@ -1,751 +1,1081 @@
-version,Participant Private ID,condition,Trial Number,Spreadsheet: pairing,Spreadsheet: modality,Spreadsheet: rated-word,Spreadsheet: rated-meaning,rating,Reaction Time
-18,13318377.0,condition-3,1.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",6,29762.0
-18,13318377.0,condition-3,2.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,9422.000000035769
-18,13318377.0,condition-3,3.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,15649.799999999988
-18,13318377.0,condition-3,4.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",6,15881.099999999948
-18,13318377.0,condition-3,5.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,10772.5
-18,13318377.0,condition-3,6.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,9389.400000000023
-18,13318377.0,condition-3,7.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,5,4971.200000023819
-18,13318377.0,condition-3,8.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,4900.79999999993
-18,13318377.0,condition-3,9.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,25474.10000001191
-18,13318377.0,condition-3,10.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,20041.90000004769
-18,13318377.0,condition-3,11.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,2,6954.700000035751
-18,13318377.0,condition-3,12.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",6,4700.099999999977
-18,13318377.0,condition-3,13.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",5,5850.099999999977
-18,13318377.0,condition-3,14.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",6,7665.799999999988
-18,13318377.0,condition-3,15.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",6,5145.3000000238535
-18,13318377.0,condition-3,16.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,4855.90000002383
-18,13318377.0,condition-3,17.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,5139.100000035774
-18,13318377.0,condition-3,18.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,8587.600000035774
-18,13318377.0,condition-3,19.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",5,7120.299999999988
-18,13318377.0,condition-3,20.0,a6,auditory,a6hk-dosari.mp4,with a thud,1,6041.600000023842
-18,13318377.0,condition-3,21.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,2,10089.599999999977
-18,13318377.0,condition-3,22.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",3,5599.50000003574
-18,13318377.0,condition-3,23.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",6,21420.79999999999
-18,13318377.0,condition-3,24.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,6226.400000047695
-18,13318377.0,condition-3,25.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",5,5049.799999999988
-18,13318377.0,condition-3,26.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,5021.300000011921
-18,13318377.0,condition-3,27.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",5,4712.400000011898
-18,13318377.0,condition-3,28.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",3,7205.300000011921
-18,13318377.0,condition-3,29.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,5019.100000047707
-18,13318377.0,condition-3,30.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",5,5886.099999999977
-18,13328943.0,condition-2,1.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,17797.399999999907
-18,13328943.0,condition-2,2.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",5,11882.600000000006
-18,13328943.0,condition-2,3.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",5,6808.899999999732
-18,13328943.0,condition-2,4.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,5365.39999999982
-18,13328943.0,condition-2,5.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",2,9572.79999999964
-18,13328943.0,condition-2,6.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,5747.099999999919
-18,13328943.0,condition-2,7.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,9036.199999999895
-18,13328943.0,condition-2,8.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,15605.59999999992
-18,13328943.0,condition-2,9.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",5,8095.299999999639
-18,13328943.0,condition-2,10.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,6,6319.799999999639
-18,13328943.0,condition-2,11.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",3,6061.399999999907
-18,13328943.0,condition-2,12.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,5664.999999999913
-18,13328943.0,condition-2,13.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,7216.600000000006
-18,13328943.0,condition-2,14.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,13646.399999999994
-18,13328943.0,condition-2,15.0,a1,auditory,a1kk-batyabatya.mp4,splashing,6,6745.399999999616
-18,13328943.0,condition-2,16.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,5976.199999999837
-18,13328943.0,condition-2,17.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",6,20462.39999999973
-18,13328943.0,condition-2,18.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,6033.799999999988
-18,13328943.0,condition-2,19.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,6,4963.199999999604
-18,13328943.0,condition-2,20.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,4965.999999999825
-18,13328943.0,condition-2,21.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",6,8140.599999999802
-18,13328943.0,condition-2,22.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",6,6088.999999999825
-18,13328943.0,condition-2,23.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",5,5564.400000000023
-18,13328943.0,condition-2,24.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5150.70000000007
-18,13328943.0,condition-2,25.0,a6,auditory,a6hh-dosari.mp4,with a thud,5,16346.29999999964
-18,13328943.0,condition-2,26.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",5,6055.099999999744
-18,13328943.0,condition-2,27.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",5,5377.699999999895
-18,13328943.0,condition-2,28.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",5,6742.799999999988
-18,13328943.0,condition-2,29.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",5,6850.799999999988
-18,13328943.0,condition-2,30.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,5204.899999999907
-18,13344171.0,condition-3,1.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",2,5681.199999988079
-18,13344171.0,condition-3,2.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",4,5362.699999988079
-18,13344171.0,condition-3,3.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",5,5760.999999976164
-18,13344171.0,condition-3,4.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",5,5633.299999999988
-18,13344171.0,condition-3,5.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",5,5592.999999988082
-18,13344171.0,condition-3,6.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,6755.900000023845
-18,13344171.0,condition-3,7.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,6283.700000000012
-18,13344171.0,condition-3,8.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,6747.200000023848
-18,13344171.0,condition-3,9.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,6,5381.5
-18,13344171.0,condition-3,10.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",4,5250.000000000015
-18,13344171.0,condition-3,11.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,5541.899999999994
-18,13344171.0,condition-3,12.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",3,19874.90000002383
-18,13344171.0,condition-3,13.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",6,6066.200000000012
-18,13344171.0,condition-3,14.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",5,7449.399999988091
-18,13344171.0,condition-3,15.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",5,6597.600000011909
-18,13344171.0,condition-3,16.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,6100.000000000029
-18,13344171.0,condition-3,17.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,4,6508.200000011915
-18,13344171.0,condition-3,18.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,7612.499999976164
-18,13344171.0,condition-3,19.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",2,6282.100000023842
-18,13344171.0,condition-3,20.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",7,5799.600000000006
-18,13344171.0,condition-3,21.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,6,6135.299999999988
-18,13344171.0,condition-3,22.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,5607.900000011927
-18,13344171.0,condition-3,23.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",3,5714.299999999988
-18,13344171.0,condition-3,24.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",5,6904.499999988067
-18,13344171.0,condition-3,25.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,6066.699999999953
-18,13344171.0,condition-3,26.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",5,5366.099999999977
-18,13344171.0,condition-3,27.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,6,5314.40000002383
-18,13344171.0,condition-3,28.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",4,6156.000000011933
-18,13344171.0,condition-3,29.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,5428.299999999988
-18,13344171.0,condition-3,30.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",7,5747.299999976181
-18,13349143.0,condition-2,1.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",7,5303.399999999994
-18,13349143.0,condition-2,2.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,7,4937.740000000005
-18,13349143.0,condition-2,3.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,7206.779999999999
-18,13349143.0,condition-2,4.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",1,5071.139999999999
-18,13349143.0,condition-2,5.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",1,13506.919999999998
-18,13349143.0,condition-2,6.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,7,4975.179999999993
-18,13349143.0,condition-2,7.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",7,7621.880000000005
-18,13349143.0,condition-2,8.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",4,8090.559999999998
-18,13349143.0,condition-2,9.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",7,11122.600000000006
-18,13349143.0,condition-2,10.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,5553.279999999999
-18,13349143.0,condition-2,11.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,4871.760000000009
-18,13349143.0,condition-2,12.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",7,5323.320000000007
-18,13349143.0,condition-2,13.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,4,8080.0
-18,13349143.0,condition-2,14.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",7,5139.420000000013
-18,13349143.0,condition-2,15.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",1,5054.720000000001
-18,13349143.0,condition-2,16.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,7,5090.059999999998
-18,13349143.0,condition-2,17.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",7,118922.2
-18,13349143.0,condition-2,18.0,a1,auditory,a1kk-batyabatya.mp4,splashing,7,4655.039999999979
-18,13349143.0,condition-2,19.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",7,4905.799999999988
-18,13349143.0,condition-2,20.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",7,12321.73999999999
-18,13349143.0,condition-2,21.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,1,7422.460000000021
-18,13349143.0,condition-2,22.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",7,5471.140000000014
-18,13349143.0,condition-2,23.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",1,6354.820000000007
-18,13349143.0,condition-2,24.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,6638.099999999977
-18,13349143.0,condition-2,25.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",1,233870.2
-18,13349143.0,condition-2,26.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",1,5273.020000000019
-18,13349143.0,condition-2,27.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",7,5370.099999999977
-18,13349143.0,condition-2,28.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",7,4484.800000000047
-18,13349143.0,condition-2,29.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",7,4351.819999999949
-18,13349143.0,condition-2,30.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",1,5486.160000000033
-18,13352762.0,condition-3,1.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",2,13187.0
-18,13352762.0,condition-3,2.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,12886.0
-18,13352762.0,condition-3,3.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",4,7911.0
-18,13352762.0,condition-3,4.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",1,6919.0
-18,13352762.0,condition-3,5.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",7,7107.0
-18,13352762.0,condition-3,6.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,5306.0
-18,13352762.0,condition-3,7.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,2,54928.0
-18,13352762.0,condition-3,8.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,10300.0
-18,13352762.0,condition-3,9.0,a1,auditory,a1kh-batyabatya.mp4,splashing,2,25387.0
-18,13352762.0,condition-3,10.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",7,10152.0
-18,13352762.0,condition-3,11.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",4,7985.0
-18,13352762.0,condition-3,12.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",3,6898.0
-18,13352762.0,condition-3,13.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,3,7532.0
-18,13352762.0,condition-3,14.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",5,7054.0
-18,13352762.0,condition-3,15.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",3,5339.0
-18,13352762.0,condition-3,16.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,6,5418.0
-18,13352762.0,condition-3,17.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",4,5502.0
-18,13352762.0,condition-3,18.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",4,6617.0
-18,13352762.0,condition-3,19.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",5,5852.0
-18,13352762.0,condition-3,20.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,7404.0
-18,13352762.0,condition-3,21.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,2,6638.0
-18,13352762.0,condition-3,22.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",2,6450.0
-18,13352762.0,condition-3,23.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",3,6796.0
-18,13352762.0,condition-3,24.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,5373.0
-18,13352762.0,condition-3,25.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",2,6385.0
-18,13352762.0,condition-3,26.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",5,6767.0
-18,13352762.0,condition-3,27.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",3,6219.0
-18,13352762.0,condition-3,28.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",2,6098.0
-18,13352762.0,condition-3,29.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,3,6601.0
-18,13352762.0,condition-3,30.0,a6,auditory,a6hk-dosari.mp4,with a thud,2,6271.0
-18,13370221.0,condition-2,1.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",4,4791.5
-18,13370221.0,condition-2,2.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,4635.599999976155
-18,13370221.0,condition-2,3.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,4948.600000000006
-18,13370221.0,condition-2,4.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",2,5077.199999976161
-18,13370221.0,condition-2,5.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",5,5398.10000000002
-18,13370221.0,condition-2,6.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",3,5230.199999988079
-18,13370221.0,condition-2,7.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",4,5173.800000000003
-18,13370221.0,condition-2,8.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",5,6514.599999999991
-18,13370221.0,condition-2,9.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,5,4830.199999964243
-18,13370221.0,condition-2,10.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",3,5903.599999976155
-18,13370221.0,condition-2,11.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",4,11662.399999999963
-18,13370221.0,condition-2,12.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,7923.099999964237
-18,13370221.0,condition-2,13.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",4,11562.600000000006
-18,13370221.0,condition-2,14.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",4,7271.899999952322
-18,13370221.0,condition-2,15.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,6,5211.099999964237
-18,13370221.0,condition-2,16.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,4,4882.000000000029
-18,13370221.0,condition-2,17.0,a1,auditory,a1kk-batyabatya.mp4,splashing,5,4913.599999952305
-18,13370221.0,condition-2,18.0,a6,auditory,a6hh-dosari.mp4,with a thud,5,4864.100000000006
-18,13370221.0,condition-2,19.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",5,4693.599999952305
-18,13370221.0,condition-2,20.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",3,4617.699999964243
-18,13370221.0,condition-2,21.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",2,4948.200000000041
-18,13370221.0,condition-2,22.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,2,5418.799999999988
-18,13370221.0,condition-2,23.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,4719.200000000012
-18,13370221.0,condition-2,24.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,5073.299999952316
-18,13370221.0,condition-2,25.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,4718.099999952305
-18,13370221.0,condition-2,26.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,1,5964.400000000023
-18,13370221.0,condition-2,27.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",4,4969.299999999988
-18,13370221.0,condition-2,28.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",4,5002.699999988079
-18,13370221.0,condition-2,29.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",6,5687.799999976181
-18,13370221.0,condition-2,30.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",3,4844.699999988079
-18,13381142.0,condition-1,1.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",6,5088.0
-18,13381142.0,condition-1,2.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",7,5672.0
-18,13381142.0,condition-1,3.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,4786.0
-18,13381142.0,condition-1,4.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",2,5640.0
-18,13381142.0,condition-1,5.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",3,6209.0
-18,13381142.0,condition-1,6.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,7,4870.0
-18,13381142.0,condition-1,7.0,a6,auditory,a6hu-dosari.mp4,with a thud,7,5488.0
-18,13381142.0,condition-1,8.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",4,4986.0
-18,13381142.0,condition-1,9.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",2,6310.0
-18,13381142.0,condition-1,10.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",6,4972.0
-18,13381142.0,condition-1,11.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",5,7832.0
-18,13381142.0,condition-1,12.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",3,9808.0
-18,13381142.0,condition-1,13.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,5774.0
-18,13381142.0,condition-1,14.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",7,5289.0
-18,13381142.0,condition-1,15.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,7,5924.0
-18,13381142.0,condition-1,16.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",6,4770.0
-18,13381142.0,condition-1,17.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",2,5337.0
-18,13381142.0,condition-1,18.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",7,4651.0
-18,13381142.0,condition-1,19.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",5,5272.0
-18,13381142.0,condition-1,20.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",6,5138.0
-18,13381142.0,condition-1,21.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",5,5505.0
-18,13381142.0,condition-1,22.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",5,4819.0
-18,13381142.0,condition-1,23.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",4,8255.0
-18,13381142.0,condition-1,24.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,4,4985.0
-18,13381142.0,condition-1,25.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,6,4502.0
-18,13381142.0,condition-1,26.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",7,4502.0
-18,13381142.0,condition-1,27.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",7,4534.0
-18,13381142.0,condition-1,28.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,4,6376.0
-18,13381142.0,condition-1,29.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",7,6159.0
-18,13381142.0,condition-1,30.0,a1,auditory,a1kd-batyabatya.mp4,splashing,6,4702.0
-18,13554674.0,condition-2,1.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",3,13833.700000000004
-18,13554674.0,condition-2,2.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",2,9933.799999999988
-18,13554674.0,condition-2,3.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,8700.599999999977
-18,13554674.0,condition-2,4.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",2,8568.699999999983
-18,13554674.0,condition-2,5.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,4,5833.300000000003
-18,13554674.0,condition-2,6.0,a6,auditory,a6hh-dosari.mp4,with a thud,3,7532.199999999997
-18,13554674.0,condition-2,7.0,a1,auditory,a1kk-batyabatya.mp4,splashing,5,6800.400000000023
-18,13554674.0,condition-2,8.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",3,5899.400000011927
-18,13554674.0,condition-2,9.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,6382.09999997617
-18,13554674.0,condition-2,10.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",5,11567.899999999963
-18,13554674.0,condition-2,11.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",4,8733.600000000006
-18,13554674.0,condition-2,12.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",2,6365.200000023848
-18,13554674.0,condition-2,13.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,6415.199999988079
-18,13554674.0,condition-2,14.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",3,9000.400000000023
-18,13554674.0,condition-2,15.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",2,5531.400000011927
-18,13554674.0,condition-2,16.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,5382.100000023842
-18,13554674.0,condition-2,17.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,5,5133.399999999994
-18,13554674.0,condition-2,18.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",3,5531.899999988091
-18,13554674.0,condition-2,19.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,5449.899999999994
-18,13554674.0,condition-2,20.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,5200.199999999953
-18,13554674.0,condition-2,21.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,5,9200.49999999997
-18,13554674.0,condition-2,22.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,4,6065.600000023842
-18,13554674.0,condition-2,23.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",5,5531.899999976158
-18,13554674.0,condition-2,24.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",4,8500.199999999953
-18,13554674.0,condition-2,25.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,3,11500.40000000008
-18,13554674.0,condition-2,26.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5499.100000011909
-18,13554674.0,condition-2,27.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,5315.100000023842
-18,13554674.0,condition-2,28.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,9017.099999999977
-18,13554674.0,condition-2,29.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",4,10450.5
-18,13554674.0,condition-2,30.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",3,7015.800000011921
-18,13573130.0,condition-2,1.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",6,6404.79999990463
-18,13573130.0,condition-2,2.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",5,6714.800000000003
-18,13573130.0,condition-2,3.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",3,7545.0
-18,13573130.0,condition-2,4.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,5395.5
-18,13573130.0,condition-2,5.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",7,6248.400000000009
-18,13573130.0,condition-2,6.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,6061.399999999994
-18,13573130.0,condition-2,7.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,6406.000000190732
-18,13573130.0,condition-2,8.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",3,6564.699999999997
-18,13573130.0,condition-2,9.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,6010.600000190723
-18,13573130.0,condition-2,10.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",7,5393.799999999988
-18,13573130.0,condition-2,11.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,9581.100000000037
-18,13573130.0,condition-2,12.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,5406.799999904644
-18,13573130.0,condition-2,13.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",6,5298.399999999965
-18,13573130.0,condition-2,14.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",3,7158.799999999988
-18,13573130.0,condition-2,15.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,6281.700000000012
-18,13573130.0,condition-2,16.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,7135.799999999988
-18,13573130.0,condition-2,17.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,5,5256.099999904633
-18,13573130.0,condition-2,18.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,2,7381.200000190729
-18,13573130.0,condition-2,19.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",6,5559.300000095362
-18,13573130.0,condition-2,20.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",5,7187.0000001907465
-18,13573130.0,condition-2,21.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",4,6415.200000000012
-18,13573130.0,condition-2,22.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",4,7448.000000000029
-18,13573130.0,condition-2,23.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",3,5359.899999809277
-18,13573130.0,condition-2,24.0,a6,auditory,a6hh-dosari.mp4,with a thud,4,5461.799999904644
-18,13573130.0,condition-2,25.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,5762.599999809288
-18,13573130.0,condition-2,26.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",2,6135.799999904644
-18,13573130.0,condition-2,27.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,2,6681.4000000000815
-18,13573130.0,condition-2,28.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",5,7214.700000000012
-18,13573130.0,condition-2,29.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",5,4954.599999809288
-18,13573130.0,condition-2,30.0,a1,auditory,a1kk-batyabatya.mp4,splashing,7,6310.600000190723
-18,13573434.0,condition-3,1.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,11245.100000000006
-18,13573434.0,condition-3,2.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",3,15843.059999999998
-18,13573434.0,condition-3,3.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,16402.079999999987
-18,13573434.0,condition-3,4.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,7498.940000000002
-18,13573434.0,condition-3,5.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,8277.48000000001
-18,13573434.0,condition-3,6.0,a1,auditory,a1kh-batyabatya.mp4,splashing,6,13369.079999999987
-18,13573434.0,condition-3,7.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",7,5045.940000000002
-18,13573434.0,condition-3,8.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",3,10899.160000000003
-18,13573434.0,condition-3,9.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",7,13334.179999999991
-18,13573434.0,condition-3,10.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",5,21675.51999999999
-18,13573434.0,condition-3,11.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",1,18406.679999999997
-18,13573434.0,condition-3,12.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",4,8205.679999999993
-18,13573434.0,condition-3,13.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,7,5619.760000000009
-18,13573434.0,condition-3,14.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,5847.919999999984
-18,13573434.0,condition-3,15.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",4,17735.580000000016
-18,13573434.0,condition-3,16.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,7753.760000000009
-18,13573434.0,condition-3,17.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,12848.099999999977
-18,13573434.0,condition-3,18.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",4,18998.900000000023
-18,13573434.0,condition-3,19.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",5,14850.640000000014
-18,13573434.0,condition-3,20.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",5,11300.080000000016
-18,13573434.0,condition-3,21.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,31111.02000000002
-18,13573434.0,condition-3,22.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,2,8847.320000000007
-18,13573434.0,condition-3,23.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,5,8843.940000000002
-18,13573434.0,condition-3,24.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,6,4967.520000000019
-18,13573434.0,condition-3,25.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",7,8222.199999999953
-18,13573434.0,condition-3,26.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,4798.440000000002
-18,13573434.0,condition-3,27.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,5,12953.840000000026
-18,13573434.0,condition-3,28.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,12029.619999999995
-18,13573434.0,condition-3,29.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",7,6653.640000000014
-18,13573434.0,condition-3,30.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",7,4878.840000000026
-19,13611841.0,condition-2,1.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,6301.199999999997
-19,13611841.0,condition-2,2.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,2,5502.700000000739
-19,13611841.0,condition-2,3.0,a1,auditory,a1kk-batyabatya.mp4,splashing,4,6033.800000000003
-19,13611841.0,condition-2,4.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,5640.399999999994
-19,13611841.0,condition-2,5.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",2,7567.0
-19,13611841.0,condition-2,6.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",1,5349.300000000367
-19,13611841.0,condition-2,7.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",5,5988.800000000003
-19,13611841.0,condition-2,8.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",5,6266.699999999997
-19,13611841.0,condition-2,9.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,6714.299999999988
-19,13611841.0,condition-2,10.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",3,6179.499999999243
-19,13611841.0,condition-2,11.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,8245.900000000373
-19,13611841.0,condition-2,12.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",3,5398.700000000012
-19,13611841.0,condition-2,13.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,5,5432.899999999994
-19,13611841.0,condition-2,14.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",3,8843.100000000384
-19,13611841.0,condition-2,15.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,5344.0
-19,13611841.0,condition-2,16.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,4,5550.700000000012
-19,13611841.0,condition-2,17.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,5441.599999999249
-19,13611841.0,condition-2,18.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,5492.700000000361
-19,13611841.0,condition-2,19.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",2,5566.599999999249
-19,13611841.0,condition-2,20.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",2,5833.499999999243
-19,13611841.0,condition-2,21.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,2,6423.100000000384
-19,13611841.0,condition-2,22.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",1,17479.600000000006
-19,13611841.0,condition-2,23.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,3,5263.0
-19,13611841.0,condition-2,24.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",2,8206.400000000023
-19,13611841.0,condition-2,25.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,5333.499999999243
-19,13611841.0,condition-2,26.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5762.800000000396
-19,13611841.0,condition-2,27.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",6,5750.499999999942
-19,13611841.0,condition-2,28.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",3,5214.699999999255
-19,13611841.0,condition-2,29.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",2,7339.999999999651
-19,13611841.0,condition-2,30.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",2,6227.900000000722
-19,13650001.0,condition-3,1.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",1,4825.899999999994
-19,13650001.0,condition-3,2.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",1,11643.100000000091
-19,13650001.0,condition-3,3.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",1,6253.69999999991
-19,13650001.0,condition-3,4.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",1,5400.100000000093
-19,13650001.0,condition-3,5.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,6931.399999999951
-19,13650001.0,condition-3,6.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,1,9462.500000000044
-19,13650001.0,condition-3,7.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",1,4689.100000000093
-19,13650001.0,condition-3,8.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",1,6402.600000000006
-19,13650001.0,condition-3,9.0,a6,auditory,a6hk-dosari.mp4,with a thud,1,5460.099999999948
-19,13650001.0,condition-3,10.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",1,4763.299999999959
-19,13650001.0,condition-3,11.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",1,4968.300000000105
-19,13650001.0,condition-3,12.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",1,4772.800000000047
-19,13650001.0,condition-3,13.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",1,11958.0
-19,13650001.0,condition-3,14.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",1,4464.900000000052
-19,13650001.0,condition-3,15.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",1,14740.09999999992
-19,13650001.0,condition-3,16.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",1,10901.2999999999
-19,13650001.0,condition-3,17.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",1,5700.100000000035
-19,13650001.0,condition-3,18.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",1,4935.399999999907
-19,13650001.0,condition-3,19.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",1,4851.000000000087
-19,13650001.0,condition-3,20.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",1,4791.100000000035
-19,13650001.0,condition-3,21.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,4,10681.79999999996
-19,13650001.0,condition-3,22.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",1,6163.200000000012
-19,13650001.0,condition-3,23.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,1,7776.20000000007
-19,13650001.0,condition-3,24.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",1,25295.599999999977
-19,13650001.0,condition-3,25.0,a1,auditory,a1kh-batyabatya.mp4,splashing,3,23010.20000000001
-19,13650001.0,condition-3,26.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",1,4857.900000000023
-19,13650001.0,condition-3,27.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,1,4683.000000000058
-19,13650001.0,condition-3,28.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,1,11538.09999999992
-19,13650001.0,condition-3,29.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,5008.200000000012
-19,13650001.0,condition-3,30.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",1,4735.199999999895
-19,13620495.0,condition-2,1.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",7,6776.299999994037
-19,13620495.0,condition-2,2.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,4764.899999988076
-19,13620495.0,condition-2,3.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",7,6453.199999988079
-19,13620495.0,condition-2,4.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,3,7482.399999982124
-19,13620495.0,condition-2,5.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,4,5769.59999999404
-19,13620495.0,condition-2,6.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,6420.199999988079
-19,13620495.0,condition-2,7.0,a1,auditory,a1kk-batyabatya.mp4,splashing,5,5213.899999994042
-19,13620495.0,condition-2,8.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,6911.699999982113
-19,13620495.0,condition-2,9.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",3,5004.100000000006
-19,13620495.0,condition-2,10.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",3,8640.09999999404
-19,13620495.0,condition-2,11.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",3,10892.200000000012
-19,13620495.0,condition-2,12.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,46813.600000000006
-19,13620495.0,condition-2,13.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,9507.900000000023
-19,13620495.0,condition-2,14.0,a6,auditory,a6hh-dosari.mp4,with a thud,5,6149.299999988085
-19,13620495.0,condition-2,15.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,9316.19999998808
-19,13620495.0,condition-2,16.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",5,5928.199999982113
-19,13620495.0,condition-2,17.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",6,4786.699999994045
-19,13620495.0,condition-2,18.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",6,4563.899999994028
-19,13620495.0,condition-2,19.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",5,5835.09999997617
-19,13620495.0,condition-2,20.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,4521.699999982142
-19,13620495.0,condition-2,21.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,5414.599999999977
-19,13620495.0,condition-2,22.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,4557.699999988079
-19,13620495.0,condition-2,23.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,5121.0
-19,13620495.0,condition-2,24.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",7,5948.0
-19,13620495.0,condition-2,25.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",3,5124.899999976158
-19,13620495.0,condition-2,26.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,4650.899999988091
-19,13620495.0,condition-2,27.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",4,5234.099999982107
-19,13620495.0,condition-2,28.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",3,5147.399999982095
-19,13620495.0,condition-2,29.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,4695.09999997617
-19,13620495.0,condition-2,30.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",6,4366.299999994051
-19,13612645.0,condition-3,1.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",7,10054.200000000012
-19,13612645.0,condition-3,2.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",4,8449.699999999997
-19,13612645.0,condition-3,3.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,5,13393.799999999988
-19,13612645.0,condition-3,4.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,8977.49999999997
-19,13612645.0,condition-3,5.0,a1,auditory,a1kh-batyabatya.mp4,splashing,3,8762.599999999977
-19,13612645.0,condition-3,6.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",4,14227.00000000003
-19,13612645.0,condition-3,7.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,8769.399999999994
-19,13612645.0,condition-3,8.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",3,14601.299999999988
-19,13612645.0,condition-3,9.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",3,13559.999999904629
-19,13612645.0,condition-3,10.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,8741.70000000004
-19,13612645.0,condition-3,11.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",5,4628.899999856949
-19,13612645.0,condition-3,12.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",2,8596.0
-19,13612645.0,condition-3,13.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,7919.499999856955
-19,13612645.0,condition-3,14.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",5,6733.799999999988
-19,13612645.0,condition-3,15.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,3,22022.89999990462
-19,13612645.0,condition-3,16.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,6,9901.200000000012
-19,13612645.0,condition-3,17.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",4,12449.900000000023
-19,13612645.0,condition-3,18.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,9804.100000000037
-19,13612645.0,condition-3,19.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,5,12025.899999999963
-19,13612645.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,15907.399999999963
-19,13612645.0,condition-3,21.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,5385.400000047695
-19,13612645.0,condition-3,22.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",5,7161.799999999988
-19,13612645.0,condition-3,23.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",4,10387.200000000012
-19,13612645.0,condition-3,24.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",5,7836.599999999977
-19,13612645.0,condition-3,25.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",5,5143.400000047695
-19,13612645.0,condition-3,26.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",4,11470.300000000048
-19,13612645.0,condition-3,27.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,6058.700000047684
-19,13612645.0,condition-3,28.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",2,5309.0
-19,13612645.0,condition-3,29.0,a6,auditory,a6hk-dosari.mp4,with a thud,4,13067.300000000048
-19,13612645.0,condition-3,30.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,11623.199999999952
-19,13612585.0,condition-2,1.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",7,16097.799999998511
-19,13612585.0,condition-2,2.0,a1,auditory,a1kk-batyabatya.mp4,splashing,1,11766.400000000009
-19,13612585.0,condition-2,3.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",1,13146.399999999252
-19,13612585.0,condition-2,4.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,6364.399999999252
-19,13612585.0,condition-2,5.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",1,12328.0
-19,13612585.0,condition-2,6.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,7672.499999999258
-19,13612585.0,condition-2,7.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,24150.0
-19,13612585.0,condition-2,8.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",3,6499.399999999994
-19,13612585.0,condition-2,9.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",1,5190.89999999851
-19,13612585.0,condition-2,10.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,6833.299999999959
-19,13612585.0,condition-2,11.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,6,8800.29999999996
-19,13612585.0,condition-2,12.0,a6,auditory,a6hh-dosari.mp4,with a thud,2,5454.899999999267
-19,13612585.0,condition-2,13.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",1,5293.499999999622
-19,13612585.0,condition-2,14.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,5833.399999998888
-19,13612585.0,condition-2,15.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",7,6026.0999999985215
-19,13612585.0,condition-2,16.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",3,6298.899999999994
-19,13612585.0,condition-2,17.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",6,6079.199999999255
-19,13612585.0,condition-2,18.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",7,5567.000000000029
-19,13612585.0,condition-2,19.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",7,5321.399999999994
-19,13612585.0,condition-2,20.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,6158.899999999994
-19,13612585.0,condition-2,21.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",7,5658.900000000023
-19,13612585.0,condition-2,22.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",1,4857.299999999639
-19,13612585.0,condition-2,23.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",7,7244.699999999255
-19,13612585.0,condition-2,24.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,8160.399999998859
-19,13612585.0,condition-2,25.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,1,6323.499999999651
-19,13612585.0,condition-2,26.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,1,6960.999999998487
-19,13612585.0,condition-2,27.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,8699.699999999953
-19,13612585.0,condition-2,28.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",5,5809.299999998882
-19,13612585.0,condition-2,29.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",7,7311.499999999243
-19,13612585.0,condition-2,30.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,7,4913.199999998498
-19,13612207.0,condition-2,1.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",1,9191.800000000192
-19,13612207.0,condition-2,2.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",2,7050.0
-19,13612207.0,condition-2,3.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",1,7574.30000000009
-19,13612207.0,condition-2,4.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,6089.300000000279
-19,13612207.0,condition-2,5.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,6433.39999999998
-19,13612207.0,condition-2,6.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",2,10341.30000000028
-19,13612207.0,condition-2,7.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,5,5379.200000000012
-19,13612207.0,condition-2,8.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",4,6343.10000000018
-19,13612207.0,condition-2,9.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,5566.300000000047
-19,13612207.0,condition-2,10.0,a1,auditory,a1kk-batyabatya.mp4,splashing,6,5588.100000000268
-19,13612207.0,condition-2,11.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,5909.899999999994
-19,13612207.0,condition-2,12.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",3,5649.799999999988
-19,13612207.0,condition-2,13.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5026.4000000000815
-19,13612207.0,condition-2,14.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,6056.200000000361
-19,13612207.0,condition-2,15.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,7,4999.600000000006
-19,13612207.0,condition-2,16.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",1,5342.700000000274
-19,13612207.0,condition-2,17.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",5,6233.100000000006
-19,13612207.0,condition-2,18.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",5,5944.200000000012
-19,13612207.0,condition-2,19.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,5071.600000000093
-19,13612207.0,condition-2,20.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",3,6707.9000000003725
-19,13612207.0,condition-2,21.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,1,5290.200000000186
-19,13612207.0,condition-2,22.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",6,6666.799999999959
-19,13612207.0,condition-2,23.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",6,8710.900000000198
-19,13612207.0,condition-2,24.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,7770.800000000163
-19,13612207.0,condition-2,25.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",3,6457.200000000012
-19,13612207.0,condition-2,26.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,5293.300000000163
-19,13612207.0,condition-2,27.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",6,5026.20000000007
-19,13612207.0,condition-2,28.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,3,5006.300000000396
-19,13612207.0,condition-2,29.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",5,7060.4000000003725
-19,13612207.0,condition-2,30.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",1,5289.200000000361
-19,13612053.0,condition-3,1.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,6359.199999999997
-19,13612053.0,condition-3,2.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",5,8227.100000005958
-19,13612053.0,condition-3,3.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",5,12558.700000000012
-19,13612053.0,condition-3,4.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,5,11921.600000005958
-19,13612053.0,condition-3,5.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,4,7286.900000002977
-19,13612053.0,condition-3,6.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,5834.500000002969
-19,13612053.0,condition-3,7.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",4,13393.00000000003
-19,13612053.0,condition-3,8.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,9105.99999999997
-19,13612053.0,condition-3,9.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",1,5457.0
-19,13612053.0,condition-3,10.0,a6,auditory,a6hk-dosari.mp4,with a thud,4,19763.60000000001
-19,13612053.0,condition-3,11.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",3,14743.300000008952
-19,13612053.0,condition-3,12.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",5,14050.100000000006
-19,13612053.0,condition-3,13.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,8763.200000005949
-19,13612053.0,condition-3,14.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",4,5748.899999999994
-19,13612053.0,condition-3,15.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",1,14789.400000008927
-19,13612053.0,condition-3,16.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",6,6095.20000000298
-19,13612053.0,condition-3,17.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",7,7597.700000000012
-19,13612053.0,condition-3,18.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,2,9446.500000005935
-19,13612053.0,condition-3,19.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,3,7846.100000005972
-19,13612053.0,condition-3,20.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,13617.5
-19,13612053.0,condition-3,21.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,5865.600000008941
-19,13612053.0,condition-3,22.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,7093.200000000012
-19,13612053.0,condition-3,23.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",1,5620.5
-19,13612053.0,condition-3,24.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,9859.600000003004
-19,13612053.0,condition-3,25.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",2,19385.90000000596
-19,13612053.0,condition-3,26.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,5629.5
-19,13612053.0,condition-3,27.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,11660.800000005984
-19,13612053.0,condition-3,28.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",2,8144.800000008952
-19,13612053.0,condition-3,29.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,7471.300000008952
-19,13612053.0,condition-3,30.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,6059.100000003004
-19,13611736.0,condition-3,1.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",4,52389.100000000006
-19,13611736.0,condition-3,2.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",6,6747.399999999994
-19,13611736.0,condition-3,3.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",6,6619.600000023842
-19,13611736.0,condition-3,4.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,6349.699999999983
-19,13611736.0,condition-3,5.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",3,16427.0
-19,13611736.0,condition-3,6.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",3,7227.500000023836
-19,13611736.0,condition-3,7.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,43475.20000003575
-19,13611736.0,condition-3,8.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",3,44326.09999999998
-19,13611736.0,condition-3,9.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,5563.600000035774
-19,13611736.0,condition-3,10.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,6,23391.900000011898
-19,13611736.0,condition-3,11.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,3,5716.20000000007
-19,13611736.0,condition-3,12.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",6,5702.600000047707
-19,13611736.0,condition-3,13.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",3,24989.30000001192
-19,13611736.0,condition-3,14.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,6316.800000000047
-19,13611736.0,condition-3,15.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,7,7077.700000047684
-19,13611736.0,condition-3,16.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",6,8018.600000023842
-19,13611736.0,condition-3,17.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",5,7211.600000035774
-19,13611736.0,condition-3,18.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,6572.100000047707
-19,13611736.0,condition-3,19.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",5,7449.70000000007
-19,13611736.0,condition-3,20.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,3,121675.70000002382
-19,13611736.0,condition-3,21.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",5,6851.700000047684
-19,13611736.0,condition-3,22.0,a1,auditory,a1kh-batyabatya.mp4,splashing,6,5661.600000047707
-19,13611736.0,condition-3,23.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,7215.000000011874
-19,13611736.0,condition-3,24.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",3,19866.09999999986
-19,13611736.0,condition-3,25.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,7428.600000035716
-19,13611736.0,condition-3,26.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,34164.40000003576
-19,13611736.0,condition-3,27.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",4,7087.900000011898
-19,13611736.0,condition-3,28.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",4,7079.900000035763
-19,13611736.0,condition-3,29.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,6598.900000000023
-19,13611736.0,condition-3,30.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,5,35665.300000023795
-19,13611062.0,condition-2,1.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,7981.200000000004
-19,13611062.0,condition-2,2.0,a6,auditory,a6hh-dosari.mp4,with a thud,2,7325.900000035763
-19,13611062.0,condition-2,3.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5887.300000011921
-19,13611062.0,condition-2,4.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",6,5475.200000047684
-19,13611062.0,condition-2,5.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",2,7767.200000023848
-19,13611062.0,condition-2,6.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,1,7772.500000011918
-19,13611062.0,condition-2,7.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,5568.800000011921
-19,13611062.0,condition-2,8.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",5,5680.300000011921
-19,13611062.0,condition-2,9.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",7,5944.700000011915
-19,13611062.0,condition-2,10.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,4857.10000003576
-19,13611062.0,condition-2,11.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",6,4791.900000011927
-19,13611062.0,condition-2,12.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",3,6468.799999999988
-19,13611062.0,condition-2,13.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",2,6961.100000047678
-19,13611062.0,condition-2,14.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,8846.699999999953
-19,13611062.0,condition-2,15.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,6056.700000023848
-19,13611062.0,condition-2,16.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,5,7027.600000047678
-19,13611062.0,condition-2,17.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",5,5263.100000035774
-19,13611062.0,condition-2,18.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,6869.000000047672
-19,13611062.0,condition-2,19.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",3,9012.899999999994
-19,13611062.0,condition-2,20.0,a1,auditory,a1kk-batyabatya.mp4,splashing,7,6358.600000035774
-19,13611062.0,condition-2,21.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,4,5072.600000000006
-19,13611062.0,condition-2,22.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,5527.000000011933
-19,13611062.0,condition-2,23.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",3,4862.400000047695
-19,13611062.0,condition-2,24.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,7574.299999999988
-19,13611062.0,condition-2,25.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",2,5945.200000035751
-19,13611062.0,condition-2,26.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,6146.40000002383
-19,13611062.0,condition-2,27.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,5159.600000035774
-19,13611062.0,condition-2,28.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",4,5364.900000000023
-19,13611062.0,condition-2,29.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",4,5314.400000000023
-19,13611062.0,condition-2,30.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",3,8102.700000000012
-19,13608280.0,condition-3,1.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,6,6566.099999928469
-19,13608280.0,condition-3,2.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",6,6293.599999999977
-19,13608280.0,condition-3,3.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,7,5328.499999999985
-19,13608280.0,condition-3,4.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,7549.499999904627
-19,13608280.0,condition-3,5.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",4,5744.899999999965
-19,13608280.0,condition-3,6.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,5344.799999976152
-19,13608280.0,condition-3,7.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",6,10481.099999904633
-19,13608280.0,condition-3,8.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,14069.499999928465
-19,13608280.0,condition-3,9.0,a6,auditory,a6hk-dosari.mp4,with a thud,5,12021.099999928469
-19,13608280.0,condition-3,10.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",4,7509.299999999959
-19,13608280.0,condition-3,11.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",4,5605.0
-19,13608280.0,condition-3,12.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,6,5693.999999928463
-19,13608280.0,condition-3,13.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",6,5278.5
-19,13608280.0,condition-3,14.0,a1,auditory,a1kh-batyabatya.mp4,splashing,6,7409.099999999977
-19,13608280.0,condition-3,15.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,9657.200000000012
-19,13608280.0,condition-3,16.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,4983.600000000006
-19,13608280.0,condition-3,17.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",6,26240.600000000064
-19,13608280.0,condition-3,18.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",6,11405.400000000023
-19,13608280.0,condition-3,19.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",6,5470.599999904633
-19,13608280.0,condition-3,20.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,5355.799999976181
-19,13608280.0,condition-3,21.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,6427.000000000058
-19,13608280.0,condition-3,22.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",6,17312.499999904656
-19,13608280.0,condition-3,23.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",7,5477.700000000012
-19,13608280.0,condition-3,24.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,4911.299999999988
-19,13608280.0,condition-3,25.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",4,6209.899999999965
-19,13608280.0,condition-3,26.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,21917.59999997617
-19,13608280.0,condition-3,27.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,5604.69999995234
-19,13608280.0,condition-3,28.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",4,7426.300000000047
-19,13608280.0,condition-3,29.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,7,5466.399999928486
-19,13608280.0,condition-3,30.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",6,8447.899999976158
-19,13607740.0,condition-3,1.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",7,9520.0
-19,13607740.0,condition-3,2.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,6,6303.0
-19,13607740.0,condition-3,3.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,6,9271.0
-19,13607740.0,condition-3,4.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",4,8387.0
-19,13607740.0,condition-3,5.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",2,4852.0
-19,13607740.0,condition-3,6.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,7286.0
-19,13607740.0,condition-3,7.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",1,9469.0
-19,13607740.0,condition-3,8.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,12571.0
-19,13607740.0,condition-3,9.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,5034.0
-19,13607740.0,condition-3,10.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",7,8554.0
-19,13607740.0,condition-3,11.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,5,7004.0
-19,13607740.0,condition-3,12.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,5369.0
-19,13607740.0,condition-3,13.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",5,9687.0
-19,13607740.0,condition-3,14.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",4,5667.0
-19,13607740.0,condition-3,15.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,6506.0
-19,13607740.0,condition-3,16.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",2,5418.0
-19,13607740.0,condition-3,17.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",2,4869.0
-19,13607740.0,condition-3,18.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",6,9423.0
-19,13607740.0,condition-3,19.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,4,5519.0
-19,13607740.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",2,9961.0
-19,13607740.0,condition-3,21.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",1,4461.0
-19,13607740.0,condition-3,22.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,7202.0
-19,13607740.0,condition-3,23.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",2,6518.0
-19,13607740.0,condition-3,24.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",4,4718.0
-19,13607740.0,condition-3,25.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,4,6952.0
-19,13607740.0,condition-3,26.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",1,6202.0
-19,13607740.0,condition-3,27.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",1,4818.0
-19,13607740.0,condition-3,28.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,4768.0
-19,13607740.0,condition-3,29.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",1,5151.0
-19,13607740.0,condition-3,30.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",5,7986.0
-19,13605274.0,condition-2,1.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,4,6037.099999998507
-19,13605274.0,condition-2,2.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",2,13148.299999998504
-19,13605274.0,condition-2,3.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,3,5427.299999998504
-19,13605274.0,condition-2,4.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,4398.899999995527
-19,13605274.0,condition-2,5.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",2,5565.799999994037
-19,13605274.0,condition-2,6.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",6,4938.899999997026
-19,13605274.0,condition-2,7.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,4355.899999995527
-19,13605274.0,condition-2,8.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",5,5002.699999994045
-19,13605274.0,condition-2,9.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",4,4722.600000000006
-19,13605274.0,condition-2,10.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,5886.399999995541
-19,13605274.0,condition-2,11.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",1,6124.299999999988
-19,13605274.0,condition-2,12.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",1,4698.89999999851
-19,13605274.0,condition-2,13.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",2,5473.999999998516
-19,13605274.0,condition-2,14.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,4533.499999999971
-19,13605274.0,condition-2,15.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",3,7027.0999999985215
-19,13605274.0,condition-2,16.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",3,4280.999999995518
-19,13605274.0,condition-2,17.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",3,4383.100000000006
-19,13605274.0,condition-2,18.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,5,5051.599999995524
-19,13605274.0,condition-2,19.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",4,4306.200000000012
-19,13605274.0,condition-2,20.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",4,4804.399999997026
-19,13605274.0,condition-2,21.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",2,5464.799999995536
-19,13605274.0,condition-2,22.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",2,4625.69999999553
-19,13605274.0,condition-2,23.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",1,4560.499999998516
-19,13605274.0,condition-2,24.0,a1,auditory,a1kk-batyabatya.mp4,splashing,4,7610.100000000006
-19,13605274.0,condition-2,25.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,3,5738.5
-19,13605274.0,condition-2,26.0,a6,auditory,a6hh-dosari.mp4,with a thud,4,5025.59999999404
-19,13605274.0,condition-2,27.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",3,6510.899999995541
-19,13605274.0,condition-2,28.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,4420.200000000012
-19,13605274.0,condition-2,29.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,5516.5
-19,13605274.0,condition-2,30.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",3,4924.699999998498
-19,13613562.0,condition-3,1.0,a1,auditory,a1kh-batyabatya.mp4,splashing,7,5146.699999999255
-19,13613562.0,condition-3,2.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",6,4729.800000000374
-19,13613562.0,condition-3,3.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",3,5669.899999999252
-19,13613562.0,condition-3,4.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",3,7287.199999999633
-19,13613562.0,condition-3,5.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",4,5666.299999999988
-19,13613562.0,condition-3,6.0,a6,auditory,a6hk-dosari.mp4,with a thud,2,4713.600000000748
-19,13613562.0,condition-3,7.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",6,5790.89999999963
-19,13613562.0,condition-3,8.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,5765.500000000015
-19,13613562.0,condition-3,9.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,5810.600000000006
-19,13613562.0,condition-3,10.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",6,4758.299999999625
-19,13613562.0,condition-3,11.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,5642.5
-19,13613562.0,condition-3,12.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,3,5068.500000000757
-19,13613562.0,condition-3,13.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",2,7198.799999999261
-19,13613562.0,condition-3,14.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,5607.699999999633
-19,13613562.0,condition-3,15.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",4,5429.399999999267
-19,13613562.0,condition-3,16.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",6,6499.100000000733
-19,13613562.0,condition-3,17.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",3,5557.799999999261
-19,13613562.0,condition-3,18.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,6,4918.300000000745
-19,13613562.0,condition-3,19.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,4775.099999999628
-19,13613562.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",6,7064.199999999255
-19,13613562.0,condition-3,21.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",7,4914.099999999628
-19,13613562.0,condition-3,22.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,4629.500000000378
-19,13613562.0,condition-3,23.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",5,5491.600000000733
-19,13613562.0,condition-3,24.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",3,5191.599999999628
-19,13613562.0,condition-3,25.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,6118.300000000745
-19,13613562.0,condition-3,26.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,7,5154.800000000745
-19,13613562.0,condition-3,27.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,2,4990.100000000006
-19,13613562.0,condition-3,28.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",2,4989.600000000733
-19,13613562.0,condition-3,29.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,4992.5
-19,13613562.0,condition-3,30.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,7,4988.200000000361
-20,13729465.0,condition-1,1.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",6,14137.30000002384
-20,13729465.0,condition-1,2.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,6,11330.300000000005
-20,13729465.0,condition-1,3.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",4,16250.300000023852
-20,13729465.0,condition-1,4.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",5,9082.800000000016
-20,13729465.0,condition-1,5.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",5,8932.799999976152
-20,13729465.0,condition-1,6.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",5,9374.700000000012
-20,13729465.0,condition-1,7.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",7,6815.399999999994
-20,13729465.0,condition-1,8.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",5,12544.200000000012
-20,13729465.0,condition-1,9.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",7,13385.40000002383
-20,13729465.0,condition-1,10.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",6,7502.09999997617
-20,13729465.0,condition-1,11.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",5,12697.40000002383
-20,13729465.0,condition-1,12.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,6,7458.1999999999825
-20,13729465.0,condition-1,13.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,6,10968.799999976152
-20,13729465.0,condition-1,14.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",5,12698.900000047695
-20,13729465.0,condition-1,15.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",5,10058.399999999963
-20,13729465.0,condition-1,16.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,6,10326.799999952316
-20,13729465.0,condition-1,17.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",5,6956.200000023819
-20,13729465.0,condition-1,18.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,5,9211.20000002382
-20,13729465.0,condition-1,19.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",6,10139.500000047672
-20,13729465.0,condition-1,20.0,a1,auditory,a1kd-batyabatya.mp4,splashing,7,7007.599999999977
-20,13729465.0,condition-1,21.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",5,7807.0
-20,13729465.0,condition-1,22.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",5,7689.799999999988
-20,13729465.0,condition-1,23.0,a6,auditory,a6hu-dosari.mp4,with a thud,6,10588.30000004766
-20,13729465.0,condition-1,24.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,6739.000000000058
-20,13729465.0,condition-1,25.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",6,8247.099999999977
-20,13729465.0,condition-1,26.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,7468.700000023819
-20,13729465.0,condition-1,27.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",5,11131.200000047684
-20,13729465.0,condition-1,28.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",5,12696.199999976148
-20,13729465.0,condition-1,29.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",6,8492.899999952293
-20,13729465.0,condition-1,30.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",4,11540.800000000048
-20,13715041.0,condition-3,1.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",3,9539.199999999995
-20,13715041.0,condition-3,2.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",3,23477.299999999974
-20,13715041.0,condition-3,3.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",4,7962.59999997617
-20,13715041.0,condition-3,4.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",2,16627.70000000001
-20,13715041.0,condition-3,5.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",6,5695.999999976164
-20,13715041.0,condition-3,6.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,4,5404.799999976152
-20,13715041.0,condition-3,7.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",4,7825.499999988067
-20,13715041.0,condition-3,8.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",3,5974.700000011915
-20,13715041.0,condition-3,9.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",2,8022.200000023848
-20,13715041.0,condition-3,10.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",2,6941.199999988079
-20,13715041.0,condition-3,11.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,5828.600000023842
-20,13715041.0,condition-3,12.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,4,9214.200000011915
-20,13715041.0,condition-3,13.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,3,12749.500000023836
-20,13715041.0,condition-3,14.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",2,12805.60000001191
-20,13715041.0,condition-3,15.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,6190.800000000047
-20,13715041.0,condition-3,16.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",2,5578.40000002383
-20,13715041.0,condition-3,17.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",4,14423.100000000037
-20,13715041.0,condition-3,18.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",6,7292.600000000035
-20,13715041.0,condition-3,19.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",3,8874.499999988067
-20,13715041.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",6,7048.40000002383
-20,13715041.0,condition-3,21.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",2,7265.799999988056
-20,13715041.0,condition-3,22.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,6257.599999999977
-20,13715041.0,condition-3,23.0,a1,auditory,a1kh-batyabatya.mp4,splashing,3,7482.800000023853
-20,13715041.0,condition-3,24.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",4,9144.19999998808
-20,13715041.0,condition-3,25.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",3,8718.000000011933
-20,13715041.0,condition-3,26.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,5247.5
-20,13715041.0,condition-3,27.0,a6,auditory,a6hk-dosari.mp4,with a thud,2,5339.500000000058
-20,13715041.0,condition-3,28.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,5112.799999976181
-20,13715041.0,condition-3,29.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",1,6974.000000011933
-20,13715041.0,condition-3,30.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",4,5212.3000000238535
+Experiment Version,Participant Private ID,Current Spreadsheet,Trial Number,Spreadsheet: pairing,Spreadsheet: modality,Spreadsheet: rated-word,Spreadsheet: rated-meaning,rating,Reaction Time
+18.0,13318377.0,condition-3,1.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",6,29762.0
+18.0,13318377.0,condition-3,2.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,9422.000000035769
+18.0,13318377.0,condition-3,3.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,15649.799999999988
+18.0,13318377.0,condition-3,4.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",6,15881.099999999948
+18.0,13318377.0,condition-3,5.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,10772.5
+18.0,13318377.0,condition-3,6.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,9389.400000000023
+18.0,13318377.0,condition-3,7.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,5,4971.200000023819
+18.0,13318377.0,condition-3,8.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,4900.79999999993
+18.0,13318377.0,condition-3,9.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,25474.10000001191
+18.0,13318377.0,condition-3,10.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,20041.90000004769
+18.0,13318377.0,condition-3,11.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,2,6954.700000035751
+18.0,13318377.0,condition-3,12.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",6,4700.099999999977
+18.0,13318377.0,condition-3,13.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",5,5850.099999999977
+18.0,13318377.0,condition-3,14.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",6,7665.799999999988
+18.0,13318377.0,condition-3,15.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",6,5145.3000000238535
+18.0,13318377.0,condition-3,16.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,4855.90000002383
+18.0,13318377.0,condition-3,17.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,5139.100000035774
+18.0,13318377.0,condition-3,18.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,8587.600000035774
+18.0,13318377.0,condition-3,19.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",5,7120.299999999988
+18.0,13318377.0,condition-3,20.0,a6,auditory,a6hk-dosari.mp4,with a thud,1,6041.600000023842
+18.0,13318377.0,condition-3,21.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,2,10089.599999999977
+18.0,13318377.0,condition-3,22.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",3,5599.50000003574
+18.0,13318377.0,condition-3,23.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",6,21420.79999999999
+18.0,13318377.0,condition-3,24.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,6226.400000047695
+18.0,13318377.0,condition-3,25.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",5,5049.799999999988
+18.0,13318377.0,condition-3,26.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,5021.300000011921
+18.0,13318377.0,condition-3,27.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",5,4712.400000011898
+18.0,13318377.0,condition-3,28.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",3,7205.300000011921
+18.0,13318377.0,condition-3,29.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,5019.100000047707
+18.0,13318377.0,condition-3,30.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",5,5886.099999999977
+18.0,13328943.0,condition-2,1.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,17797.399999999907
+18.0,13328943.0,condition-2,2.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",5,11882.600000000006
+18.0,13328943.0,condition-2,3.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",5,6808.899999999732
+18.0,13328943.0,condition-2,4.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,5365.39999999982
+18.0,13328943.0,condition-2,5.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",2,9572.79999999964
+18.0,13328943.0,condition-2,6.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,5747.099999999919
+18.0,13328943.0,condition-2,7.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,9036.199999999895
+18.0,13328943.0,condition-2,8.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,15605.59999999992
+18.0,13328943.0,condition-2,9.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",5,8095.299999999639
+18.0,13328943.0,condition-2,10.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,6,6319.799999999639
+18.0,13328943.0,condition-2,11.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",3,6061.399999999907
+18.0,13328943.0,condition-2,12.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,5664.999999999913
+18.0,13328943.0,condition-2,13.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,7216.600000000006
+18.0,13328943.0,condition-2,14.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,13646.399999999994
+18.0,13328943.0,condition-2,15.0,a1,auditory,a1kk-batyabatya.mp4,splashing,6,6745.399999999616
+18.0,13328943.0,condition-2,16.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,5976.199999999837
+18.0,13328943.0,condition-2,17.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",6,20462.39999999973
+18.0,13328943.0,condition-2,18.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,6033.799999999988
+18.0,13328943.0,condition-2,19.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,6,4963.199999999604
+18.0,13328943.0,condition-2,20.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,4965.999999999825
+18.0,13328943.0,condition-2,21.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",6,8140.599999999802
+18.0,13328943.0,condition-2,22.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",6,6088.999999999825
+18.0,13328943.0,condition-2,23.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",5,5564.400000000023
+18.0,13328943.0,condition-2,24.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5150.70000000007
+18.0,13328943.0,condition-2,25.0,a6,auditory,a6hh-dosari.mp4,with a thud,5,16346.29999999964
+18.0,13328943.0,condition-2,26.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",5,6055.099999999744
+18.0,13328943.0,condition-2,27.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",5,5377.699999999895
+18.0,13328943.0,condition-2,28.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",5,6742.799999999988
+18.0,13328943.0,condition-2,29.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",5,6850.799999999988
+18.0,13328943.0,condition-2,30.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,5204.899999999907
+18.0,13344171.0,condition-3,1.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",2,5681.199999988079
+18.0,13344171.0,condition-3,2.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",4,5362.699999988079
+18.0,13344171.0,condition-3,3.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",5,5760.999999976164
+18.0,13344171.0,condition-3,4.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",5,5633.299999999988
+18.0,13344171.0,condition-3,5.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",5,5592.999999988082
+18.0,13344171.0,condition-3,6.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,6755.900000023845
+18.0,13344171.0,condition-3,7.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,6283.700000000012
+18.0,13344171.0,condition-3,8.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,6747.200000023848
+18.0,13344171.0,condition-3,9.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,6,5381.5
+18.0,13344171.0,condition-3,10.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",4,5250.000000000015
+18.0,13344171.0,condition-3,11.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,5541.899999999994
+18.0,13344171.0,condition-3,12.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",3,19874.90000002383
+18.0,13344171.0,condition-3,13.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",6,6066.200000000012
+18.0,13344171.0,condition-3,14.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",5,7449.399999988091
+18.0,13344171.0,condition-3,15.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",5,6597.600000011909
+18.0,13344171.0,condition-3,16.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,6100.000000000029
+18.0,13344171.0,condition-3,17.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,4,6508.200000011915
+18.0,13344171.0,condition-3,18.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,7612.499999976164
+18.0,13344171.0,condition-3,19.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",2,6282.100000023842
+18.0,13344171.0,condition-3,20.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",7,5799.600000000006
+18.0,13344171.0,condition-3,21.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,6,6135.299999999988
+18.0,13344171.0,condition-3,22.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,5607.900000011927
+18.0,13344171.0,condition-3,23.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",3,5714.299999999988
+18.0,13344171.0,condition-3,24.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",5,6904.499999988067
+18.0,13344171.0,condition-3,25.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,6066.699999999953
+18.0,13344171.0,condition-3,26.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",5,5366.099999999977
+18.0,13344171.0,condition-3,27.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,6,5314.40000002383
+18.0,13344171.0,condition-3,28.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",4,6156.000000011933
+18.0,13344171.0,condition-3,29.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,5428.299999999988
+18.0,13344171.0,condition-3,30.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",7,5747.299999976181
+18.0,13349143.0,condition-2,1.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",7,5303.399999999994
+18.0,13349143.0,condition-2,2.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,7,4937.740000000005
+18.0,13349143.0,condition-2,3.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,7206.779999999999
+18.0,13349143.0,condition-2,4.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",1,5071.139999999999
+18.0,13349143.0,condition-2,5.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",1,13506.919999999998
+18.0,13349143.0,condition-2,6.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,7,4975.179999999993
+18.0,13349143.0,condition-2,7.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",7,7621.880000000005
+18.0,13349143.0,condition-2,8.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",4,8090.559999999998
+18.0,13349143.0,condition-2,9.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",7,11122.600000000006
+18.0,13349143.0,condition-2,10.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,5553.279999999999
+18.0,13349143.0,condition-2,11.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,4871.760000000009
+18.0,13349143.0,condition-2,12.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",7,5323.320000000007
+18.0,13349143.0,condition-2,13.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,4,8080.0
+18.0,13349143.0,condition-2,14.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",7,5139.420000000013
+18.0,13349143.0,condition-2,15.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",1,5054.720000000001
+18.0,13349143.0,condition-2,16.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,7,5090.059999999998
+18.0,13349143.0,condition-2,17.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",7,118922.2
+18.0,13349143.0,condition-2,18.0,a1,auditory,a1kk-batyabatya.mp4,splashing,7,4655.039999999979
+18.0,13349143.0,condition-2,19.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",7,4905.799999999988
+18.0,13349143.0,condition-2,20.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",7,12321.73999999999
+18.0,13349143.0,condition-2,21.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,1,7422.460000000021
+18.0,13349143.0,condition-2,22.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",7,5471.140000000014
+18.0,13349143.0,condition-2,23.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",1,6354.820000000007
+18.0,13349143.0,condition-2,24.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,6638.099999999977
+18.0,13349143.0,condition-2,25.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",1,233870.2
+18.0,13349143.0,condition-2,26.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",1,5273.020000000019
+18.0,13349143.0,condition-2,27.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",7,5370.099999999977
+18.0,13349143.0,condition-2,28.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",7,4484.800000000047
+18.0,13349143.0,condition-2,29.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",7,4351.819999999949
+18.0,13349143.0,condition-2,30.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",1,5486.160000000033
+18.0,13352762.0,condition-3,1.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",2,13187.0
+18.0,13352762.0,condition-3,2.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,12886.0
+18.0,13352762.0,condition-3,3.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",4,7911.0
+18.0,13352762.0,condition-3,4.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",1,6919.0
+18.0,13352762.0,condition-3,5.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",7,7107.0
+18.0,13352762.0,condition-3,6.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,5306.0
+18.0,13352762.0,condition-3,7.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,2,54928.0
+18.0,13352762.0,condition-3,8.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,10300.0
+18.0,13352762.0,condition-3,9.0,a1,auditory,a1kh-batyabatya.mp4,splashing,2,25387.0
+18.0,13352762.0,condition-3,10.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",7,10152.0
+18.0,13352762.0,condition-3,11.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",4,7985.0
+18.0,13352762.0,condition-3,12.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",3,6898.0
+18.0,13352762.0,condition-3,13.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,3,7532.0
+18.0,13352762.0,condition-3,14.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",5,7054.0
+18.0,13352762.0,condition-3,15.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",3,5339.0
+18.0,13352762.0,condition-3,16.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,6,5418.0
+18.0,13352762.0,condition-3,17.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",4,5502.0
+18.0,13352762.0,condition-3,18.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",4,6617.0
+18.0,13352762.0,condition-3,19.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",5,5852.0
+18.0,13352762.0,condition-3,20.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,7404.0
+18.0,13352762.0,condition-3,21.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,2,6638.0
+18.0,13352762.0,condition-3,22.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",2,6450.0
+18.0,13352762.0,condition-3,23.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",3,6796.0
+18.0,13352762.0,condition-3,24.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,5373.0
+18.0,13352762.0,condition-3,25.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",2,6385.0
+18.0,13352762.0,condition-3,26.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",5,6767.0
+18.0,13352762.0,condition-3,27.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",3,6219.0
+18.0,13352762.0,condition-3,28.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",2,6098.0
+18.0,13352762.0,condition-3,29.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,3,6601.0
+18.0,13352762.0,condition-3,30.0,a6,auditory,a6hk-dosari.mp4,with a thud,2,6271.0
+18.0,13370221.0,condition-2,1.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",4,4791.5
+18.0,13370221.0,condition-2,2.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,4635.599999976155
+18.0,13370221.0,condition-2,3.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,4948.600000000006
+18.0,13370221.0,condition-2,4.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",2,5077.199999976161
+18.0,13370221.0,condition-2,5.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",5,5398.10000000002
+18.0,13370221.0,condition-2,6.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",3,5230.199999988079
+18.0,13370221.0,condition-2,7.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",4,5173.800000000003
+18.0,13370221.0,condition-2,8.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",5,6514.599999999991
+18.0,13370221.0,condition-2,9.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,5,4830.199999964243
+18.0,13370221.0,condition-2,10.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",3,5903.599999976155
+18.0,13370221.0,condition-2,11.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",4,11662.399999999963
+18.0,13370221.0,condition-2,12.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,7923.099999964237
+18.0,13370221.0,condition-2,13.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",4,11562.600000000006
+18.0,13370221.0,condition-2,14.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",4,7271.899999952322
+18.0,13370221.0,condition-2,15.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,6,5211.099999964237
+18.0,13370221.0,condition-2,16.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,4,4882.000000000029
+18.0,13370221.0,condition-2,17.0,a1,auditory,a1kk-batyabatya.mp4,splashing,5,4913.599999952305
+18.0,13370221.0,condition-2,18.0,a6,auditory,a6hh-dosari.mp4,with a thud,5,4864.100000000006
+18.0,13370221.0,condition-2,19.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",5,4693.599999952305
+18.0,13370221.0,condition-2,20.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",3,4617.699999964243
+18.0,13370221.0,condition-2,21.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",2,4948.200000000041
+18.0,13370221.0,condition-2,22.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,2,5418.799999999988
+18.0,13370221.0,condition-2,23.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,4719.200000000012
+18.0,13370221.0,condition-2,24.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,5073.299999952316
+18.0,13370221.0,condition-2,25.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,4718.099999952305
+18.0,13370221.0,condition-2,26.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,1,5964.400000000023
+18.0,13370221.0,condition-2,27.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",4,4969.299999999988
+18.0,13370221.0,condition-2,28.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",4,5002.699999988079
+18.0,13370221.0,condition-2,29.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",6,5687.799999976181
+18.0,13370221.0,condition-2,30.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",3,4844.699999988079
+18.0,13381142.0,condition-1,1.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",6,5088.0
+18.0,13381142.0,condition-1,2.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",7,5672.0
+18.0,13381142.0,condition-1,3.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,4786.0
+18.0,13381142.0,condition-1,4.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",2,5640.0
+18.0,13381142.0,condition-1,5.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",3,6209.0
+18.0,13381142.0,condition-1,6.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,7,4870.0
+18.0,13381142.0,condition-1,7.0,a6,auditory,a6hu-dosari.mp4,with a thud,7,5488.0
+18.0,13381142.0,condition-1,8.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",4,4986.0
+18.0,13381142.0,condition-1,9.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",2,6310.0
+18.0,13381142.0,condition-1,10.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",6,4972.0
+18.0,13381142.0,condition-1,11.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",5,7832.0
+18.0,13381142.0,condition-1,12.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",3,9808.0
+18.0,13381142.0,condition-1,13.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,5774.0
+18.0,13381142.0,condition-1,14.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",7,5289.0
+18.0,13381142.0,condition-1,15.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,7,5924.0
+18.0,13381142.0,condition-1,16.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",6,4770.0
+18.0,13381142.0,condition-1,17.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",2,5337.0
+18.0,13381142.0,condition-1,18.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",7,4651.0
+18.0,13381142.0,condition-1,19.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",5,5272.0
+18.0,13381142.0,condition-1,20.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",6,5138.0
+18.0,13381142.0,condition-1,21.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",5,5505.0
+18.0,13381142.0,condition-1,22.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",5,4819.0
+18.0,13381142.0,condition-1,23.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",4,8255.0
+18.0,13381142.0,condition-1,24.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,4,4985.0
+18.0,13381142.0,condition-1,25.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,6,4502.0
+18.0,13381142.0,condition-1,26.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",7,4502.0
+18.0,13381142.0,condition-1,27.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",7,4534.0
+18.0,13381142.0,condition-1,28.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,4,6376.0
+18.0,13381142.0,condition-1,29.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",7,6159.0
+18.0,13381142.0,condition-1,30.0,a1,auditory,a1kd-batyabatya.mp4,splashing,6,4702.0
+18.0,13554674.0,condition-2,1.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",3,13833.700000000004
+18.0,13554674.0,condition-2,2.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",2,9933.799999999988
+18.0,13554674.0,condition-2,3.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,8700.599999999977
+18.0,13554674.0,condition-2,4.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",2,8568.699999999983
+18.0,13554674.0,condition-2,5.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,4,5833.300000000003
+18.0,13554674.0,condition-2,6.0,a6,auditory,a6hh-dosari.mp4,with a thud,3,7532.199999999997
+18.0,13554674.0,condition-2,7.0,a1,auditory,a1kk-batyabatya.mp4,splashing,5,6800.400000000023
+18.0,13554674.0,condition-2,8.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",3,5899.400000011927
+18.0,13554674.0,condition-2,9.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,6382.09999997617
+18.0,13554674.0,condition-2,10.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",5,11567.899999999963
+18.0,13554674.0,condition-2,11.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",4,8733.600000000006
+18.0,13554674.0,condition-2,12.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",2,6365.200000023848
+18.0,13554674.0,condition-2,13.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,6415.199999988079
+18.0,13554674.0,condition-2,14.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",3,9000.400000000023
+18.0,13554674.0,condition-2,15.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",2,5531.400000011927
+18.0,13554674.0,condition-2,16.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,5382.100000023842
+18.0,13554674.0,condition-2,17.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,5,5133.399999999994
+18.0,13554674.0,condition-2,18.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",3,5531.899999988091
+18.0,13554674.0,condition-2,19.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,5449.899999999994
+18.0,13554674.0,condition-2,20.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,5200.199999999953
+18.0,13554674.0,condition-2,21.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,5,9200.49999999997
+18.0,13554674.0,condition-2,22.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,4,6065.600000023842
+18.0,13554674.0,condition-2,23.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",5,5531.899999976158
+18.0,13554674.0,condition-2,24.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",4,8500.199999999953
+18.0,13554674.0,condition-2,25.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,3,11500.40000000008
+18.0,13554674.0,condition-2,26.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5499.100000011909
+18.0,13554674.0,condition-2,27.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,5315.100000023842
+18.0,13554674.0,condition-2,28.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,9017.099999999977
+18.0,13554674.0,condition-2,29.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",4,10450.5
+18.0,13554674.0,condition-2,30.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",3,7015.800000011921
+18.0,13573130.0,condition-2,1.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",6,6404.79999990463
+18.0,13573130.0,condition-2,2.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",5,6714.800000000003
+18.0,13573130.0,condition-2,3.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",3,7545.0
+18.0,13573130.0,condition-2,4.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,5395.5
+18.0,13573130.0,condition-2,5.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",7,6248.400000000009
+18.0,13573130.0,condition-2,6.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,6061.399999999994
+18.0,13573130.0,condition-2,7.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,6406.000000190732
+18.0,13573130.0,condition-2,8.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",3,6564.699999999997
+18.0,13573130.0,condition-2,9.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,6010.600000190723
+18.0,13573130.0,condition-2,10.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",7,5393.799999999988
+18.0,13573130.0,condition-2,11.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,9581.100000000037
+18.0,13573130.0,condition-2,12.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,5406.799999904644
+18.0,13573130.0,condition-2,13.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",6,5298.399999999965
+18.0,13573130.0,condition-2,14.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",3,7158.799999999988
+18.0,13573130.0,condition-2,15.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,6281.700000000012
+18.0,13573130.0,condition-2,16.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,7135.799999999988
+18.0,13573130.0,condition-2,17.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,5,5256.099999904633
+18.0,13573130.0,condition-2,18.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,2,7381.200000190729
+18.0,13573130.0,condition-2,19.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",6,5559.300000095362
+18.0,13573130.0,condition-2,20.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",5,7187.0000001907465
+18.0,13573130.0,condition-2,21.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",4,6415.200000000012
+18.0,13573130.0,condition-2,22.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",4,7448.000000000029
+18.0,13573130.0,condition-2,23.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",3,5359.899999809277
+18.0,13573130.0,condition-2,24.0,a6,auditory,a6hh-dosari.mp4,with a thud,4,5461.799999904644
+18.0,13573130.0,condition-2,25.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,5762.599999809288
+18.0,13573130.0,condition-2,26.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",2,6135.799999904644
+18.0,13573130.0,condition-2,27.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,2,6681.4000000000815
+18.0,13573130.0,condition-2,28.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",5,7214.700000000012
+18.0,13573130.0,condition-2,29.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",5,4954.599999809288
+18.0,13573130.0,condition-2,30.0,a1,auditory,a1kk-batyabatya.mp4,splashing,7,6310.600000190723
+18.0,13573434.0,condition-3,1.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,11245.100000000006
+18.0,13573434.0,condition-3,2.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",3,15843.059999999998
+18.0,13573434.0,condition-3,3.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,16402.079999999987
+18.0,13573434.0,condition-3,4.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,7498.940000000002
+18.0,13573434.0,condition-3,5.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,8277.48000000001
+18.0,13573434.0,condition-3,6.0,a1,auditory,a1kh-batyabatya.mp4,splashing,6,13369.079999999987
+18.0,13573434.0,condition-3,7.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",7,5045.940000000002
+18.0,13573434.0,condition-3,8.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",3,10899.160000000003
+18.0,13573434.0,condition-3,9.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",7,13334.179999999991
+18.0,13573434.0,condition-3,10.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",5,21675.51999999999
+18.0,13573434.0,condition-3,11.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",1,18406.679999999997
+18.0,13573434.0,condition-3,12.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",4,8205.679999999993
+18.0,13573434.0,condition-3,13.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,7,5619.760000000009
+18.0,13573434.0,condition-3,14.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,5847.919999999984
+18.0,13573434.0,condition-3,15.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",4,17735.580000000016
+18.0,13573434.0,condition-3,16.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,7753.760000000009
+18.0,13573434.0,condition-3,17.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,12848.099999999977
+18.0,13573434.0,condition-3,18.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",4,18998.900000000023
+18.0,13573434.0,condition-3,19.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",5,14850.640000000014
+18.0,13573434.0,condition-3,20.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",5,11300.080000000016
+18.0,13573434.0,condition-3,21.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,31111.02000000002
+18.0,13573434.0,condition-3,22.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,2,8847.320000000007
+18.0,13573434.0,condition-3,23.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,5,8843.940000000002
+18.0,13573434.0,condition-3,24.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,6,4967.520000000019
+18.0,13573434.0,condition-3,25.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",7,8222.199999999953
+18.0,13573434.0,condition-3,26.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,4798.440000000002
+18.0,13573434.0,condition-3,27.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,5,12953.840000000026
+18.0,13573434.0,condition-3,28.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,12029.619999999995
+18.0,13573434.0,condition-3,29.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",7,6653.640000000014
+18.0,13573434.0,condition-3,30.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",7,4878.840000000026
+19.0,13605274.0,condition-2,1.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,4,6037.099999998507
+19.0,13605274.0,condition-2,2.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",2,13148.299999998504
+19.0,13605274.0,condition-2,3.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,3,5427.299999998504
+19.0,13605274.0,condition-2,4.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,4398.899999995527
+19.0,13605274.0,condition-2,5.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",2,5565.799999994037
+19.0,13605274.0,condition-2,6.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",6,4938.899999997026
+19.0,13605274.0,condition-2,7.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,4355.899999995527
+19.0,13605274.0,condition-2,8.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",5,5002.699999994045
+19.0,13605274.0,condition-2,9.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",4,4722.600000000006
+19.0,13605274.0,condition-2,10.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,5886.399999995541
+19.0,13605274.0,condition-2,11.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",1,6124.299999999988
+19.0,13605274.0,condition-2,12.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",1,4698.89999999851
+19.0,13605274.0,condition-2,13.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",2,5473.999999998516
+19.0,13605274.0,condition-2,14.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,4533.499999999971
+19.0,13605274.0,condition-2,15.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",3,7027.0999999985215
+19.0,13605274.0,condition-2,16.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",3,4280.999999995518
+19.0,13605274.0,condition-2,17.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",3,4383.100000000006
+19.0,13605274.0,condition-2,18.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,5,5051.599999995524
+19.0,13605274.0,condition-2,19.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",4,4306.200000000012
+19.0,13605274.0,condition-2,20.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",4,4804.399999997026
+19.0,13605274.0,condition-2,21.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",2,5464.799999995536
+19.0,13605274.0,condition-2,22.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",2,4625.69999999553
+19.0,13605274.0,condition-2,23.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",1,4560.499999998516
+19.0,13605274.0,condition-2,24.0,a1,auditory,a1kk-batyabatya.mp4,splashing,4,7610.100000000006
+19.0,13605274.0,condition-2,25.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,3,5738.5
+19.0,13605274.0,condition-2,26.0,a6,auditory,a6hh-dosari.mp4,with a thud,4,5025.59999999404
+19.0,13605274.0,condition-2,27.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",3,6510.899999995541
+19.0,13605274.0,condition-2,28.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,4420.200000000012
+19.0,13605274.0,condition-2,29.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,5516.5
+19.0,13605274.0,condition-2,30.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",3,4924.699999998498
+19.0,13607740.0,condition-3,1.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",7,9520.0
+19.0,13607740.0,condition-3,2.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,6,6303.0
+19.0,13607740.0,condition-3,3.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,6,9271.0
+19.0,13607740.0,condition-3,4.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",4,8387.0
+19.0,13607740.0,condition-3,5.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",2,4852.0
+19.0,13607740.0,condition-3,6.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,7286.0
+19.0,13607740.0,condition-3,7.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",1,9469.0
+19.0,13607740.0,condition-3,8.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,12571.0
+19.0,13607740.0,condition-3,9.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,5034.0
+19.0,13607740.0,condition-3,10.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",7,8554.0
+19.0,13607740.0,condition-3,11.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,5,7004.0
+19.0,13607740.0,condition-3,12.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,5369.0
+19.0,13607740.0,condition-3,13.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",5,9687.0
+19.0,13607740.0,condition-3,14.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",4,5667.0
+19.0,13607740.0,condition-3,15.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,6506.0
+19.0,13607740.0,condition-3,16.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",2,5418.0
+19.0,13607740.0,condition-3,17.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",2,4869.0
+19.0,13607740.0,condition-3,18.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",6,9423.0
+19.0,13607740.0,condition-3,19.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,4,5519.0
+19.0,13607740.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",2,9961.0
+19.0,13607740.0,condition-3,21.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",1,4461.0
+19.0,13607740.0,condition-3,22.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,7202.0
+19.0,13607740.0,condition-3,23.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",2,6518.0
+19.0,13607740.0,condition-3,24.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",4,4718.0
+19.0,13607740.0,condition-3,25.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,4,6952.0
+19.0,13607740.0,condition-3,26.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",1,6202.0
+19.0,13607740.0,condition-3,27.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",1,4818.0
+19.0,13607740.0,condition-3,28.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,4768.0
+19.0,13607740.0,condition-3,29.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",1,5151.0
+19.0,13607740.0,condition-3,30.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",5,7986.0
+19.0,13608280.0,condition-3,1.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,6,6566.099999928469
+19.0,13608280.0,condition-3,2.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",6,6293.599999999977
+19.0,13608280.0,condition-3,3.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,7,5328.499999999985
+19.0,13608280.0,condition-3,4.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,7549.499999904627
+19.0,13608280.0,condition-3,5.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",4,5744.899999999965
+19.0,13608280.0,condition-3,6.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,5344.799999976152
+19.0,13608280.0,condition-3,7.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",6,10481.099999904633
+19.0,13608280.0,condition-3,8.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,14069.499999928465
+19.0,13608280.0,condition-3,9.0,a6,auditory,a6hk-dosari.mp4,with a thud,5,12021.099999928469
+19.0,13608280.0,condition-3,10.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",4,7509.299999999959
+19.0,13608280.0,condition-3,11.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",4,5605.0
+19.0,13608280.0,condition-3,12.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,6,5693.999999928463
+19.0,13608280.0,condition-3,13.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",6,5278.5
+19.0,13608280.0,condition-3,14.0,a1,auditory,a1kh-batyabatya.mp4,splashing,6,7409.099999999977
+19.0,13608280.0,condition-3,15.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,9657.200000000012
+19.0,13608280.0,condition-3,16.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,4983.600000000006
+19.0,13608280.0,condition-3,17.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",6,26240.600000000064
+19.0,13608280.0,condition-3,18.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",6,11405.400000000023
+19.0,13608280.0,condition-3,19.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",6,5470.599999904633
+19.0,13608280.0,condition-3,20.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,5355.799999976181
+19.0,13608280.0,condition-3,21.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,6427.000000000058
+19.0,13608280.0,condition-3,22.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",6,17312.499999904656
+19.0,13608280.0,condition-3,23.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",7,5477.700000000012
+19.0,13608280.0,condition-3,24.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,4911.299999999988
+19.0,13608280.0,condition-3,25.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",4,6209.899999999965
+19.0,13608280.0,condition-3,26.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,21917.59999997617
+19.0,13608280.0,condition-3,27.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,5604.69999995234
+19.0,13608280.0,condition-3,28.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",4,7426.300000000047
+19.0,13608280.0,condition-3,29.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,7,5466.399999928486
+19.0,13608280.0,condition-3,30.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",6,8447.899999976158
+19.0,13611062.0,condition-2,1.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,7981.200000000004
+19.0,13611062.0,condition-2,2.0,a6,auditory,a6hh-dosari.mp4,with a thud,2,7325.900000035763
+19.0,13611062.0,condition-2,3.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5887.300000011921
+19.0,13611062.0,condition-2,4.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",6,5475.200000047684
+19.0,13611062.0,condition-2,5.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",2,7767.200000023848
+19.0,13611062.0,condition-2,6.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,1,7772.500000011918
+19.0,13611062.0,condition-2,7.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,5568.800000011921
+19.0,13611062.0,condition-2,8.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",5,5680.300000011921
+19.0,13611062.0,condition-2,9.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",7,5944.700000011915
+19.0,13611062.0,condition-2,10.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,4857.10000003576
+19.0,13611062.0,condition-2,11.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",6,4791.900000011927
+19.0,13611062.0,condition-2,12.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",3,6468.799999999988
+19.0,13611062.0,condition-2,13.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",2,6961.100000047678
+19.0,13611062.0,condition-2,14.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,8846.699999999953
+19.0,13611062.0,condition-2,15.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,6056.700000023848
+19.0,13611062.0,condition-2,16.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,5,7027.600000047678
+19.0,13611062.0,condition-2,17.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",5,5263.100000035774
+19.0,13611062.0,condition-2,18.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,6869.000000047672
+19.0,13611062.0,condition-2,19.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",3,9012.899999999994
+19.0,13611062.0,condition-2,20.0,a1,auditory,a1kk-batyabatya.mp4,splashing,7,6358.600000035774
+19.0,13611062.0,condition-2,21.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,4,5072.600000000006
+19.0,13611062.0,condition-2,22.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,5527.000000011933
+19.0,13611062.0,condition-2,23.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",3,4862.400000047695
+19.0,13611062.0,condition-2,24.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,7574.299999999988
+19.0,13611062.0,condition-2,25.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",2,5945.200000035751
+19.0,13611062.0,condition-2,26.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,6146.40000002383
+19.0,13611062.0,condition-2,27.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,5159.600000035774
+19.0,13611062.0,condition-2,28.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",4,5364.900000000023
+19.0,13611062.0,condition-2,29.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",4,5314.400000000023
+19.0,13611062.0,condition-2,30.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",3,8102.700000000012
+19.0,13611736.0,condition-3,1.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",4,52389.100000000006
+19.0,13611736.0,condition-3,2.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",6,6747.399999999994
+19.0,13611736.0,condition-3,3.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",6,6619.600000023842
+19.0,13611736.0,condition-3,4.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,6349.699999999983
+19.0,13611736.0,condition-3,5.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",3,16427.0
+19.0,13611736.0,condition-3,6.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",3,7227.500000023836
+19.0,13611736.0,condition-3,7.0,a6,auditory,a6hk-dosari.mp4,with a thud,3,43475.20000003575
+19.0,13611736.0,condition-3,8.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",3,44326.09999999998
+19.0,13611736.0,condition-3,9.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",5,5563.600000035774
+19.0,13611736.0,condition-3,10.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,6,23391.900000011898
+19.0,13611736.0,condition-3,11.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,3,5716.20000000007
+19.0,13611736.0,condition-3,12.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",6,5702.600000047707
+19.0,13611736.0,condition-3,13.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",3,24989.30000001192
+19.0,13611736.0,condition-3,14.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,6316.800000000047
+19.0,13611736.0,condition-3,15.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,7,7077.700000047684
+19.0,13611736.0,condition-3,16.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",6,8018.600000023842
+19.0,13611736.0,condition-3,17.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",5,7211.600000035774
+19.0,13611736.0,condition-3,18.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,6572.100000047707
+19.0,13611736.0,condition-3,19.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",5,7449.70000000007
+19.0,13611736.0,condition-3,20.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,3,121675.70000002382
+19.0,13611736.0,condition-3,21.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",5,6851.700000047684
+19.0,13611736.0,condition-3,22.0,a1,auditory,a1kh-batyabatya.mp4,splashing,6,5661.600000047707
+19.0,13611736.0,condition-3,23.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,7215.000000011874
+19.0,13611736.0,condition-3,24.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",3,19866.09999999986
+19.0,13611736.0,condition-3,25.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,7428.600000035716
+19.0,13611736.0,condition-3,26.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,34164.40000003576
+19.0,13611736.0,condition-3,27.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",4,7087.900000011898
+19.0,13611736.0,condition-3,28.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",4,7079.900000035763
+19.0,13611736.0,condition-3,29.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",6,6598.900000000023
+19.0,13611736.0,condition-3,30.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,5,35665.300000023795
+19.0,13611841.0,condition-2,1.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,6301.199999999997
+19.0,13611841.0,condition-2,2.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,2,5502.700000000739
+19.0,13611841.0,condition-2,3.0,a1,auditory,a1kk-batyabatya.mp4,splashing,4,6033.800000000003
+19.0,13611841.0,condition-2,4.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,5640.399999999994
+19.0,13611841.0,condition-2,5.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",2,7567.0
+19.0,13611841.0,condition-2,6.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",1,5349.300000000367
+19.0,13611841.0,condition-2,7.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",5,5988.800000000003
+19.0,13611841.0,condition-2,8.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",5,6266.699999999997
+19.0,13611841.0,condition-2,9.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,6714.299999999988
+19.0,13611841.0,condition-2,10.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",3,6179.499999999243
+19.0,13611841.0,condition-2,11.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",2,8245.900000000373
+19.0,13611841.0,condition-2,12.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",3,5398.700000000012
+19.0,13611841.0,condition-2,13.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,5,5432.899999999994
+19.0,13611841.0,condition-2,14.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",3,8843.100000000384
+19.0,13611841.0,condition-2,15.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",4,5344.0
+19.0,13611841.0,condition-2,16.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,4,5550.700000000012
+19.0,13611841.0,condition-2,17.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,5441.599999999249
+19.0,13611841.0,condition-2,18.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,5492.700000000361
+19.0,13611841.0,condition-2,19.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",2,5566.599999999249
+19.0,13611841.0,condition-2,20.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",2,5833.499999999243
+19.0,13611841.0,condition-2,21.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,2,6423.100000000384
+19.0,13611841.0,condition-2,22.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",1,17479.600000000006
+19.0,13611841.0,condition-2,23.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,3,5263.0
+19.0,13611841.0,condition-2,24.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",2,8206.400000000023
+19.0,13611841.0,condition-2,25.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,5333.499999999243
+19.0,13611841.0,condition-2,26.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5762.800000000396
+19.0,13611841.0,condition-2,27.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",6,5750.499999999942
+19.0,13611841.0,condition-2,28.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",3,5214.699999999255
+19.0,13611841.0,condition-2,29.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",2,7339.999999999651
+19.0,13611841.0,condition-2,30.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",2,6227.900000000722
+19.0,13612053.0,condition-3,1.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,6359.199999999997
+19.0,13612053.0,condition-3,2.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",5,8227.100000005958
+19.0,13612053.0,condition-3,3.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",5,12558.700000000012
+19.0,13612053.0,condition-3,4.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,5,11921.600000005958
+19.0,13612053.0,condition-3,5.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,4,7286.900000002977
+19.0,13612053.0,condition-3,6.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,5834.500000002969
+19.0,13612053.0,condition-3,7.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",4,13393.00000000003
+19.0,13612053.0,condition-3,8.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,9105.99999999997
+19.0,13612053.0,condition-3,9.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",1,5457.0
+19.0,13612053.0,condition-3,10.0,a6,auditory,a6hk-dosari.mp4,with a thud,4,19763.60000000001
+19.0,13612053.0,condition-3,11.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",3,14743.300000008952
+19.0,13612053.0,condition-3,12.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",5,14050.100000000006
+19.0,13612053.0,condition-3,13.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",3,8763.200000005949
+19.0,13612053.0,condition-3,14.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",4,5748.899999999994
+19.0,13612053.0,condition-3,15.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",1,14789.400000008927
+19.0,13612053.0,condition-3,16.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",6,6095.20000000298
+19.0,13612053.0,condition-3,17.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",7,7597.700000000012
+19.0,13612053.0,condition-3,18.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,2,9446.500000005935
+19.0,13612053.0,condition-3,19.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,3,7846.100000005972
+19.0,13612053.0,condition-3,20.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",2,13617.5
+19.0,13612053.0,condition-3,21.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,5865.600000008941
+19.0,13612053.0,condition-3,22.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,7093.200000000012
+19.0,13612053.0,condition-3,23.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",1,5620.5
+19.0,13612053.0,condition-3,24.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,9859.600000003004
+19.0,13612053.0,condition-3,25.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",2,19385.90000000596
+19.0,13612053.0,condition-3,26.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",6,5629.5
+19.0,13612053.0,condition-3,27.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,11660.800000005984
+19.0,13612053.0,condition-3,28.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",2,8144.800000008952
+19.0,13612053.0,condition-3,29.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,7471.300000008952
+19.0,13612053.0,condition-3,30.0,a1,auditory,a1kh-batyabatya.mp4,splashing,5,6059.100000003004
+19.0,13612207.0,condition-2,1.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",1,9191.800000000192
+19.0,13612207.0,condition-2,2.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",2,7050.0
+19.0,13612207.0,condition-2,3.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",1,7574.30000000009
+19.0,13612207.0,condition-2,4.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,6089.300000000279
+19.0,13612207.0,condition-2,5.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,6433.39999999998
+19.0,13612207.0,condition-2,6.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",2,10341.30000000028
+19.0,13612207.0,condition-2,7.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,5,5379.200000000012
+19.0,13612207.0,condition-2,8.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",4,6343.10000000018
+19.0,13612207.0,condition-2,9.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,5566.300000000047
+19.0,13612207.0,condition-2,10.0,a1,auditory,a1kk-batyabatya.mp4,splashing,6,5588.100000000268
+19.0,13612207.0,condition-2,11.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",4,5909.899999999994
+19.0,13612207.0,condition-2,12.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",3,5649.799999999988
+19.0,13612207.0,condition-2,13.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,6,5026.4000000000815
+19.0,13612207.0,condition-2,14.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,6056.200000000361
+19.0,13612207.0,condition-2,15.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,7,4999.600000000006
+19.0,13612207.0,condition-2,16.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",1,5342.700000000274
+19.0,13612207.0,condition-2,17.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",5,6233.100000000006
+19.0,13612207.0,condition-2,18.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",5,5944.200000000012
+19.0,13612207.0,condition-2,19.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",4,5071.600000000093
+19.0,13612207.0,condition-2,20.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",3,6707.9000000003725
+19.0,13612207.0,condition-2,21.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,1,5290.200000000186
+19.0,13612207.0,condition-2,22.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",6,6666.799999999959
+19.0,13612207.0,condition-2,23.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",6,8710.900000000198
+19.0,13612207.0,condition-2,24.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,7770.800000000163
+19.0,13612207.0,condition-2,25.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",3,6457.200000000012
+19.0,13612207.0,condition-2,26.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,5293.300000000163
+19.0,13612207.0,condition-2,27.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",6,5026.20000000007
+19.0,13612207.0,condition-2,28.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,3,5006.300000000396
+19.0,13612207.0,condition-2,29.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",5,7060.4000000003725
+19.0,13612207.0,condition-2,30.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",1,5289.200000000361
+19.0,13612585.0,condition-2,1.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",7,16097.799999998511
+19.0,13612585.0,condition-2,2.0,a1,auditory,a1kk-batyabatya.mp4,splashing,1,11766.400000000009
+19.0,13612585.0,condition-2,3.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",1,13146.399999999252
+19.0,13612585.0,condition-2,4.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,6364.399999999252
+19.0,13612585.0,condition-2,5.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",1,12328.0
+19.0,13612585.0,condition-2,6.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",1,7672.499999999258
+19.0,13612585.0,condition-2,7.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",4,24150.0
+19.0,13612585.0,condition-2,8.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",3,6499.399999999994
+19.0,13612585.0,condition-2,9.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",1,5190.89999999851
+19.0,13612585.0,condition-2,10.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,6833.299999999959
+19.0,13612585.0,condition-2,11.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,6,8800.29999999996
+19.0,13612585.0,condition-2,12.0,a6,auditory,a6hh-dosari.mp4,with a thud,2,5454.899999999267
+19.0,13612585.0,condition-2,13.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",1,5293.499999999622
+19.0,13612585.0,condition-2,14.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,5833.399999998888
+19.0,13612585.0,condition-2,15.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",7,6026.0999999985215
+19.0,13612585.0,condition-2,16.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",3,6298.899999999994
+19.0,13612585.0,condition-2,17.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",6,6079.199999999255
+19.0,13612585.0,condition-2,18.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",7,5567.000000000029
+19.0,13612585.0,condition-2,19.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",7,5321.399999999994
+19.0,13612585.0,condition-2,20.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",5,6158.899999999994
+19.0,13612585.0,condition-2,21.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",7,5658.900000000023
+19.0,13612585.0,condition-2,22.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",1,4857.299999999639
+19.0,13612585.0,condition-2,23.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",7,7244.699999999255
+19.0,13612585.0,condition-2,24.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,8160.399999998859
+19.0,13612585.0,condition-2,25.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,1,6323.499999999651
+19.0,13612585.0,condition-2,26.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,1,6960.999999998487
+19.0,13612585.0,condition-2,27.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,8699.699999999953
+19.0,13612585.0,condition-2,28.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",5,5809.299999998882
+19.0,13612585.0,condition-2,29.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",7,7311.499999999243
+19.0,13612585.0,condition-2,30.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,7,4913.199999998498
+19.0,13612645.0,condition-3,1.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",7,10054.200000000012
+19.0,13612645.0,condition-3,2.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",4,8449.699999999997
+19.0,13612645.0,condition-3,3.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,5,13393.799999999988
+19.0,13612645.0,condition-3,4.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,8977.49999999997
+19.0,13612645.0,condition-3,5.0,a1,auditory,a1kh-batyabatya.mp4,splashing,3,8762.599999999977
+19.0,13612645.0,condition-3,6.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",4,14227.00000000003
+19.0,13612645.0,condition-3,7.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,8769.399999999994
+19.0,13612645.0,condition-3,8.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",3,14601.299999999988
+19.0,13612645.0,condition-3,9.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",3,13559.999999904629
+19.0,13612645.0,condition-3,10.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,5,8741.70000000004
+19.0,13612645.0,condition-3,11.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",5,4628.899999856949
+19.0,13612645.0,condition-3,12.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",2,8596.0
+19.0,13612645.0,condition-3,13.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",5,7919.499999856955
+19.0,13612645.0,condition-3,14.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",5,6733.799999999988
+19.0,13612645.0,condition-3,15.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,3,22022.89999990462
+19.0,13612645.0,condition-3,16.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,6,9901.200000000012
+19.0,13612645.0,condition-3,17.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",4,12449.900000000023
+19.0,13612645.0,condition-3,18.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",3,9804.100000000037
+19.0,13612645.0,condition-3,19.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,5,12025.899999999963
+19.0,13612645.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",4,15907.399999999963
+19.0,13612645.0,condition-3,21.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,5385.400000047695
+19.0,13612645.0,condition-3,22.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",5,7161.799999999988
+19.0,13612645.0,condition-3,23.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",4,10387.200000000012
+19.0,13612645.0,condition-3,24.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",5,7836.599999999977
+19.0,13612645.0,condition-3,25.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",5,5143.400000047695
+19.0,13612645.0,condition-3,26.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",4,11470.300000000048
+19.0,13612645.0,condition-3,27.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",6,6058.700000047684
+19.0,13612645.0,condition-3,28.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",2,5309.0
+19.0,13612645.0,condition-3,29.0,a6,auditory,a6hk-dosari.mp4,with a thud,4,13067.300000000048
+19.0,13612645.0,condition-3,30.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,11623.199999999952
+19.0,13613562.0,condition-3,1.0,a1,auditory,a1kh-batyabatya.mp4,splashing,7,5146.699999999255
+19.0,13613562.0,condition-3,2.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",6,4729.800000000374
+19.0,13613562.0,condition-3,3.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",3,5669.899999999252
+19.0,13613562.0,condition-3,4.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",3,7287.199999999633
+19.0,13613562.0,condition-3,5.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",4,5666.299999999988
+19.0,13613562.0,condition-3,6.0,a6,auditory,a6hk-dosari.mp4,with a thud,2,4713.600000000748
+19.0,13613562.0,condition-3,7.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",6,5790.89999999963
+19.0,13613562.0,condition-3,8.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",6,5765.500000000015
+19.0,13613562.0,condition-3,9.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",5,5810.600000000006
+19.0,13613562.0,condition-3,10.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",6,4758.299999999625
+19.0,13613562.0,condition-3,11.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",6,5642.5
+19.0,13613562.0,condition-3,12.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,3,5068.500000000757
+19.0,13613562.0,condition-3,13.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",2,7198.799999999261
+19.0,13613562.0,condition-3,14.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",5,5607.699999999633
+19.0,13613562.0,condition-3,15.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",4,5429.399999999267
+19.0,13613562.0,condition-3,16.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",6,6499.100000000733
+19.0,13613562.0,condition-3,17.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",3,5557.799999999261
+19.0,13613562.0,condition-3,18.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,6,4918.300000000745
+19.0,13613562.0,condition-3,19.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,4775.099999999628
+19.0,13613562.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",6,7064.199999999255
+19.0,13613562.0,condition-3,21.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",7,4914.099999999628
+19.0,13613562.0,condition-3,22.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",6,4629.500000000378
+19.0,13613562.0,condition-3,23.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",5,5491.600000000733
+19.0,13613562.0,condition-3,24.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",3,5191.599999999628
+19.0,13613562.0,condition-3,25.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,6118.300000000745
+19.0,13613562.0,condition-3,26.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,7,5154.800000000745
+19.0,13613562.0,condition-3,27.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,2,4990.100000000006
+19.0,13613562.0,condition-3,28.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",2,4989.600000000733
+19.0,13613562.0,condition-3,29.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,4992.5
+19.0,13613562.0,condition-3,30.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,7,4988.200000000361
+19.0,13620495.0,condition-2,1.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",7,6776.299999994037
+19.0,13620495.0,condition-2,2.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,4764.899999988076
+19.0,13620495.0,condition-2,3.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",7,6453.199999988079
+19.0,13620495.0,condition-2,4.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,3,7482.399999982124
+19.0,13620495.0,condition-2,5.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,4,5769.59999999404
+19.0,13620495.0,condition-2,6.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",6,6420.199999988079
+19.0,13620495.0,condition-2,7.0,a1,auditory,a1kk-batyabatya.mp4,splashing,5,5213.899999994042
+19.0,13620495.0,condition-2,8.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,6911.699999982113
+19.0,13620495.0,condition-2,9.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",3,5004.100000000006
+19.0,13620495.0,condition-2,10.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",3,8640.09999999404
+19.0,13620495.0,condition-2,11.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",3,10892.200000000012
+19.0,13620495.0,condition-2,12.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,46813.600000000006
+19.0,13620495.0,condition-2,13.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,9507.900000000023
+19.0,13620495.0,condition-2,14.0,a6,auditory,a6hh-dosari.mp4,with a thud,5,6149.299999988085
+19.0,13620495.0,condition-2,15.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,9316.19999998808
+19.0,13620495.0,condition-2,16.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",5,5928.199999982113
+19.0,13620495.0,condition-2,17.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",6,4786.699999994045
+19.0,13620495.0,condition-2,18.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",6,4563.899999994028
+19.0,13620495.0,condition-2,19.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",5,5835.09999997617
+19.0,13620495.0,condition-2,20.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",6,4521.699999982142
+19.0,13620495.0,condition-2,21.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,5414.599999999977
+19.0,13620495.0,condition-2,22.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,5,4557.699999988079
+19.0,13620495.0,condition-2,23.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,5121.0
+19.0,13620495.0,condition-2,24.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",7,5948.0
+19.0,13620495.0,condition-2,25.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",3,5124.899999976158
+19.0,13620495.0,condition-2,26.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,5,4650.899999988091
+19.0,13620495.0,condition-2,27.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",4,5234.099999982107
+19.0,13620495.0,condition-2,28.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",3,5147.399999982095
+19.0,13620495.0,condition-2,29.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",5,4695.09999997617
+19.0,13620495.0,condition-2,30.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",6,4366.299999994051
+19.0,13650001.0,condition-3,1.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",1,4825.899999999994
+19.0,13650001.0,condition-3,2.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",1,11643.100000000091
+19.0,13650001.0,condition-3,3.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",1,6253.69999999991
+19.0,13650001.0,condition-3,4.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",1,5400.100000000093
+19.0,13650001.0,condition-3,5.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",3,6931.399999999951
+19.0,13650001.0,condition-3,6.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,1,9462.500000000044
+19.0,13650001.0,condition-3,7.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",1,4689.100000000093
+19.0,13650001.0,condition-3,8.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",1,6402.600000000006
+19.0,13650001.0,condition-3,9.0,a6,auditory,a6hk-dosari.mp4,with a thud,1,5460.099999999948
+19.0,13650001.0,condition-3,10.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",1,4763.299999999959
+19.0,13650001.0,condition-3,11.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",1,4968.300000000105
+19.0,13650001.0,condition-3,12.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",1,4772.800000000047
+19.0,13650001.0,condition-3,13.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",1,11958.0
+19.0,13650001.0,condition-3,14.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",1,4464.900000000052
+19.0,13650001.0,condition-3,15.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",1,14740.09999999992
+19.0,13650001.0,condition-3,16.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",1,10901.2999999999
+19.0,13650001.0,condition-3,17.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",1,5700.100000000035
+19.0,13650001.0,condition-3,18.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",1,4935.399999999907
+19.0,13650001.0,condition-3,19.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",1,4851.000000000087
+19.0,13650001.0,condition-3,20.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",1,4791.100000000035
+19.0,13650001.0,condition-3,21.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,4,10681.79999999996
+19.0,13650001.0,condition-3,22.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",1,6163.200000000012
+19.0,13650001.0,condition-3,23.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,1,7776.20000000007
+19.0,13650001.0,condition-3,24.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",1,25295.599999999977
+19.0,13650001.0,condition-3,25.0,a1,auditory,a1kh-batyabatya.mp4,splashing,3,23010.20000000001
+19.0,13650001.0,condition-3,26.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",1,4857.900000000023
+19.0,13650001.0,condition-3,27.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,1,4683.000000000058
+19.0,13650001.0,condition-3,28.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,1,11538.09999999992
+19.0,13650001.0,condition-3,29.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,5008.200000000012
+19.0,13650001.0,condition-3,30.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",1,4735.199999999895
+20.0,13715041.0,condition-3,1.0,a5,auditory,a5kh-dotabata.mp4,"noisily, with heavy feet",3,9539.199999999995
+20.0,13715041.0,condition-3,2.0,v2,visual,v2hk-doNyori.mp4,"dark, gloomy",3,23477.299999999974
+20.0,13715041.0,condition-3,3.0,i4,interoceptive,i4hk-tyaNto.mp4,"attentive, proper attitude",4,7962.59999997617
+20.0,13715041.0,condition-3,4.0,i2,interoceptive,i2hk-syoboN.mp4,"downhearted, dejected",2,16627.70000000001
+20.0,13715041.0,condition-3,5.0,v9,visual,v9kh-bosabosa.mp4,"ruffled, disheveled",6,5695.999999976164
+20.0,13715041.0,condition-3,6.0,a0,auditory,a0hk-gosogoso.mp4,with a rustling sound,4,5404.799999976152
+20.0,13715041.0,condition-3,7.0,v7,visual,v7kh-kiritto.mp4,"crisp appearance, stiffly",4,7825.499999988067
+20.0,13715041.0,condition-3,8.0,v6,visual,v6hk-huNwari.mp4,"gently, airily, fluffy",3,5974.700000011915
+20.0,13715041.0,condition-3,9.0,a3,auditory,a3kh-syakisyaki.mp4,"crisp, crunchy",2,8022.200000023848
+20.0,13715041.0,condition-3,10.0,v5,visual,v5kh-nikoniko.mp4,"smilingly, with a grin",2,6941.199999988079
+20.0,13715041.0,condition-3,11.0,i7,interoceptive,i7kh-zokuzoku.mp4,"shivering, feeling chilly",6,5828.600000023842
+20.0,13715041.0,condition-3,12.0,a2,auditory,a2hk-zyaazyaa.mp4,noisily gushing,4,9214.200000011915
+20.0,13715041.0,condition-3,13.0,a9,auditory,a9kh-sakutto.mp4,with a crunch,3,12749.500000023836
+20.0,13715041.0,condition-3,14.0,i6,interoceptive,i6hk-noNbiri.mp4,"at leisure, in a relaxed manner",2,12805.60000001191
+20.0,13715041.0,condition-3,15.0,i8,interoceptive,i8hk-hotto.mp4,with a feeling of relief,5,6190.800000000047
+20.0,13715041.0,condition-3,16.0,v1,visual,v1kh-gizagiza.mp4,"jagged, serrated",2,5578.40000002383
+20.0,13715041.0,condition-3,17.0,v3,visual,v3kh-hirahira.mp4,"fluttering, dangling",4,14423.100000000037
+20.0,13715041.0,condition-3,18.0,v0,visual,v0hk-kukkiri.mp4,"clearly, distinctly, sharply",6,7292.600000000035
+20.0,13715041.0,condition-3,19.0,i0,interoceptive,i0hk-uNzari.mp4,"boredom, tedious, fed up with",3,8874.499999988067
+20.0,13715041.0,condition-3,20.0,v8,visual,v8hk-marumaru.mp4,"plump, rotund, chubby",6,7048.40000002383
+20.0,13715041.0,condition-3,21.0,i1,interoceptive,i1kh-gatugatu.mp4,"ravenously, greedily",2,7265.799999988056
+20.0,13715041.0,condition-3,22.0,a4,auditory,a4hk-zuruzuru.mp4,with a slurp,4,6257.599999999977
+20.0,13715041.0,condition-3,23.0,a1,auditory,a1kh-batyabatya.mp4,splashing,3,7482.800000023853
+20.0,13715041.0,condition-3,24.0,a8,auditory,a8hk-bosori.mp4,"in a whisper, in a murmur",4,9144.19999998808
+20.0,13715041.0,condition-3,25.0,a7,auditory,a7kh-gisigisi.mp4,"with a creak, squeak",3,8718.000000011933
+20.0,13715041.0,condition-3,26.0,i5,interoceptive,i5kh-harahara.mp4,"anxious, nervous",3,5247.5
+20.0,13715041.0,condition-3,27.0,a6,auditory,a6hk-dosari.mp4,with a thud,2,5339.500000000058
+20.0,13715041.0,condition-3,28.0,i9,interoceptive,i9kh-dokidoki.mp4,with a rapid heartbeat,7,5112.799999976181
+20.0,13715041.0,condition-3,29.0,i3,interoceptive,i3kh-iraira.mp4,"to get irritated, annoyed",1,6974.000000011933
+20.0,13715041.0,condition-3,30.0,v4,visual,v4hk-bissiri.mp4,"closely lined up, densely",4,5212.3000000238535
+20.0,13729465.0,condition-1,1.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",6,14137.30000002384
+20.0,13729465.0,condition-1,2.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,6,11330.300000000005
+20.0,13729465.0,condition-1,3.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",4,16250.300000023852
+20.0,13729465.0,condition-1,4.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",5,9082.800000000016
+20.0,13729465.0,condition-1,5.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",5,8932.799999976152
+20.0,13729465.0,condition-1,6.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",5,9374.700000000012
+20.0,13729465.0,condition-1,7.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",7,6815.399999999994
+20.0,13729465.0,condition-1,8.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",5,12544.200000000012
+20.0,13729465.0,condition-1,9.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",7,13385.40000002383
+20.0,13729465.0,condition-1,10.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",6,7502.09999997617
+20.0,13729465.0,condition-1,11.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",5,12697.40000002383
+20.0,13729465.0,condition-1,12.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,6,7458.1999999999825
+20.0,13729465.0,condition-1,13.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,6,10968.799999976152
+20.0,13729465.0,condition-1,14.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",5,12698.900000047695
+20.0,13729465.0,condition-1,15.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",5,10058.399999999963
+20.0,13729465.0,condition-1,16.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,6,10326.799999952316
+20.0,13729465.0,condition-1,17.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",5,6956.200000023819
+20.0,13729465.0,condition-1,18.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,5,9211.20000002382
+20.0,13729465.0,condition-1,19.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",6,10139.500000047672
+20.0,13729465.0,condition-1,20.0,a1,auditory,a1kd-batyabatya.mp4,splashing,7,7007.599999999977
+20.0,13729465.0,condition-1,21.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",5,7807.0
+20.0,13729465.0,condition-1,22.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",5,7689.799999999988
+20.0,13729465.0,condition-1,23.0,a6,auditory,a6hu-dosari.mp4,with a thud,6,10588.30000004766
+20.0,13729465.0,condition-1,24.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,6739.000000000058
+20.0,13729465.0,condition-1,25.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",6,8247.099999999977
+20.0,13729465.0,condition-1,26.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,7468.700000023819
+20.0,13729465.0,condition-1,27.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",5,11131.200000047684
+20.0,13729465.0,condition-1,28.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",5,12696.199999976148
+20.0,13729465.0,condition-1,29.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",6,8492.899999952293
+20.0,13729465.0,condition-1,30.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",4,11540.800000000048
+20.0,13744093.0,condition-1,1.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",4,7575.0
+20.0,13744093.0,condition-1,2.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",5,6145.639999999999
+20.0,13744093.0,condition-1,3.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",5,10195.619999999995
+20.0,13744093.0,condition-1,4.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",2,8107.600000000006
+20.0,13744093.0,condition-1,5.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",5,9349.899999999994
+20.0,13744093.0,condition-1,6.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",3,32011.859999999982
+20.0,13744093.0,condition-1,7.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,5,8956.119999999995
+20.0,13744093.0,condition-1,8.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",2,7442.420000000013
+20.0,13744093.0,condition-1,9.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,6,5548.420000000013
+20.0,13744093.0,condition-1,10.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,2,6316.660000000004
+20.0,13744093.0,condition-1,11.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",2,5350.0
+20.0,13744093.0,condition-1,12.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",2,7660.640000000014
+20.0,13744093.0,condition-1,13.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",1,5312.0
+20.0,13744093.0,condition-1,14.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",4,7958.320000000007
+20.0,13744093.0,condition-1,15.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",2,5332.640000000014
+20.0,13744093.0,condition-1,16.0,a1,auditory,a1kd-batyabatya.mp4,splashing,5,5557.279999999999
+20.0,13744093.0,condition-1,17.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",3,5343.600000000006
+20.0,13744093.0,condition-1,18.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,3,10956.579999999987
+20.0,13744093.0,condition-1,19.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",1,14008.900000000023
+20.0,13744093.0,condition-1,20.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",1,6724.219999999972
+20.0,13744093.0,condition-1,21.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",3,6235.859999999986
+20.0,13744093.0,condition-1,22.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",1,11512.820000000009
+20.0,13744093.0,condition-1,23.0,a6,auditory,a6hu-dosari.mp4,with a thud,2,5793.099999999977
+20.0,13744093.0,condition-1,24.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",1,6050.080000000016
+20.0,13744093.0,condition-1,25.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",4,5995.880000000005
+20.0,13744093.0,condition-1,26.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,3,10639.059999999998
+20.0,13744093.0,condition-1,27.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,3,7565.020000000019
+20.0,13744093.0,condition-1,28.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",4,5728.340000000026
+20.0,13744093.0,condition-1,29.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",4,5604.979999999981
+20.0,13744093.0,condition-1,30.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",5,6481.280000000028
+20.0,13744443.0,condition-1,1.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",5,7142.0
+20.0,13744443.0,condition-1,2.0,a6,auditory,a6hu-dosari.mp4,with a thud,4,8643.0
+20.0,13744443.0,condition-1,3.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",6,6326.0
+20.0,13744443.0,condition-1,4.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",2,5210.0
+20.0,13744443.0,condition-1,5.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",7,4885.0
+20.0,13744443.0,condition-1,6.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",7,6427.0
+20.0,13744443.0,condition-1,7.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,7,5041.0
+20.0,13744443.0,condition-1,8.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",2,7192.0
+20.0,13744443.0,condition-1,9.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",6,7051.0
+20.0,13744443.0,condition-1,10.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,1,6409.0
+20.0,13744443.0,condition-1,11.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",4,8051.0
+20.0,13744443.0,condition-1,12.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",5,8293.0
+20.0,13744443.0,condition-1,13.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",1,7837.0
+20.0,13744443.0,condition-1,14.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,7,4843.0
+20.0,13744443.0,condition-1,15.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",1,7975.0
+20.0,13744443.0,condition-1,16.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",4,5353.0
+20.0,13744443.0,condition-1,17.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",7,5309.0
+20.0,13744443.0,condition-1,18.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,7,8229.0
+20.0,13744443.0,condition-1,19.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,2,6091.0
+20.0,13744443.0,condition-1,20.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",7,5886.0
+20.0,13744443.0,condition-1,21.0,a1,auditory,a1kd-batyabatya.mp4,splashing,3,5859.0
+20.0,13744443.0,condition-1,22.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",4,8585.0
+20.0,13744443.0,condition-1,23.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",1,4851.0
+20.0,13744443.0,condition-1,24.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,4547.0
+20.0,13744443.0,condition-1,25.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",7,6567.0
+20.0,13744443.0,condition-1,26.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",2,7354.0
+20.0,13744443.0,condition-1,27.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",6,4574.0
+20.0,13744443.0,condition-1,28.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",7,5351.0
+20.0,13744443.0,condition-1,29.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,3,5358.0
+20.0,13744443.0,condition-1,30.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",3,6143.0
+20.0,13745045.0,condition-1,1.0,a6,auditory,a6hu-dosari.mp4,with a thud,4,20640.60000004768
+20.0,13745045.0,condition-1,2.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",4,17038.800000000017
+20.0,13745045.0,condition-1,3.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,3,21978.699999999957
+20.0,13745045.0,condition-1,4.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",4,19113.00000000003
+20.0,13745045.0,condition-1,5.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",5,12756.900000000023
+20.0,13745045.0,condition-1,6.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",3,13470.399999999994
+20.0,13745045.0,condition-1,7.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",6,16916.300000000017
+20.0,13745045.0,condition-1,8.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",6,12489.400000000023
+20.0,13745045.0,condition-1,9.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",4,27342.50000000003
+20.0,13745045.0,condition-1,10.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",3,12545.199999999952
+20.0,13745045.0,condition-1,11.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,11887.40000000008
+20.0,13745045.0,condition-1,12.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",3,9645.600000000037
+20.0,13745045.0,condition-1,13.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",7,14986.899999999963
+20.0,13745045.0,condition-1,14.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,7,8920.800000000047
+20.0,13745045.0,condition-1,15.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",4,9010.200000000012
+20.0,13745045.0,condition-1,16.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",7,10046.90000000008
+20.0,13745045.0,condition-1,17.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",3,10091.600000000037
+20.0,13745045.0,condition-1,18.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,5,12690.0
+20.0,13745045.0,condition-1,19.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,3,7880.100000047707
+20.0,13745045.0,condition-1,20.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",5,7333.400000143039
+20.0,13745045.0,condition-1,21.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",4,7994.400000047695
+20.0,13745045.0,condition-1,22.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",7,8269.700000143028
+20.0,13745045.0,condition-1,23.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",4,10771.999999999942
+20.0,13745045.0,condition-1,24.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",5,9054.699999999952
+20.0,13745045.0,condition-1,25.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",3,8720.299999999988
+20.0,13745045.0,condition-1,26.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",2,5617.80000004766
+20.0,13745045.0,condition-1,27.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",4,7828.200000000012
+20.0,13745045.0,condition-1,28.0,a1,auditory,a1kd-batyabatya.mp4,splashing,4,12132.500000000058
+20.0,13745045.0,condition-1,29.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",4,14730.600000000037
+20.0,13745045.0,condition-1,30.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,6,6545.599999999977
+20.0,13745051.0,condition-1,1.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",5,23680.0
+20.0,13745051.0,condition-1,2.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",5,8072.0
+20.0,13745051.0,condition-1,3.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",7,7003.0
+20.0,13745051.0,condition-1,4.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,32920.0
+20.0,13745051.0,condition-1,5.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",5,9872.0
+20.0,13745051.0,condition-1,6.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",6,10906.0
+20.0,13745051.0,condition-1,7.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",6,9406.0
+20.0,13745051.0,condition-1,8.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,3,9706.0
+20.0,13745051.0,condition-1,9.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",7,7805.0
+20.0,13745051.0,condition-1,10.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",2,11306.0
+20.0,13745051.0,condition-1,11.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",4,12875.0
+20.0,13745051.0,condition-1,12.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",6,6737.0
+20.0,13745051.0,condition-1,13.0,a1,auditory,a1kd-batyabatya.mp4,splashing,4,7471.0
+20.0,13745051.0,condition-1,14.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",4,9108.0
+20.0,13745051.0,condition-1,15.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,4,9473.0
+20.0,13745051.0,condition-1,16.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,5,7671.0
+20.0,13745051.0,condition-1,17.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",6,8273.0
+20.0,13745051.0,condition-1,18.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",3,9907.0
+20.0,13745051.0,condition-1,19.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",4,11609.0
+20.0,13745051.0,condition-1,20.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,3,10240.0
+20.0,13745051.0,condition-1,21.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",7,7604.0
+20.0,13745051.0,condition-1,22.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",4,15510.0
+20.0,13745051.0,condition-1,23.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",4,9773.0
+20.0,13745051.0,condition-1,24.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",3,8939.0
+20.0,13745051.0,condition-1,25.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,3,13075.0
+20.0,13745051.0,condition-1,26.0,a6,auditory,a6hu-dosari.mp4,with a thud,5,10541.0
+20.0,13745051.0,condition-1,27.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",6,8639.0
+20.0,13745051.0,condition-1,28.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",2,8806.0
+20.0,13745051.0,condition-1,29.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",7,8107.0
+20.0,13745051.0,condition-1,30.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,12409.0
+20.0,13745400.0,condition-1,1.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",3,15143.699999999995
+20.0,13745400.0,condition-1,2.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,7,8317.199999997014
+20.0,13745400.0,condition-1,3.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",2,6992.400000002977
+20.0,13745400.0,condition-1,4.0,a1,auditory,a1kd-batyabatya.mp4,splashing,1,5499.300000000003
+20.0,13745400.0,condition-1,5.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",6,5304.5
+20.0,13745400.0,condition-1,6.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",2,9395.600000000006
+20.0,13745400.0,condition-1,7.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,6651.999999991065
+20.0,13745400.0,condition-1,8.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",5,6764.600000002974
+20.0,13745400.0,condition-1,9.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,1,6682.800000002986
+20.0,13745400.0,condition-1,10.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",2,9017.0
+20.0,13745400.0,condition-1,11.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",5,7562.599999991071
+20.0,13745400.0,condition-1,12.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",1,8219.900000002992
+20.0,13745400.0,condition-1,13.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",2,5740.699999994045
+20.0,13745400.0,condition-1,14.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",3,5821.3000000000175
+20.0,13745400.0,condition-1,15.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,6,5738.199999999983
+20.0,13745400.0,condition-1,16.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",7,6658.7999999910535
+20.0,13745400.0,condition-1,17.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",6,8800.499999991065
+20.0,13745400.0,condition-1,18.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",1,6142.499999997031
+20.0,13745400.0,condition-1,19.0,a6,auditory,a6hu-dosari.mp4,with a thud,3,6794.199999997014
+20.0,13745400.0,condition-1,20.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",6,8706.999999997031
+20.0,13745400.0,condition-1,21.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,7,9730.299999991084
+20.0,13745400.0,condition-1,22.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,6,6138.199999997043
+20.0,13745400.0,condition-1,23.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",6,6850.400000002992
+20.0,13745400.0,condition-1,24.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,1,7920.999999994063
+20.0,13745400.0,condition-1,25.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",2,6728.59999999404
+20.0,13745400.0,condition-1,26.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",6,6503.79999999702
+20.0,13745400.0,condition-1,27.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",4,6125.300000002957
+20.0,13745400.0,condition-1,28.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",2,8387.29999999702
+20.0,13745400.0,condition-1,29.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",7,6499.099999999977
+20.0,13745400.0,condition-1,30.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",6,7216.999999991036
+20.0,13748897.0,condition-1,1.0,a6,auditory,a6hu-dosari.mp4,with a thud,1,7936.0
+20.0,13748897.0,condition-1,2.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,7,4879.0
+20.0,13748897.0,condition-1,3.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",2,5513.0
+20.0,13748897.0,condition-1,4.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",2,5280.0
+20.0,13748897.0,condition-1,5.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",2,9089.0
+20.0,13748897.0,condition-1,6.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",2,7819.0
+20.0,13748897.0,condition-1,7.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",1,5077.0
+20.0,13748897.0,condition-1,8.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",1,4860.0
+20.0,13748897.0,condition-1,9.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",5,5213.0
+20.0,13748897.0,condition-1,10.0,a1,auditory,a1kd-batyabatya.mp4,splashing,2,6516.0
+20.0,13748897.0,condition-1,11.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,6,8621.0
+20.0,13748897.0,condition-1,12.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,2,8503.0
+20.0,13748897.0,condition-1,13.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",3,6113.0
+20.0,13748897.0,condition-1,14.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",2,8452.0
+20.0,13748897.0,condition-1,15.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",3,6198.0
+20.0,13748897.0,condition-1,16.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",6,5011.0
+20.0,13748897.0,condition-1,17.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",5,6598.0
+20.0,13748897.0,condition-1,18.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,4,34297.0
+20.0,13748897.0,condition-1,19.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",4,10675.0
+20.0,13748897.0,condition-1,20.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,3,8169.0
+20.0,13748897.0,condition-1,21.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",1,9890.0
+20.0,13748897.0,condition-1,22.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",4,5762.0
+20.0,13748897.0,condition-1,23.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",1,4610.0
+20.0,13748897.0,condition-1,24.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",1,5227.0
+20.0,13748897.0,condition-1,25.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",4,5714.0
+20.0,13748897.0,condition-1,26.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",4,7334.0
+20.0,13748897.0,condition-1,27.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",5,4717.0
+20.0,13748897.0,condition-1,28.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",4,4979.0
+20.0,13748897.0,condition-1,29.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",2,6148.0
+20.0,13748897.0,condition-1,30.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,3,5429.0
+20.0,13750143.0,condition-1,1.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",1,10583.0
+20.0,13750143.0,condition-1,2.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,6,6023.0
+20.0,13750143.0,condition-1,3.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",7,5216.0
+20.0,13750143.0,condition-1,4.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",6,5145.0
+20.0,13750143.0,condition-1,5.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",1,8184.0
+20.0,13750143.0,condition-1,6.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",6,11034.0
+20.0,13750143.0,condition-1,7.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",6,7058.0
+20.0,13750143.0,condition-1,8.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",1,7984.0
+20.0,13750143.0,condition-1,9.0,a6,auditory,a6hu-dosari.mp4,with a thud,7,6690.0
+20.0,13750143.0,condition-1,10.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",1,6928.0
+20.0,13750143.0,condition-1,11.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",6,6299.0
+20.0,13750143.0,condition-1,12.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",7,6104.0
+20.0,13750143.0,condition-1,13.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",2,9424.0
+20.0,13750143.0,condition-1,14.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",6,5708.0
+20.0,13750143.0,condition-1,15.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",7,5877.0
+20.0,13750143.0,condition-1,16.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",2,6846.0
+20.0,13750143.0,condition-1,17.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",6,5861.000000000058
+20.0,13750143.0,condition-1,18.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",1,15051.0
+20.0,13750143.0,condition-1,19.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,6,11564.0
+20.0,13750143.0,condition-1,20.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",6,11095.000000000058
+20.0,13750143.0,condition-1,21.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,1,7572.0
+20.0,13750143.0,condition-1,22.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,7,5596.0
+20.0,13750143.0,condition-1,23.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",7,5190.0
+20.0,13750143.0,condition-1,24.0,a1,auditory,a1kd-batyabatya.mp4,splashing,6,6357.0
+20.0,13750143.0,condition-1,25.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",6,11220.0
+20.0,13750143.0,condition-1,26.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,1,7432.0
+20.0,13750143.0,condition-1,27.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",6,5338.0
+20.0,13750143.0,condition-1,28.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",7,6947.0
+20.0,13750143.0,condition-1,29.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",6,5289.0
+20.0,13750143.0,condition-1,30.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,3,10166.0
+20.0,13752970.0,condition-1,1.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",4,11665.1
+20.0,13752970.0,condition-1,2.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",4,6370.900000002235
+20.0,13752970.0,condition-1,3.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",6,5043.200000001496
+20.0,13752970.0,condition-1,4.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",5,5462.599999999249
+20.0,13752970.0,condition-1,5.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",5,6582.000000000742
+20.0,13752970.0,condition-1,6.0,a6,auditory,a6hu-dosari.mp4,with a thud,3,6403.100000000748
+20.0,13752970.0,condition-1,7.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,5,5199.500000000015
+20.0,13752970.0,condition-1,8.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",7,4746.60000000149
+20.0,13752970.0,condition-1,9.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",6,5616.100000002232
+20.0,13752970.0,condition-1,10.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,5,5321.399999999994
+20.0,13752970.0,condition-1,11.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",6,5028.5
+20.0,13752970.0,condition-1,12.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",7,5266.200000000012
+20.0,13752970.0,condition-1,13.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",4,5895.000000000757
+20.0,13752970.0,condition-1,14.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,4,5674.000000002241
+20.0,13752970.0,condition-1,15.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",4,4750.500000000029
+20.0,13752970.0,condition-1,16.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",6,5294.0
+20.0,13752970.0,condition-1,17.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",5,6426.100000000733
+20.0,13752970.0,condition-1,18.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,7,5185.400000002235
+20.0,13752970.0,condition-1,19.0,a1,auditory,a1kd-batyabatya.mp4,splashing,6,5017.400000001479
+20.0,13752970.0,condition-1,20.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",6,5045.700000002224
+20.0,13752970.0,condition-1,21.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,6,4729.199999999255
+20.0,13752970.0,condition-1,22.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,5,5946.699999999255
+20.0,13752970.0,condition-1,23.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",6,4735.399999999994
+20.0,13752970.0,condition-1,24.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",3,6454.100000002247
+20.0,13752970.0,condition-1,25.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",5,4998.100000000006
+20.0,13752970.0,condition-1,26.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",6,4707.499999999243
+20.0,13752970.0,condition-1,27.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",6,5116.200000000012
+20.0,13752970.0,condition-1,28.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",7,4682.8000000000175
+20.0,13752970.0,condition-1,29.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",5,5415.899999999965
+20.0,13752970.0,condition-1,30.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",4,6011.400000001479
+20.0,13755646.0,condition-2,1.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",6,15892.839999999997
+20.0,13755646.0,condition-2,2.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,6,7311.320000000007
+20.0,13755646.0,condition-2,3.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,7,6809.639999999999
+20.0,13755646.0,condition-2,4.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,6,7397.639999999999
+20.0,13755646.0,condition-2,5.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",7,9794.14
+20.0,13755646.0,condition-2,6.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",7,7444.580000000002
+20.0,13755646.0,condition-2,7.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,2,6133.8399999999965
+20.0,13755646.0,condition-2,8.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",5,7221.75999999998
+20.0,13755646.0,condition-2,9.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",7,6639.919999999984
+20.0,13755646.0,condition-2,10.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",3,6035.479999999981
+20.0,13755646.0,condition-2,11.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,7,6166.959999999992
+20.0,13755646.0,condition-2,12.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",1,6483.459999999992
+20.0,13755646.0,condition-2,13.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,2,6583.559999999998
+20.0,13755646.0,condition-2,14.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",4,6597.659999999974
+20.0,13755646.0,condition-2,15.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",6,6114.799999999988
+20.0,13755646.0,condition-2,16.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",5,6859.299999999988
+20.0,13755646.0,condition-2,17.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",1,8521.540000000008
+20.0,13755646.0,condition-2,18.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",3,8196.559999999998
+20.0,13755646.0,condition-2,19.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,6115.620000000024
+20.0,13755646.0,condition-2,20.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",3,7054.920000000013
+20.0,13755646.0,condition-2,21.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",1,5744.0199999999895
+20.0,13755646.0,condition-2,22.0,a6,auditory,a6hh-dosari.mp4,with a thud,1,5840.780000000028
+20.0,13755646.0,condition-2,23.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",5,11897.799999999988
+20.0,13755646.0,condition-2,24.0,a1,auditory,a1kk-batyabatya.mp4,splashing,1,5529.380000000005
+20.0,13755646.0,condition-2,25.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",5,6650.0
+20.0,13755646.0,condition-2,26.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",3,5652.940000000002
+20.0,13755646.0,condition-2,27.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",7,6715.159999999974
+20.0,13755646.0,condition-2,28.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",1,5808.719999999972
+20.0,13755646.0,condition-2,29.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",4,7899.919999999984
+20.0,13755646.0,condition-2,30.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",7,5804.580000000016
+20.0,13760748.0,condition-1,1.0,a5,auditory,a5kd-dotabata.mp4,"noisily, with heavy feet",2,6228.799999999996
+20.0,13760748.0,condition-1,2.0,v7,visual,v7kd-kiritto.mp4,"crisp appearance, stiffly",6,4829.900000023845
+20.0,13760748.0,condition-1,3.0,v6,visual,v6hu-huNwari.mp4,"gently, airily, fluffy",1,5101.500000023836
+20.0,13760748.0,condition-1,4.0,i7,interoceptive,i7kd-zokuzoku.mp4,"shivering, feeling chilly",6,6311.400000000009
+20.0,13760748.0,condition-1,5.0,i3,interoceptive,i3kd-iraira.mp4,"to get irritated, annoyed",6,5852.799999952316
+20.0,13760748.0,condition-1,6.0,v8,visual,v8hu-marumaru.mp4,"plump, rotund, chubby",6,4585.5
+20.0,13760748.0,condition-1,7.0,a0,auditory,a0hu-gosogoso.mp4,with a rustling sound,2,4487.899999999994
+20.0,13760748.0,condition-1,8.0,a6,auditory,a6hu-dosari.mp4,with a thud,6,4934.700000047684
+20.0,13760748.0,condition-1,9.0,v9,visual,v9kd-bosabosa.mp4,"ruffled, disheveled",6,5258.899999999994
+20.0,13760748.0,condition-1,10.0,a1,auditory,a1kd-batyabatya.mp4,splashing,1,4871.799999952316
+20.0,13760748.0,condition-1,11.0,v5,visual,v5kd-nikoniko.mp4,"smilingly, with a grin",6,4982.799999976152
+20.0,13760748.0,condition-1,12.0,i5,interoceptive,i5kd-harahara.mp4,"anxious, nervous",6,4969.59999997617
+20.0,13760748.0,condition-1,13.0,i1,interoceptive,i1kd-gatugatu.mp4,"ravenously, greedily",2,5266.100000047678
+20.0,13760748.0,condition-1,14.0,v0,visual,v0hu-kukkiri.mp4,"clearly, distinctly, sharply",7,4662.899999999994
+20.0,13760748.0,condition-1,15.0,i8,interoceptive,i8hu-hotto.mp4,with a feeling of relief,1,4449.199999952311
+20.0,13760748.0,condition-1,16.0,a8,auditory,a8hu-bosori.mp4,"in a whisper, in a murmur",6,4777.399999999994
+20.0,13760748.0,condition-1,17.0,v2,visual,v2hu-doNyori.mp4,"dark, gloomy",6,4463.099999999977
+20.0,13760748.0,condition-1,18.0,i4,interoceptive,i4hu-tyaNto.mp4,"attentive, proper attitude",6,5011.600000000006
+20.0,13760748.0,condition-1,19.0,a4,auditory,a4hu-zuruzuru.mp4,with a slurp,7,4650.000000047672
+20.0,13760748.0,condition-1,20.0,v4,visual,v4hu-bissiri.mp4,"closely lined up, densely",6,4938.399999976158
+20.0,13760748.0,condition-1,21.0,i0,interoceptive,i0hu-uNzari.mp4,"boredom, tedious, fed up with",1,4652.8000000238535
+20.0,13760748.0,condition-1,22.0,i6,interoceptive,i6hu-noNbiri.mp4,"at leisure, in a relaxed manner",6,4699.999999976164
+20.0,13760748.0,condition-1,23.0,a2,auditory,a2hu-zyaazyaa.mp4,noisily gushing,6,5166.09999997617
+20.0,13760748.0,condition-1,24.0,v3,visual,v3kd-hirahira.mp4,"fluttering, dangling",6,5063.299999976152
+20.0,13760748.0,condition-1,25.0,a3,auditory,a3kd-syakisyaki.mp4,"crisp, crunchy",6,4387.40000002383
+20.0,13760748.0,condition-1,26.0,v1,visual,v1kd-gizagiza.mp4,"jagged, serrated",1,4691.200000047684
+20.0,13760748.0,condition-1,27.0,a7,auditory,a7kd-gisigisi.mp4,"with a creak, squeak",6,4982.09999997617
+20.0,13760748.0,condition-1,28.0,i9,interoceptive,i9kd-dokidoki.mp4,with a rapid heartbeat,2,5150.100000047678
+20.0,13760748.0,condition-1,29.0,a9,auditory,a9kd-sakutto.mp4,with a crunch,6,4329.000000047672
+20.0,13760748.0,condition-1,30.0,i2,interoceptive,i2hu-syoboN.mp4,"downhearted, dejected",6,4921.100000000006
+20.0,13769060.0,condition-2,1.0,a3,auditory,a3kk-syakisyaki.mp4,"crisp, crunchy",7,11548.0
+20.0,13769060.0,condition-2,2.0,a4,auditory,a4hh-zuruzuru.mp4,with a slurp,3,11978.0
+20.0,13769060.0,condition-2,3.0,v8,visual,v8hh-marumaru.mp4,"plump, rotund, chubby",1,16359.0
+20.0,13769060.0,condition-2,4.0,v6,visual,v6hh-huNwari.mp4,"gently, airily, fluffy",2,8887.0
+20.0,13769060.0,condition-2,5.0,v7,visual,v7kk-kiritto.mp4,"crisp appearance, stiffly",4,30022.0
+20.0,13769060.0,condition-2,6.0,i1,interoceptive,i1kk-gatugatu.mp4,"ravenously, greedily",1,12182.0
+20.0,13769060.0,condition-2,7.0,i2,interoceptive,i2hh-syoboN.mp4,"downhearted, dejected",4,12913.0
+20.0,13769060.0,condition-2,8.0,v4,visual,v4hh-bissiri.mp4,"closely lined up, densely",2,18572.0
+20.0,13769060.0,condition-2,9.0,v1,visual,v1kk-gizagiza.mp4,"jagged, serrated",4,32781.0
+20.0,13769060.0,condition-2,10.0,i3,interoceptive,i3kk-iraira.mp4,"to get irritated, annoyed",5,13863.0
+20.0,13769060.0,condition-2,11.0,a7,auditory,a7kk-gisigisi.mp4,"with a creak, squeak",1,9717.0
+20.0,13769060.0,condition-2,12.0,a8,auditory,a8hh-bosori.mp4,"in a whisper, in a murmur",4,26793.0
+20.0,13769060.0,condition-2,13.0,v0,visual,v0hh-kukkiri.mp4,"clearly, distinctly, sharply",6,9838.0
+20.0,13769060.0,condition-2,14.0,a6,auditory,a6hh-dosari.mp4,with a thud,3,8320.0
+20.0,13769060.0,condition-2,15.0,i7,interoceptive,i7kk-zokuzoku.mp4,"shivering, feeling chilly",6,8922.0
+20.0,13769060.0,condition-2,16.0,a0,auditory,a0hh-gosogoso.mp4,with a rustling sound,2,8904.0
+20.0,13769060.0,condition-2,17.0,v5,visual,v5kk-nikoniko.mp4,"smilingly, with a grin",1,10984.0
+20.0,13769060.0,condition-2,18.0,i5,interoceptive,i5kk-harahara.mp4,"anxious, nervous",6,9568.0
+20.0,13769060.0,condition-2,19.0,v2,visual,v2hh-doNyori.mp4,"dark, gloomy",7,8736.0
+20.0,13769060.0,condition-2,20.0,i9,interoceptive,i9kk-dokidoki.mp4,with a rapid heartbeat,4,9103.0
+20.0,13769060.0,condition-2,21.0,a5,auditory,a5kk-dotabata.mp4,"noisily, with heavy feet",6,11648.0
+20.0,13769060.0,condition-2,22.0,i8,interoceptive,i8hh-hotto.mp4,with a feeling of relief,4,18487.0
+20.0,13769060.0,condition-2,23.0,i4,interoceptive,i4hh-tyaNto.mp4,"attentive, proper attitude",6,13363.0
+20.0,13769060.0,condition-2,24.0,a1,auditory,a1kk-batyabatya.mp4,splashing,4,6125.0
+20.0,13769060.0,condition-2,25.0,v9,visual,v9kk-bosabosa.mp4,"ruffled, disheveled",4,8838.0
+20.0,13769060.0,condition-2,26.0,v3,visual,v3kk-hirahira.mp4,"fluttering, dangling",3,8937.0
+20.0,13769060.0,condition-2,27.0,a9,auditory,a9kk-sakutto.mp4,with a crunch,4,12616.0
+20.0,13769060.0,condition-2,28.0,i6,interoceptive,i6hh-noNbiri.mp4,"at leisure, in a relaxed manner",4,8252.0
+20.0,13769060.0,condition-2,29.0,a2,auditory,a2hh-zyaazyaa.mp4,noisily gushing,4,7354.0
+20.0,13769060.0,condition-2,30.0,i0,interoceptive,i0hh-uNzari.mp4,"boredom, tedious, fed up with",6,5857.0

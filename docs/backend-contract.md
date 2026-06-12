@@ -201,6 +201,45 @@ Practice answers:
 Practice rounds do not consume round numbers: "Round 1/30" still means the first scored round. Sessions started
 without the flag behave exactly as before; existing clients are unaffected.
 
+## Deterministic per-session shuffle (2026-06-12)
+
+Every session stores a server-generated `shuffle_seed` (`SecureRandom`, never exposed in player-facing DTOs).
+The seed deterministically derives the session's entire presentation, recomputed from scratch on every request —
+nothing but the seed is persisted, so a session replays identically across server restarts:
+
+1. the order of the 30 scored rounds,
+2. which word of each pair is the **target** (identity randomization — a deliberate extension beyond the thesis,
+   which fixed targets by pairing parity; decision recorded 2026-06-12),
+3. the target's left/right position,
+4. the order of the two meaning lines in the prompt (currently a reserved draw, see below).
+
+### Derivation spec (compatibility contract — do not change once sessions exist)
+
+1. Base list: the session's scored rounds for its condition and difficulty, ordered by round id ascending.
+2. `Random r = new Random(shuffleSeed)`; `Collections.shuffle(baseList, r)`. Both are algorithmically specified
+   in the JDK, hence portable and stable across versions and restarts.
+3. Iterating the _shuffled_ list in order, three draws per round from the same stream, in this order:
+   `targetIsPairSecond = r.nextBoolean()`, `targetOnLeft = r.nextBoolean()`,
+   `targetMeaningListedFirst = r.nextBoolean()`. **"Pair second" is the round member with the higher ideophone
+   id** (defined on the pair's ideophone ids, never on the stored left/right columns).
+4. Practice rounds keep their fixed order (p0 then p1), but take the same three per-round draws from a separate
+   stream, `new Random(shuffleSeed + 1)`, so the scored derivation is unaffected by practice on/off.
+
+### Consequences
+
+- **The round DTO shape is unchanged**; only the values vary by seed. `targetTranslation`/`prompt`/
+  `translations.target` are the derived target's gloss, `translations.other` the derived distractor's gloss, and
+  `left`/`right` are the derived sides.
+- **Correctness is judged against the derived target**, never against `arena_rounds.correct_ideophone_id`. That
+  column (and `arena_rounds.prompt`, a copy of the same word's gloss) remains in the schema purely as
+  documentation of the fixed thesis target and is no longer read in the serving path.
+- `player_answers.target_ideophone_id` stores the derived target at answer time, so analytics can aggregate
+  per actually-served target — including the 30 complementary targets the thesis never measured. Recent-attempts
+  history replays the stored target, not the thesis target.
+- `targetMeaningListedFirst` is **reserved**: it is drawn (so the stream consumption above is final) but the
+  current Vite frontend always lists the target meaning first, since `translations.target`/`translations.other`
+  are semantic fields. A future frontend rider can honor the draw without any backend change.
+
 ## Completion behavior
 
 When there are no more unanswered rounds, the next-round endpoint returns `200 OK` with an explicit completion DTO.
@@ -250,7 +289,7 @@ Query params: `page` (default `0`, clamped to `>= 0`) and `size` (default `10`, 
 values are clamped, not rejected; the response metadata reports the effective values.
 
 The metric is **best completed session** (changed 2026-06-11; previously lifetime account totals): each user is
-ranked by the highest number of correct answers achieved within a single *completed* session. Incomplete sessions
+ranked by the highest number of correct answers achieved within a single _completed_ session. Incomplete sessions
 never count. Ordering is deterministic: `bestSessionCorrect` desc, then best-session accuracy desc (equivalently
 `bestSessionAnswered` asc), then `username` asc.
 
@@ -259,7 +298,12 @@ Response shape:
 ```json
 {
   "entries": [
-    { "username": "demo", "bestSessionCorrect": 21, "bestSessionAnswered": 30, "bestSessionAccuracy": 0.7 }
+    {
+      "username": "demo",
+      "bestSessionCorrect": 21,
+      "bestSessionAnswered": 30,
+      "bestSessionAccuracy": 0.7
+    }
   ],
   "page": 0,
   "size": 10,
@@ -289,9 +333,20 @@ Response shape:
 
 ```json
 {
-  "totals": { "users": 13, "sessions": 10, "completedSessions": 1, "answers": 3 },
+  "totals": {
+    "users": 13,
+    "sessions": 10,
+    "completedSessions": 1,
+    "answers": 3
+  },
   "byCondition": [
-    { "conditionName": "CONDITION_1_SOKUON", "sessions": 5, "answers": 2, "correct": 2, "accuracy": 1.0 }
+    {
+      "conditionName": "CONDITION_1_SOKUON",
+      "sessions": 5,
+      "answers": 2,
+      "correct": 2,
+      "accuracy": 1.0
+    }
   ],
   "byModality": [
     { "modality": "AUDITORY", "answers": 3, "correct": 3, "accuracy": 1.0 }
@@ -324,6 +379,10 @@ This is enough for minimal personal progress/history.
 
 ## Changelog
 
+- 2026-06-12 (Session B): deterministic per-session shuffle — `game_sessions.shuffle_seed` (server-generated,
+  never exposed) derives round order, target identity, target side, and meaning order per the spec above;
+  correctness is judged against the derived target; `player_answers.target_ideophone_id` stores it. DTO shapes
+  unchanged, zero frontend changes; sessions replay identically across restarts.
 - 2026-06-11 (Session A): practice rounds — `POST /api/game/sessions` accepts optional `includePractice`
   (default `false`); practice rounds are served before round 1 with `practice: true` in the round DTO; practice
   answers return feedback but are never persisted and cannot affect score, completion, or the leaderboard. The

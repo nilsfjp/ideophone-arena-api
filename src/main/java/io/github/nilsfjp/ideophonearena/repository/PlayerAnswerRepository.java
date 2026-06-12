@@ -13,13 +13,13 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
 
     boolean existsBySessionIdAndRoundId(Long sessionId, Long roundId);
 
-    @EntityGraph(attributePaths = {"round", "round.correctIdeophone", "selectedIdeophone"})
+    @EntityGraph(attributePaths = {"round", "targetIdeophone", "selectedIdeophone"})
     List<PlayerAnswer> findBySessionId(Long sessionId);
 
-    @EntityGraph(attributePaths = {"round", "round.correctIdeophone", "selectedIdeophone"})
+    @EntityGraph(attributePaths = {"round", "targetIdeophone", "selectedIdeophone"})
     List<PlayerAnswer> findBySessionIdOrderByAnsweredAtAsc(Long sessionId);
 
-    @EntityGraph(attributePaths = {"session", "round", "round.correctIdeophone", "selectedIdeophone"})
+    @EntityGraph(attributePaths = {"session", "round", "targetIdeophone", "selectedIdeophone"})
     List<PlayerAnswer> findBySessionUserIdOrderByAnsweredAtDesc(Long userId, Pageable pageable);
 
     @Query("select answer.round.id from PlayerAnswer answer where answer.session.id = :sessionId")
@@ -97,8 +97,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
                 count(answer.id) as answers,
                 sum(case when answer.correct = true then 1 else 0 end) as correct
             from PlayerAnswer answer
-            join answer.round round
-            join round.correctIdeophone ideophone
+            join answer.targetIdeophone ideophone
             where ideophone.modality is not null
             group by ideophone.modality
             order by ideophone.modality

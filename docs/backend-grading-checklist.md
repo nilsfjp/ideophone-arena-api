@@ -387,6 +387,17 @@ curl -i http://localhost:8081/api/game/sessions/<SESSION_UUID>/rounds/next \
 
 2026-06-11 evidence (Session A, practice rounds): `POST /api/game/sessions` accepts optional `includePractice` (default `false`, echoed in the session response); when set, `rounds/next` serves 2 practice rounds (thesis pairs p0/p1, `arena_rounds.is_practice` flag, p-prefix audio) before the first scored round, each with `practice: true` in the same `RoundResponse` DTO. Practice answers return feedback (`practice: true`) but create no `PlayerAnswer` rows and never affect `totalAnswered`/`totalCorrect`, completion, or the leaderboard; out-of-order practice answers return `400`, repeats `409`. Seed extended to 204 ideophones / 102 rounds (trial ids unchanged); `IdeophoneSeedIntegrityTests` (8 tests) now also cross-checks the practice rows and the round practice flags; display forms verified against the practice stimulus PNGs (e.g. p0hk renders ソット). Live proof: practice session served `/stimuli/audio/p0h-sotto.m4a` (200, `audio/mp4`), 2 practice + 30 scored rounds, totals stayed 0 during practice, session completed after round 30.
 
+2026-06-12 evidence (Session B, deterministic shuffle): round order, target identity, target side, and meaning
+order are derived per request from `game_sessions.shuffle_seed` (`SecureRandom` at session creation, never
+exposed) by `RoundShuffler` per the contract's derivation spec; nothing but the seed is persisted, so sessions
+replay identically across restarts. `RoundShufflerTests` (7 tests) covers determinism across instances,
+seed divergence, permutation integrity, id-based pair-second stability under swapped columns, practice-stream
+independence, and a 200-seed distribution sweep (every round's target takes both identities and both sides).
+`GameServiceTests.getNextRoundResumesIdenticallyAfterServiceRestart` proves continuation on fresh service
+instances. Live proof: two same-condition sessions served visibly different orders/targets/sides (round 18:
+"crisp appearance, stiffly" vs "dim, faint, indistinct"); a kill+restart mid-session returned a byte-identical
+next-round body.
+
 ### Answer submission
 
 - [x] Answer submission requires authentication.
@@ -410,6 +421,13 @@ curl -i -X POST http://localhost:8081/api/game/sessions/<SESSION_UUID>/answers \
 ```
 
 2026-06-04 evidence: `SubmitAnswerRequest` validates positive IDs; `GameService.submitAnswer` checks session, round, session condition/difficulty, duplicate answer, valid selected ideophone, calculates correctness, saves `PlayerAnswer`, and returns `AnswerResultResponse`. `GameServiceTests` and `GameLoopHttpTests` cover this path.
+
+2026-06-12 evidence (Session B): correctness is judged against the seed-derived target
+(`arena_rounds.correct_ideophone_id` is thesis-target documentation only, no longer read in the serving path);
+the derived target is stored per answer in `player_answers.target_ideophone_id` (NOT NULL + FK) for per-target
+analytics, and recent-attempts history replays the stored target. Duplicate answers still 409 under the derived
+flow (`ShuffledSessionHttpTests` walks a full practice-on session: served order/sides/meanings match the
+derivation, every stored `target_ideophone_id` matches, completion semantics unchanged).
 
 ### Leaderboard and history
 
@@ -436,7 +454,7 @@ curl -i http://localhost:8081/api/game/me/attempts \
 
 2026-06-11 evidence (pagination): `GET /api/leaderboard` is now paginated; response is a wrapper object (`entries` list + `page`/`size`/`totalElements`/`totalPages`) instead of a bare array. `page` and `size` query params are accepted (defaults 0/10, size clamped to 1–50). Ordering: `totalCorrect` desc, `totalAnswered` desc, avg response time asc, `username` asc as tiebreak (superseded by the Session A best-session metric below). `LeaderboardPaginationHttpTests` covers defaults, size cap, explicit params, and clamping. Live proof: `?page=0&size=5` returned wrapper with 3 entries; `?size=500` clamped to `size:50`.
 
-2026-06-11 evidence (Session A, best-session metric): the leaderboard ranks each user by their best *completed* session — most correct answers in a single session, ties broken by best-session accuracy (fewer answers) then `username`; incomplete sessions never count. Entry fields are `username`/`bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` (**breaking** for the Vite frontend; wrapper shape unchanged). Implemented as a paged JPQL query with explicit `countQuery` in `PlayerAnswerRepository.findLeaderboard` (derived-table aggregate + not-exists argmax, no native SQL); mapping in `GameMapper`. `LeaderboardPaginationHttpTests` covers best-of-several-sessions, incomplete-session exclusion, accuracy and username tiebreaks, plus the original pagination behavior. Live proof: a played-through 30-round session appeared as `bestSessionCorrect: 15, bestSessionAnswered: 30, bestSessionAccuracy: 0.5`. Companion cleanup: `scripts/cleanup-test-accounts.sql` idempotently deletes `browser_loop_%` users with their sessions/answers (proof: registered `browser_loop_proof`, ran script, row count 1 -> 0; second run clean).
+2026-06-11 evidence (Session A, best-session metric): the leaderboard ranks each user by their best _completed_ session — most correct answers in a single session, ties broken by best-session accuracy (fewer answers) then `username`; incomplete sessions never count. Entry fields are `username`/`bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` (**breaking** for the Vite frontend; wrapper shape unchanged). Implemented as a paged JPQL query with explicit `countQuery` in `PlayerAnswerRepository.findLeaderboard` (derived-table aggregate + not-exists argmax, no native SQL); mapping in `GameMapper`. `LeaderboardPaginationHttpTests` covers best-of-several-sessions, incomplete-session exclusion, accuracy and username tiebreaks, plus the original pagination behavior. Live proof: a played-through 30-round session appeared as `bestSessionCorrect: 15, bestSessionAnswered: 30, bestSessionAccuracy: 0.5`. Companion cleanup: `scripts/cleanup-test-accounts.sql` idempotently deletes `browser_loop_%` users with their sessions/answers (proof: registered `browser_loop_proof`, ran script, row count 1 -> 0; second run clean).
 
 ## Configuration and secrets
 
@@ -480,7 +498,14 @@ Proof:
 
 2026-06-11 evidence (superseded by Session A count below): `./mvnw test` -> 47 tests, 0 failures. Suite covers JWT (7 tests), seed integrity (7 tests), game loop HTTP tests (with `responseTimeMs` validation and duplicate-answer 409), static resource access (mini-frontend 401, stimuli 200), admin stats HTTP tests (401/403/200), leaderboard pagination tests, service unit tests, and serialization tests. Legacy static-frontend tests removed with the feature (2026-06-10).
 
-2026-06-11 evidence (Session A, current): `./mvnw test` -> 59 tests, 0 failures. New coverage: `PracticeRoundHttpTests` (5 tests: practice-first flow with no persisted practice answers, no-flag sessions unchanged, serving-order enforcement, `includePractice` request/response handling, seeded p-prefix data), best-session leaderboard tests in `LeaderboardPaginationHttpTests` (+3), practice unit tests in `GameServiceTests` (+3), seed-integrity practice cross-checks (8 total). Clean `spring-boot:run` startup against the reseeded schema with `ddl-auto=validate` (started in 3.5 s).
+2026-06-11 evidence (Session A): `./mvnw test` -> 59 tests, 0 failures. New coverage: `PracticeRoundHttpTests` (5 tests: practice-first flow with no persisted practice answers, no-flag sessions unchanged, serving-order enforcement, `includePractice` request/response handling, seeded p-prefix data), best-session leaderboard tests in `LeaderboardPaginationHttpTests` (+3), practice unit tests in `GameServiceTests` (+3), seed-integrity practice cross-checks (8 total). Clean `spring-boot:run` startup against the reseeded schema with `ddl-auto=validate` (started in 3.5 s).
+
+2026-06-12 evidence (Session B, current): `./mvnw test` -> 69 tests, 0 failures. New coverage: `RoundShufflerTests`
+(7 derivation-spec tests incl. the 200-seed distribution sweep), `ShuffledSessionHttpTests` (full practice-on HTTP
+loop against the derivation with stored-target verification and 409 duplicates), `GameServiceTests` restart-
+continuity and derived-target judging tests. `python scripts/generate_seed_sql.py --check` clean after the
+`shuffle_seed`/`target_ideophone_id` migration; reseed + `ddl-auto=validate` clean startup; browser loop
+(`verify-browser-loop.mjs`) played 2 practice + 30 scored rounds with zero frontend changes and zero console errors.
 
 ## Documentation checklist
 

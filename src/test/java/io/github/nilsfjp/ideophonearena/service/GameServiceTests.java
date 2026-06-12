@@ -1,6 +1,7 @@
 package io.github.nilsfjp.ideophonearena.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,6 +18,7 @@ import io.github.nilsfjp.ideophonearena.exception.ConflictException;
 import io.github.nilsfjp.ideophonearena.mapper.GameMapper;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
 import io.github.nilsfjp.ideophonearena.model.ArenaRound;
+import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
 import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
@@ -59,6 +61,7 @@ class GameServiceTests {
     @Mock
     private UserDetails userDetails;
 
+    private final RoundShuffler roundShuffler = new RoundShuffler();
     private GameService gameService;
     private AppUser user;
     private GameSession session;
@@ -70,7 +73,8 @@ class GameServiceTests {
                 gameSessionRepository,
                 arenaRoundRepository,
                 playerAnswerRepository,
-                new GameMapper()
+                new GameMapper(),
+                roundShuffler
         );
         user = new AppUser(USERNAME, "player@example.test", "hash");
         setId(user, 10L);
@@ -155,14 +159,70 @@ class GameServiceTests {
 
         RoundResponse response = gameService.getNextRound(userDetails, SESSION_UUID);
 
+        DerivedRound expected = derivedScoredRound(List.of(answeredRound, nextRound), 101L);
         assertEquals(101L, response.getRoundId());
-        assertEquals("drizzling", response.getTargetTranslation());
-        assertEquals("drizzling", response.getPrompt());
-        assertEquals("drizzling", response.getTranslations().getTarget());
-        assertEquals("splashing", response.getTranslations().getOther());
-        assertEquals(3L, response.getLeft().getIdeophoneId());
-        assertEquals("/stimuli/a1hu-sitosito.mp4", response.getLeft().getStimulusUrl());
+        assertEquals(expected.getTarget().getGloss(), response.getTargetTranslation());
+        assertEquals(expected.getTarget().getGloss(), response.getPrompt());
+        assertEquals(expected.getTarget().getGloss(), response.getTranslations().getTarget());
+        assertEquals(expected.getOther().getGloss(), response.getTranslations().getOther());
+        assertEquals(expected.getLeft().getId(), response.getLeft().getIdeophoneId());
+        assertEquals(expected.getRight().getId(), response.getRight().getIdeophoneId());
+        assertEquals("/stimuli/" + expected.getLeft().getStimulusFile(), response.getLeft().getStimulusUrl());
         assertEquals(800, response.getTiming().getFixationMs());
+    }
+
+    @Test
+    void getNextRoundResumesIdenticallyAfterServiceRestart() {
+        ArenaRound firstRound = round(
+                100L,
+                "with a rustling sound",
+                ideophone(1L, "ごそごそ", "gosogoso", "with a rustling sound", "a0hu-gosogoso.mp4"),
+                ideophone(2L, "かたかた", "katakata", "clattering, rattling", "a0kd-katakata.mp4")
+        );
+        ArenaRound secondRound = round(
+                101L,
+                "drizzling",
+                ideophone(3L, "しとしと", "sitosito", "drizzling", "a1hu-sitosito.mp4"),
+                ideophone(4L, "ばちゃばちゃ", "batyabatya", "splashing", "a1kd-batyabatya.mp4")
+        );
+        ArenaRound thirdRound = round(
+                102L,
+                "noisily gushing",
+                ideophone(5L, "じゃあじゃあ", "zyaazyaa", "noisily gushing", "a2hu-zyaazyaa.mp4"),
+                ideophone(6L, "ぽたぽた", "potapota", "dripping, trickling", "a2kd-potapota.mp4")
+        );
+        session.setShuffleSeed(424242L);
+        List<ArenaRound> rounds = List.of(firstRound, secondRound, thirdRound);
+        List<DerivedRound> derivedOrder = roundShuffler.deriveScoredRounds(424242L, rounds);
+        List<Long> answeredFirstTwo = List.of(
+                derivedOrder.get(0).getRound().getId(),
+                derivedOrder.get(1).getRound().getId()
+        );
+        when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
+                ConditionName.CONDITION_1_SOKUON,
+                1
+        )).thenReturn(rounds);
+        when(playerAnswerRepository.findAnsweredRoundIdsBySessionId(20L)).thenReturn(answeredFirstTwo);
+
+        // A fresh service and shuffler stand in for a restarted server: the
+        // derivation must continue exactly where the session left off.
+        GameService restartedService = new GameService(
+                appUserRepository,
+                gameSessionRepository,
+                arenaRoundRepository,
+                playerAnswerRepository,
+                new GameMapper(),
+                new RoundShuffler()
+        );
+
+        RoundResponse response = restartedService.getNextRound(userDetails, SESSION_UUID);
+
+        DerivedRound expected = derivedOrder.get(2);
+        assertEquals(expected.getRound().getId(), response.getRoundId());
+        assertEquals(expected.getTarget().getGloss(), response.getTargetTranslation());
+        assertEquals(expected.getLeft().getId(), response.getLeft().getIdeophoneId());
+        assertEquals(expected.getRight().getId(), response.getRight().getIdeophoneId());
     }
 
     @Test
@@ -191,17 +251,19 @@ class GameServiceTests {
     }
 
     @Test
-    void submitAnswerPersistsSelectedIdeophoneAndReturnsFeedback() {
+    void submitAnswerJudgesAgainstDerivedTargetAndStoresIt() {
         Ideophone left = ideophone(1L, "ごそごそ", "gosogoso", "with a rustling sound", "a0hu-gosogoso.mp4");
         Ideophone right = ideophone(2L, "かたかた", "katakata", "clattering, rattling", "a0kd-katakata.mp4");
         ArenaRound round = round(100L, "with a rustling sound", left, right);
+        DerivedRound derived = derivedScoredRound(List.of(round), 100L);
         SubmitAnswerRequest request = new SubmitAnswerRequest();
         request.setRoundId(100L);
-        request.setSelectedIdeophoneId(1L);
+        request.setSelectedIdeophoneId(derived.getTarget().getId());
         request.setResponseTimeMs(1234);
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(arenaRoundRepository.findByIdWithIdeophones(100L)).thenReturn(Optional.of(round));
         when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
+        stubScoredRounds(List.of(round));
         when(playerAnswerRepository.countBySessionId(20L)).thenReturn(1L);
         when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(1L);
         when(arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
@@ -214,19 +276,51 @@ class GameServiceTests {
         PlayerAnswer savedAnswer = answerCaptor.getValue();
         assertEquals(session, savedAnswer.getSession());
         assertEquals(round, savedAnswer.getRound());
-        assertEquals(left, savedAnswer.getSelectedIdeophone());
+        assertEquals(derived.getTarget(), savedAnswer.getSelectedIdeophone());
+        assertEquals(derived.getTarget(), savedAnswer.getTargetIdeophone());
         assertEquals(1234, savedAnswer.getResponseTimeMs());
         assertTrue(savedAnswer.isCorrect());
         assertEquals(100L, response.getRoundId());
-        assertEquals(1L, response.getSelectedIdeophoneId());
-        assertEquals(1L, response.getCorrectIdeophoneId());
+        assertEquals(derived.getTarget().getId(), response.getSelectedIdeophoneId());
+        assertEquals(derived.getTarget().getId(), response.getCorrectIdeophoneId());
         assertTrue(response.isCorrect());
-        assertEquals("with a rustling sound", response.getTargetTranslation());
-        assertEquals("ごそごそ", response.getSelectedKana());
-        assertEquals("ごそごそ", response.getCorrectKana());
+        assertEquals(derived.getTarget().getGloss(), response.getTargetTranslation());
+        assertEquals(derived.getTarget().getKana(), response.getSelectedKana());
+        assertEquals(derived.getTarget().getKana(), response.getCorrectKana());
         assertEquals(1L, response.getTotalAnswered());
         assertEquals(1L, response.getTotalCorrect());
         assertNull(session.getCompletedAt());
+    }
+
+    @Test
+    void submitAnswerMarksDerivedDistractorIncorrectAndStillStoresTarget() {
+        Ideophone left = ideophone(1L, "ごそごそ", "gosogoso", "with a rustling sound", "a0hu-gosogoso.mp4");
+        Ideophone right = ideophone(2L, "かたかた", "katakata", "clattering, rattling", "a0kd-katakata.mp4");
+        ArenaRound round = round(100L, "with a rustling sound", left, right);
+        DerivedRound derived = derivedScoredRound(List.of(round), 100L);
+        SubmitAnswerRequest request = new SubmitAnswerRequest();
+        request.setRoundId(100L);
+        request.setSelectedIdeophoneId(derived.getOther().getId());
+        request.setResponseTimeMs(1234);
+        when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
+        when(arenaRoundRepository.findByIdWithIdeophones(100L)).thenReturn(Optional.of(round));
+        when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
+        stubScoredRounds(List.of(round));
+        when(playerAnswerRepository.countBySessionId(20L)).thenReturn(1L);
+        when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(0L);
+        when(arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
+                ConditionName.CONDITION_1_SOKUON, 1)).thenReturn(60L);
+
+        AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
+
+        ArgumentCaptor<PlayerAnswer> answerCaptor = ArgumentCaptor.forClass(PlayerAnswer.class);
+        verify(playerAnswerRepository).saveAndFlush(answerCaptor.capture());
+        PlayerAnswer savedAnswer = answerCaptor.getValue();
+        assertEquals(derived.getOther(), savedAnswer.getSelectedIdeophone());
+        assertEquals(derived.getTarget(), savedAnswer.getTargetIdeophone());
+        assertFalse(savedAnswer.isCorrect());
+        assertFalse(response.isCorrect());
+        assertEquals(derived.getTarget().getId(), response.getCorrectIdeophoneId());
     }
 
     @Test
@@ -241,6 +335,7 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(arenaRoundRepository.findByIdWithIdeophones(100L)).thenReturn(Optional.of(round));
         when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
+        stubScoredRounds(List.of(round));
         when(playerAnswerRepository.countBySessionId(20L)).thenReturn(60L);
         when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(45L);
         when(arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
@@ -265,6 +360,7 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(arenaRoundRepository.findByIdWithIdeophones(100L)).thenReturn(Optional.of(round));
         when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
+        stubScoredRounds(List.of(round));
         when(playerAnswerRepository.saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class)))
                 .thenThrow(new DataIntegrityViolationException("duplicate key"));
 
@@ -287,6 +383,7 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(arenaRoundRepository.findByIdWithIdeophones(100L)).thenReturn(Optional.of(round));
         when(playerAnswerRepository.existsBySessionIdAndRoundId(20L, 100L)).thenReturn(false);
+        stubScoredRounds(List.of(round));
 
         assertThrows(BadRequestException.class, () -> gameService.submitAnswer(userDetails, SESSION_UUID, request));
         verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
@@ -327,9 +424,12 @@ class GameServiceTests {
         Ideophone left = ideophone(31L, "そっと", "sotto", "softly, gently", "audio/p0h-sotto.m4a");
         Ideophone right = ideophone(32L, "がたん", "gataN", "with a bang", "audio/p0k-gataN.m4a");
         ArenaRound practiceRound = practiceRound(900L, "softly, gently", left, right);
+        DerivedRound derived = roundShuffler
+                .derivePracticeRounds(session.getShuffleSeed(), List.of(practiceRound))
+                .get(0);
         SubmitAnswerRequest request = new SubmitAnswerRequest();
         request.setRoundId(900L);
-        request.setSelectedIdeophoneId(31L);
+        request.setSelectedIdeophoneId(derived.getTarget().getId());
         request.setResponseTimeMs(1234);
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(arenaRoundRepository.findByIdWithIdeophones(900L)).thenReturn(Optional.of(practiceRound));
@@ -388,6 +488,20 @@ class GameServiceTests {
         assertThrows(ConflictException.class,
                 () -> gameService.submitAnswer(userDetails, SESSION_UUID, repeated));
         verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
+    }
+
+    private void stubScoredRounds(List<ArenaRound> rounds) {
+        when(arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
+                ConditionName.CONDITION_1_SOKUON,
+                1
+        )).thenReturn(rounds);
+    }
+
+    private DerivedRound derivedScoredRound(List<ArenaRound> rounds, Long roundId) {
+        return roundShuffler.deriveScoredRounds(session.getShuffleSeed(), rounds).stream()
+                .filter(derived -> derived.getRound().getId().equals(roundId))
+                .findFirst()
+                .orElseThrow();
     }
 
     private ArenaRound round(Long id, String prompt, Ideophone left, Ideophone right) {
