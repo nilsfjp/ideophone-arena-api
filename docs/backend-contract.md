@@ -1,7 +1,7 @@
 # Ideophone Arena demo contract
 
-Date: 2026-06-07
-Deadline: 2026-06-05
+Date: 2026-06-11
+Deadline: 2026-06-05 (passed)
 
 ## Purpose
 
@@ -17,7 +17,8 @@ http://localhost:8081
 
 ## Supported session-start settings
 
-`conditionName` and `difficultyLevel` are required in `POST /api/game/sessions`.
+`conditionName` and `difficultyLevel` are required in `POST /api/game/sessions`. `includePractice` is optional
+(default `false`); when `true`, the session serves 2 practice rounds before round 1 (see "Practice rounds").
 
 The stable demo path uses:
 
@@ -77,6 +78,7 @@ targetTranslation
 prompt
 conditionName
 difficultyLevel
+practice
 translations.target
 translations.other
 left.ideophoneId
@@ -140,14 +142,17 @@ Start session:
 POST /api/game/sessions
 ```
 
-Request body:
+Request body (`includePractice` optional, default `false`):
 
 ```json
 {
   "conditionName": "CONDITION_1_SOKUON",
-  "difficultyLevel": 1
+  "difficultyLevel": 1,
+  "includePractice": false
 }
 ```
+
+The session response echoes `includePractice`.
 
 Get next round:
 
@@ -174,6 +179,27 @@ Request body:
 All three fields are required. `responseTimeMs` must be between `0` and `600000` (10 minutes); out-of-range or
 missing values return `400` with a `validationErrors` map. Submitting an answer for a round already answered in
 the session returns `409 Conflict`, including under concurrent duplicate submissions.
+
+The answer response includes a `practice` boolean mirroring the round's flag (always `false` for scored rounds).
+
+## Practice rounds (2026-06-11)
+
+When a session is started with `"includePractice": true`, the next-round endpoint serves **2 practice rounds**
+(thesis Appendix B pairs p0 auditory and p1 visual, seeded with p-prefix stimuli) before the first scored round.
+Practice rounds use the same round DTO with `practice: true`; scored rounds carry `practice: false`.
+
+Practice answers:
+
+- return normal correctness feedback (`practice: true` in the answer response) — a deliberate, documented divergence
+  from the thesis, which hid practice feedback;
+- are **never persisted**: no `PlayerAnswer` row is created, `totalAnswered`/`totalCorrect` stay at the session's
+  scored counts (0 during practice), and practice cannot affect completion or the leaderboard;
+- must be submitted in serving order: answering the second practice round first returns `400`, re-answering an
+  already-passed practice round returns `409`, and practice answers against a session started without the flag
+  return `400`.
+
+Practice rounds do not consume round numbers: "Round 1/30" still means the first scored round. Sessions started
+without the flag behave exactly as before; existing clients are unaffected.
 
 ## Completion behavior
 
@@ -223,15 +249,17 @@ GET /api/leaderboard?page=0&size=10
 Query params: `page` (default `0`, clamped to `>= 0`) and `size` (default `10`, clamped to `1..50`). Out-of-range
 values are clamped, not rejected; the response metadata reports the effective values.
 
-Ordering is deterministic: `totalCorrect` desc, then `totalAnswered` desc, then average response time asc, then
-`username` asc as the final tiebreak.
+The metric is **best completed session** (changed 2026-06-11; previously lifetime account totals): each user is
+ranked by the highest number of correct answers achieved within a single *completed* session. Incomplete sessions
+never count. Ordering is deterministic: `bestSessionCorrect` desc, then best-session accuracy desc (equivalently
+`bestSessionAnswered` asc), then `username` asc.
 
 Response shape:
 
 ```json
 {
   "entries": [
-    { "username": "demo", "totalAnswered": 30, "totalCorrect": 21, "accuracy": 0.7 }
+    { "username": "demo", "bestSessionCorrect": 21, "bestSessionAnswered": 30, "bestSessionAccuracy": 0.7 }
   ],
   "page": 0,
   "size": 10,
@@ -240,8 +268,9 @@ Response shape:
 }
 ```
 
-**Breaking change for the frontend:** the previous shape was the bare `entries` array. The Vite app's
-`getLeaderboard()` (`src/api/client.ts`) and the `Leaderboard` component must read `.entries` instead.
+**Breaking change for the frontend (2026-06-11):** entry fields renamed/re-scoped from
+`totalAnswered`/`totalCorrect`/`accuracy` (lifetime) to `bestSessionCorrect`/`bestSessionAnswered`/
+`bestSessionAccuracy` (best completed session). The Vite app's leaderboard rendering needs a follow-up rider.
 
 This should be visible in the final demo.
 
@@ -295,6 +324,17 @@ This is enough for minimal personal progress/history.
 
 ## Changelog
 
+- 2026-06-11 (Session A): practice rounds — `POST /api/game/sessions` accepts optional `includePractice`
+  (default `false`); practice rounds are served before round 1 with `practice: true` in the round DTO; practice
+  answers return feedback but are never persisted and cannot affect score, completion, or the leaderboard. The
+  answer response gained a `practice` boolean. Non-breaking for existing clients.
+- 2026-06-11 (Session A): leaderboard metric reworked to **best completed-session score** — entry fields are now
+  `bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` (was lifetime `totalCorrect`/`totalAnswered`/
+  `accuracy`); only completed sessions count. **Breaking for the Vite frontend** (needs a follow-up rider). The
+  pagination wrapper is unchanged.
+- 2026-06-11 (Session A): seed extended with the 8 practice words / 12 practice rounds (p0-p3); `arena_rounds`
+  gained `is_practice`, `game_sessions` gained `include_practice`/`practice_answered`. Trial ideophone and round
+  ids are unchanged.
 - 2026-06-11: `GET /api/leaderboard` is paginated and returns a wrapper object (`entries` + `page`/`size`/
   `totalElements`/`totalPages`) instead of a bare array — **breaking for the Vite frontend** until its
   `getLeaderboard()` reads `.entries`. Ordering gained a deterministic `username` tiebreak.

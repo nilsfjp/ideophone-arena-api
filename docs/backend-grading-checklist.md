@@ -281,7 +281,7 @@ Proof:
 rg -n "SecurityFilterChain|requestMatchers|csrf|SessionCreationPolicy|anyRequest" src/main/java/io/github/nilsfjp/ideophonearena/config/SecurityConfig.java
 ```
 
-2026-06-04 evidence: `SecurityConfig` permits `/api/auth/**`, `/api/leaderboard`, static frontend files, and `/stimuli/**`, then uses `anyRequest().authenticated()`. CSRF is disabled with stateless sessions for JWT. Live curl proof returned `401` for unauthenticated `POST /api/game/sessions` and `200 video/mp4` for `GET /stimuli/a0hu-gosogoso.mp4`.
+2026-06-04 evidence (superseded by 2026-06-10 evidence below): `SecurityConfig` permits `/api/auth/**`, `/api/leaderboard`, static frontend files, and `/stimuli/**`, then uses `anyRequest().authenticated()`. CSRF is disabled with stateless sessions for JWT. Live curl proof returned `401` for unauthenticated `POST /api/game/sessions` and `200 video/mp4` for `GET /stimuli/a0hu-gosogoso.mp4`. The static frontend files and mp4 stimulus references are legacy — see 2026-06-10 evidence for current public surface and audio/mp4 stimuli.
 
 2026-06-10 evidence: stimulus references switched to per-word audio. `SecurityConfig` now permits both `GET` and `HEAD` on `/stimuli/**`. Live curl proof returned `200` with `Content-Type: audio/mp4` for both `GET` and `HEAD` on `http://localhost:8081/stimuli/audio/a0h-gosogoso.m4a`.
 
@@ -385,6 +385,8 @@ curl -i http://localhost:8081/api/game/sessions/<SESSION_UUID>/rounds/next \
 
 2026-06-10 evidence: round responses now ship `displayForm` (exact kana shown pre-answer) and `canonicalForm` (canonical-script form for feedback reveal) per choice, mapped in `GameMapper` from the new NOT NULL `ideophones.display_form`/`canonical_form` columns; the seed derives both from the stimulus filename prefix ground truth and `IdeophoneSeedIntegrityTests` (7 tests) permanently asserts script-family agreement with pos3/pos4 for all 180 rows. Live curl of `rounds/next` for `CONDITION_3_SOKUON` showed `displayForm` ゴソゴソ vs `canonicalForm` ごそごそ (left, HK) and `displayForm` かたかた vs `canonicalForm` カタカタ (right, KH) with shared per-word `stimulusUrl` values `/stimuli/audio/a0h-gosogoso.m4a` and `/stimuli/audio/a0k-katakata.m4a`.
 
+2026-06-11 evidence (Session A, practice rounds): `POST /api/game/sessions` accepts optional `includePractice` (default `false`, echoed in the session response); when set, `rounds/next` serves 2 practice rounds (thesis pairs p0/p1, `arena_rounds.is_practice` flag, p-prefix audio) before the first scored round, each with `practice: true` in the same `RoundResponse` DTO. Practice answers return feedback (`practice: true`) but create no `PlayerAnswer` rows and never affect `totalAnswered`/`totalCorrect`, completion, or the leaderboard; out-of-order practice answers return `400`, repeats `409`. Seed extended to 204 ideophones / 102 rounds (trial ids unchanged); `IdeophoneSeedIntegrityTests` (8 tests) now also cross-checks the practice rows and the round practice flags; display forms verified against the practice stimulus PNGs (e.g. p0hk renders ソット). Live proof: practice session served `/stimuli/audio/p0h-sotto.m4a` (200, `audio/mp4`), 2 practice + 30 scored rounds, totals stayed 0 during practice, session completed after round 30.
+
 ### Answer submission
 
 - [x] Answer submission requires authentication.
@@ -414,6 +416,8 @@ curl -i -X POST http://localhost:8081/api/game/sessions/<SESSION_UUID>/answers \
 - [x] Public leaderboard endpoint exists.
 - [x] Leaderboard returns DTOs.
 - [x] Leaderboard does not expose sensitive user data.
+- [x] Leaderboard is paginated (wrapper with `entries`, `page`, `size`, `totalElements`, `totalPages`; size capped at 50).
+- [x] Leaderboard ranks by best completed-session score (`bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy`); incomplete sessions excluded.
 - [x] Personal recent attempts endpoint exists.
 - [x] Recent attempts endpoint requires authentication.
 - [x] Recent attempts are scoped to the authenticated user.
@@ -422,13 +426,17 @@ curl -i -X POST http://localhost:8081/api/game/sessions/<SESSION_UUID>/answers \
 Proof:
 
 ```bash
-curl -i http://localhost:8081/api/leaderboard
+curl -i 'http://localhost:8081/api/leaderboard?page=0&size=10'
 
 curl -i http://localhost:8081/api/game/me/attempts \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
 2026-06-04 evidence: `ScoreController` exposes `GET /api/leaderboard` and `GET /api/game/me/attempts`; `SecurityConfig` leaves only leaderboard public; `ScoreService.getMyAttempts` scopes attempts by authenticated user id.
+
+2026-06-11 evidence (pagination): `GET /api/leaderboard` is now paginated; response is a wrapper object (`entries` list + `page`/`size`/`totalElements`/`totalPages`) instead of a bare array. `page` and `size` query params are accepted (defaults 0/10, size clamped to 1–50). Ordering: `totalCorrect` desc, `totalAnswered` desc, avg response time asc, `username` asc as tiebreak (superseded by the Session A best-session metric below). `LeaderboardPaginationHttpTests` covers defaults, size cap, explicit params, and clamping. Live proof: `?page=0&size=5` returned wrapper with 3 entries; `?size=500` clamped to `size:50`.
+
+2026-06-11 evidence (Session A, best-session metric): the leaderboard ranks each user by their best *completed* session — most correct answers in a single session, ties broken by best-session accuracy (fewer answers) then `username`; incomplete sessions never count. Entry fields are `username`/`bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` (**breaking** for the Vite frontend; wrapper shape unchanged). Implemented as a paged JPQL query with explicit `countQuery` in `PlayerAnswerRepository.findLeaderboard` (derived-table aggregate + not-exists argmax, no native SQL); mapping in `GameMapper`. `LeaderboardPaginationHttpTests` covers best-of-several-sessions, incomplete-session exclusion, accuracy and username tiebreaks, plus the original pagination behavior. Live proof: a played-through 30-round session appeared as `bestSessionCorrect: 15, bestSessionAnswered: 30, bestSessionAccuracy: 0.5`. Companion cleanup: `scripts/cleanup-test-accounts.sql` idempotently deletes `browser_loop_%` users with their sessions/answers (proof: registered `browser_loop_proof`, ran script, row count 1 -> 0; second run clean).
 
 ## Configuration and secrets
 
@@ -468,7 +476,11 @@ Proof:
 ./mvnw spring-boot:run
 ```
 
-2026-06-07 evidence: `./mvnw test` passed with 24 tests. Spring Boot test contexts started, connected to local MySQL, served static frontend resources through MockMvc, registered users, started sessions, fetched rounds, submitted answers, verified missing session-start fields return validation `400`s, verified unsupported difficulty and `TEXT_ONLY` return clear `400`s, verified all three supported sokuon conditions can create difficulty-1 sessions and fetch renderable first rounds, verified seeded difficulty-1 rounds exist for those conditions, and verified next-round completion returns `200 OK` with `completed:true`. Live curl proof against the running `http://localhost:8081` backend returned `201 Created` for `CONDITION_1_SOKUON`, `CONDITION_2_SOKUON`, and `CONDITION_3_SOKUON` with `difficultyLevel: 1`, and `400 Bad Request` for `TEXT_ONLY`.
+2026-06-07 evidence (superseded; count and static-frontend reference are stale): `./mvnw test` passed with 24 tests. Spring Boot test contexts started, connected to local MySQL, served static frontend resources through MockMvc (legacy mini-frontend, since removed), registered users, started sessions, fetched rounds, submitted answers, verified missing session-start fields return validation `400`s, verified unsupported difficulty and `TEXT_ONLY` return clear `400`s, verified all three supported sokuon conditions can create difficulty-1 sessions and fetch renderable first rounds, verified seeded difficulty-1 rounds exist for those conditions, and verified next-round completion returns `200 OK` with `completed:true`. Live curl proof against the running `http://localhost:8081` backend returned `201 Created` for `CONDITION_1_SOKUON`, `CONDITION_2_SOKUON`, and `CONDITION_3_SOKUON` with `difficultyLevel: 1`, and `400 Bad Request` for `TEXT_ONLY`.
+
+2026-06-11 evidence (superseded by Session A count below): `./mvnw test` -> 47 tests, 0 failures. Suite covers JWT (7 tests), seed integrity (7 tests), game loop HTTP tests (with `responseTimeMs` validation and duplicate-answer 409), static resource access (mini-frontend 401, stimuli 200), admin stats HTTP tests (401/403/200), leaderboard pagination tests, service unit tests, and serialization tests. Legacy static-frontend tests removed with the feature (2026-06-10).
+
+2026-06-11 evidence (Session A, current): `./mvnw test` -> 59 tests, 0 failures. New coverage: `PracticeRoundHttpTests` (5 tests: practice-first flow with no persisted practice answers, no-flag sessions unchanged, serving-order enforcement, `includePractice` request/response handling, seeded p-prefix data), best-session leaderboard tests in `LeaderboardPaginationHttpTests` (+3), practice unit tests in `GameServiceTests` (+3), seed-integrity practice cross-checks (8 total). Clean `spring-boot:run` startup against the reseeded schema with `ddl-auto=validate` (started in 3.5 s).
 
 ## Documentation checklist
 

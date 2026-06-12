@@ -516,3 +516,69 @@ None.
 
 Next single task:
 S4 remainder: practice rounds (p-prefix stimuli).
+
+## 2026-06-11 (session 2)
+
+Session goal:
+Docs-only housekeeping: bring all documentation in line with reality after S1a migration, hygiene batch (S3), and S4. No Java, SQL, or script changes.
+
+Changed:
+- `README.md`: rewrote to remove all mini-frontend references ("serves the minimal static demo frontend", "Browser Demo" pointing at `:8081/`); expanded Demo Settings to all three conditions; added admin stats and Swagger endpoints to Main Endpoints; updated leaderboard curl to paginated form with response shape; added Vite Frontend and API Docs sections; fixed test description (removed "static frontend/media route").
+- `CLAUDE.md` (`.AGENTS.backend.md`): replaced the Bean Validation imperative NOTE (verify and complete; add bounds) with a done statement reflecting S3 completion.
+- `docs/backend-contract.md`: updated Date from 2026-06-07 to 2026-06-11.
+- `docs/backend-grading-checklist.md`: added `[x]` leaderboard pagination checklist item; updated leaderboard proof curl to paginated form; added 2026-06-11 leaderboard evidence; added 2026-06-11 build proof evidence (47 tests); annotated two stale historical blocks (2026-06-04 authorization evidence referencing "static frontend files" and "200 video/mp4 for a0hu-gosogoso.mp4"; 2026-06-07 build evidence referencing "served static frontend resources through MockMvc" and 24 tests) as "(superseded)" with current state noted.
+
+Proof:
+Grep sweep: `grep -rn "mini-frontend|static frontend|index\.html|arena\.js|arena\.css|\.mp4|video/mp4|account total" docs/backend-contract.md docs/backend-grading-checklist.md docs/demo-runbook.md README.md CLAUDE.md` — zero unresolved hits in active doc files after edits; all remaining hits are either correct current URLs (swagger-ui/index.html), correctly labelled legacy/removal notes, or research data CSVs (not active docs).
+`./mvnw test` -> 47 tests, 0 failures (no code changed).
+
+Result:
+All active documentation is internally consistent and matches current codebase state. Historical evidence blocks are annotated "(superseded)" rather than deleted.
+
+Commit:
+Not committed.
+
+Blocker:
+None.
+
+Next single task:
+S4 remainder: practice rounds (p-prefix stimuli).
+
+## 2026-06-11 (session 3, "Session A")
+
+Session goal:
+Backend small batch: (1) practice rounds from the p-prefix stimuli, (2) cleanup script for `browser_loop_*` test accounts, (3) leaderboard reworked from lifetime totals to best completed-session score.
+
+Changed:
+- `scripts/generate_seed_sql.py`: also reads the `display == "practice"` CSV rows (4 per condition, pairs p0-p3 per thesis Appendix B); practice ideophones/rounds are appended after all trial rows so trial ids 1-180 / round ids 1-90 are unchanged (practice: ideophones 181-204, rounds 91-102, `is_practice = 1`); schema gains `arena_rounds.is_practice`, `game_sessions.include_practice`, `game_sessions.practice_answered`.
+- `scripts/extract-audio.sh`: expected count 60 -> 68 (glob already covered the p-prefix); ran it — 8 new practice m4a files (ffmpeg stream copy from the u/d mp4s), copied into `ideophone-arena-web/dist/stimuli/audio/`.
+- `ArenaRound.practice`, `GameSession.includePractice`/`practiceAnswered` (+ constructor overloads, `recordPracticeAnswer()`).
+- `StartSessionRequest.includePractice` (optional, default false); `GameSessionResponse` echoes it; `RoundResponse` and `AnswerResultResponse` gained `practice`.
+- `GameService`: serves the first 2 practice rounds of the session's condition before scored rounds when the flag is set; practice answers are validated (in-order, 400/409 otherwise), evaluated for feedback, never persisted; main round list/completion count switched to practice-excluding repository methods.
+- `ArenaRoundRepository`: practice-aware derived queries (replacing the unpaged ordered query and an unused Pageable variant).
+- `PlayerAnswerRepository.findLeaderboard`: rewritten as paged JPQL (derived-table per-session aggregate + not-exists argmax, explicit countQuery) ranking by best completed-session correct, tiebreak accuracy (fewer answers) then username; `LeaderboardEntryProjection`/`LeaderboardEntryResponse` now `bestSessionCorrect`/`bestSessionAnswered`(+`bestSessionAccuracy` in the DTO); mapping in `GameMapper` (which also gained `toPracticeAnswerResultResponse`).
+- `scripts/cleanup-test-accounts.sql`: idempotent FK-ordered deletion of `browser_loop_%` users + sessions + answers.
+- Tests: new `PracticeRoundHttpTests` (5); `LeaderboardPaginationHttpTests` +3 best-session tests with isolated fixtures; `GameServiceTests` +3 practice unit tests; `IdeophoneSeedIntegrityTests` extended to 204 rows / 68 audio files / practice-round flag cross-check (8 tests); `RoundResponseSerializationTests` asserts the `practice` property.
+- Docs: `backend-contract.md` (practice section, leaderboard rework, changelog), `demo-runbook.md` (practice curl flow, audio proof, cleanup-script section), `backend-grading-checklist.md` (new items + dated evidence), punch list in `.AGENTS.backend.md`.
+
+Proof:
+- `python3 scripts/generate_seed_sql.py --check` -> "SQL is up to date: 204 ideophones, 102 rounds".
+- Reseed via mysql.exe -> 204 ideophones, 102 rounds, 12 practice rounds, `arena_admin` restored.
+- `scripts/extract-audio.sh` -> "Extracted 68 audio files (expected 68)"; practice display forms cross-checked against the stimulus PNGs (p0hk renders ソット, p2kh がんがん, p1kh ぱっ, p3hk ソックリ).
+- `./mvnw test` -> 59 tests, 0 failures (was 47).
+- `./mvnw spring-boot:run` with `ddl-auto=validate` -> clean start in 3.5 s.
+- Live flow (fresh server): start session with `includePractice: true` -> first round `practice: true` with `/stimuli/audio/p0h-sotto.m4a`; practice answers returned feedback with `totalAnswered`/`totalCorrect` stuck at 0; 2 practice + 30 scored rounds -> `completed`; `GET /api/leaderboard` -> `{bestSessionCorrect: 15, bestSessionAnswered: 30, bestSessionAccuracy: 0.5}`.
+- `curl -I /stimuli/audio/p0h-sotto.m4a` -> 200, `Content-Type: audio/mp4`.
+- Cleanup script: registered `browser_loop_proof`, ran script -> `browser_loop_%` count 1 -> 0; second run clean (idempotent).
+
+Result:
+All three Session A items done. Practice answers are feedback-only by design (documented divergence from the thesis, which hid practice feedback). Leaderboard entry fields changed — BREAKING for the Vite frontend (needs a follow-up rider to read `bestSession*` fields).
+
+Commit:
+Not committed (proposed message below).
+
+Blocker:
+None.
+
+Next single task:
+Frontend rider: update the Vite leaderboard to the `bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` fields (and optionally adopt `includePractice`).

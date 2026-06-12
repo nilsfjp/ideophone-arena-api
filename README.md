@@ -1,6 +1,6 @@
 # Ideophone Arena API
 
-Spring Boot backend for the Ideophone Arena MVP demo. The backend exposes JWT-authenticated game endpoints, stores users, sessions, rounds, and answers in MySQL, and serves the minimal static demo frontend from the same application.
+Spring Boot backend for the Ideophone Arena experiment. The backend exposes JWT-authenticated game endpoints, stores users, sessions, rounds, and answers in MySQL, and serves experiment audio stimuli. The Vite app (`/code/js/ideophone-arena-web`) is the only frontend.
 
 ## Requirements
 
@@ -50,20 +50,19 @@ curl -i http://localhost:8081/api/health
 ./mvnw test
 ```
 
-The test suite starts Spring contexts, validates repository/security wiring, exercises the authenticated game flow with MockMvc, and checks the static frontend/media route.
+The test suite starts Spring contexts, validates repository/security wiring, exercises the authenticated game flow with MockMvc, covers JWT, seed integrity, admin authorization, and leaderboard pagination.
 
 ## Demo Settings
 
-Use the supported demo request:
+`conditionName` and `difficultyLevel` are required at session start. All three conditions are supported at `difficultyLevel: 1`:
 
-```json
-{
-  "conditionName": "CONDITION_1_SOKUON",
-  "difficultyLevel": 1
-}
+```text
+CONDITION_1_SOKUON   (audio only)
+CONDITION_2_SOKUON   (congruent script)
+CONDITION_3_SOKUON   (incongruent script)
 ```
 
-Difficulty values other than `1` are rejected with `400 Bad Request`.
+Difficulty values other than `1` are rejected with `400 Bad Request`. `TEXT_ONLY` is an internal enum value and is not externally selectable.
 
 ## Main Endpoints
 
@@ -72,9 +71,11 @@ Public:
 ```text
 POST /api/auth/register
 POST /api/auth/login
-GET  /api/leaderboard
+GET  /api/leaderboard          (paginated: ?page=0&size=10)
 GET  /api/health
 GET  /stimuli/**
+GET  /v3/api-docs
+GET  /swagger-ui/index.html
 ```
 
 Authenticated with `Authorization: Bearer <token>`:
@@ -84,6 +85,12 @@ POST /api/game/sessions
 GET  /api/game/sessions/{sessionUuid}/rounds/next
 POST /api/game/sessions/{sessionUuid}/answers
 GET  /api/game/me/attempts
+```
+
+`ROLE_ADMIN` only:
+
+```text
+GET  /api/admin/stats
 ```
 
 ## Curl Demo Script
@@ -110,7 +117,7 @@ Start a session:
 curl -i -X POST http://localhost:8081/api/game/sessions \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"conditionName":"CONDITION_1_SOKUON","difficultyLevel":1}'
+  -d '{"conditionName":"CONDITION_2_SOKUON","difficultyLevel":1}'
 ```
 
 Fetch the next round:
@@ -120,7 +127,7 @@ curl -i http://localhost:8081/api/game/sessions/$SESSION_UUID/rounds/next \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-Submit an answer:
+Submit an answer (`responseTimeMs` is required, range 0–600000):
 
 ```sh
 curl -i -X POST http://localhost:8081/api/game/sessions/$SESSION_UUID/answers \
@@ -135,18 +142,50 @@ Recent attempts and leaderboard:
 curl -i http://localhost:8081/api/game/me/attempts \
   -H "Authorization: Bearer $TOKEN"
 
-curl -i http://localhost:8081/api/leaderboard
+curl -i 'http://localhost:8081/api/leaderboard?page=0&size=10'
 ```
 
-## Browser Demo
+Leaderboard response wraps entries:
 
-With the backend running, open:
+```json
+{
+  "entries": [
+    { "username": "demo", "totalAnswered": 30, "totalCorrect": 21, "accuracy": 0.7 }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
+Admin stats (requires `ROLE_ADMIN` token):
+
+```sh
+curl -i http://localhost:8081/api/admin/stats \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+The dev seed creates `arena_admin` for local testing; see `docs/demo-runbook.md` for credentials.
+
+## Vite Frontend
+
+Start the frontend from `/code/js/ideophone-arena-web`:
+
+```sh
+npm run dev
+```
+
+Default frontend URL: `http://localhost:5174`. Backend CORS allows both `http://localhost:5174` and `http://localhost:5173`.
+
+## API Docs (Swagger UI)
+
+With the backend running:
 
 ```text
-http://localhost:8081/
+http://localhost:8081/swagger-ui/index.html
+http://localhost:8081/v3/api-docs
 ```
-
-The separate Vite frontend can also run from `/code/js/ideophone-arena-web` on `http://localhost:5174`. Backend CORS allows both `http://localhost:5174` and `http://localhost:5173`.
 
 More detailed proof steps live in:
 

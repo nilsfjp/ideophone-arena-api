@@ -202,10 +202,45 @@ HTTP/1.1 200
 }
 ```
 
-Leaderboard (public, paginated since 2026-06-11):
+Leaderboard (public, paginated since 2026-06-11; best-completed-session metric since 2026-06-11 Session A):
 
 ```sh
 curl -i 'http://localhost:8081/api/leaderboard?page=0&size=5'
 ```
 
-Returns `entries` plus `page`/`size`/`totalElements`/`totalPages`; `size` is capped at 50.
+Returns `entries` plus `page`/`size`/`totalElements`/`totalPages`; `size` is capped at 50. Each entry is the user's
+best completed session: `username`, `bestSessionCorrect`, `bestSessionAnswered`, `bestSessionAccuracy`. Users
+without a completed session do not appear.
+
+## Practice rounds
+
+Start a session with practice (`includePractice` defaults to `false`):
+
+```sh
+curl -i -X POST http://localhost:8081/api/game/sessions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"difficultyLevel":1,"conditionName":"CONDITION_1_SOKUON","includePractice":true}'
+```
+
+The first two next-round responses carry `practice: true` and p-prefix stimuli
+(for example `/stimuli/audio/p0h-sotto.m4a`). Practice answers return feedback with `practice: true` but keep
+`totalAnswered`/`totalCorrect` at 0 and create no `player_answers` rows; the scored 30 rounds follow unchanged.
+
+Practice audio proof:
+
+```sh
+curl -I http://localhost:8081/stimuli/audio/p0h-sotto.m4a
+```
+
+## Cleaning up browser-loop test accounts
+
+Local browser automation registers throwaway `browser_loop_*` users. They are not seed rows; remove them (and their
+sessions/answers) with the idempotent cleanup script whenever they clutter the leaderboard:
+
+```sh
+"/mnt/c/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe" -u root -p"$PW" \
+  --default-character-set=utf8mb4 < scripts/cleanup-test-accounts.sql
+```
+
+Re-running it deletes nothing once the accounts are gone.
