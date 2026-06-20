@@ -593,18 +593,7 @@ Session goal:
 Deterministic per-session shuffle: a server-generated seed derives round order, target identity (deliberate extension beyond the thesis's parity-fixed targets), target side, and meaning order; sessions replay identically across restarts; answers are judged against, and store, the derived target.
 
 Changed:
-<<<<<<< Updated upstream
 
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> f10a2dc3545d4185614eadb1dfd8833eea7b741c
-=======
-
->>>>>>> 40fbefb6bd3668ad61e30ba178f532ff5f5226ac
->>>>>>> Stashed changes
 - `scripts/generate_seed_sql.py` + regenerated `ideophone_arena.sql`: `game_sessions.shuffle_seed BIGINT NOT NULL`; `player_answers.target_ideophone_id BIGINT NOT NULL` + FK to `ideophones` (approval gate cleared 2026-06-12; seed data rows unchanged).
 - `GameSession.shuffleSeed` (5-arg constructor; `GameService.startSession` fills it from a `SecureRandom`); `PlayerAnswer.targetIdeophone` (constructor param).
 - New `model/DerivedRound` (round + derived target/other/side/meaning-order, never persisted) and `service/RoundShuffler` (@Component): scored rounds ordered by id asc -> `Collections.shuffle(list, new Random(seed))` -> per shuffled round, in order, `targetIsPairSecond`/`targetOnLeft`/`targetMeaningListedFirst` from the same stream; "pair second" = higher ideophone id; practice rounds keep fixed order with draws from `new Random(seed + 1)`. Spec documented verbatim in the contract as a compatibility contract.
@@ -615,18 +604,7 @@ Changed:
 - Docs: contract (new "Deterministic per-session shuffle" section with the verbatim derivation spec + changelog), runbook (shuffle proofs section), grading checklist (Session B evidence), punch list.
 
 Proof:
-<<<<<<< Updated upstream
 
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> f10a2dc3545d4185614eadb1dfd8833eea7b741c
-=======
-
->>>>>>> 40fbefb6bd3668ad61e30ba178f532ff5f5226ac
->>>>>>> Stashed changes
 - `python scripts/generate_seed_sql.py --check` -> "SQL is up to date: 204 ideophones, 102 rounds".
 - Reseed via mysql.exe; `./mvnw spring-boot:run` with `ddl-auto=validate` -> clean start.
 - `./mvnw test` -> 69 tests, 0 failures (was 59).
