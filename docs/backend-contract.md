@@ -218,7 +218,19 @@ nothing but the seed is persisted, so a session replays identically across serve
 1. Base list: the session's scored rounds for its condition and difficulty, ordered by round id ascending.
 2. `Random r = new Random(shuffleSeed)`; `Collections.shuffle(baseList, r)`. Both are algorithmically specified
    in the JDK, hence portable and stable across versions and restarts.
+<<<<<<< Updated upstream
 3. Iterating the _shuffled_ list in order, three draws per round from the same stream, in this order:
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+3. Iterating the _shuffled_ list in order, three draws per round from the same stream, in this order:
+=======
+3. Iterating the *shuffled* list in order, three draws per round from the same stream, in this order:
+>>>>>>> f10a2dc3545d4185614eadb1dfd8833eea7b741c
+=======
+3. Iterating the _shuffled_ list in order, three draws per round from the same stream, in this order:
+>>>>>>> 40fbefb6bd3668ad61e30ba178f532ff5f5226ac
+>>>>>>> Stashed changes
    `targetIsPairSecond = r.nextBoolean()`, `targetOnLeft = r.nextBoolean()`,
    `targetMeaningListedFirst = r.nextBoolean()`. **"Pair second" is the round member with the higher ideophone
    id** (defined on the pair's ideophone ids, never on the stored left/right columns).
