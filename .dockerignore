@@ -1,0 +1,26 @@
+# Build output (the image builds the jar itself)
+target/
+
+# Git metadata
+.git/
+.gitignore
+.gitattributes
+
+# IDE / editor files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+.run/
+
+# Local, untracked configuration and secrets
+src/main/resources/application-local.properties
+.env
+.env.*
+!.env.example
+
+# Docs are not needed in the build context
+docs/
+README.md
+HELP.md

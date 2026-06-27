@@ -521,6 +521,19 @@ after adding the `ratings` table to the generator (`204 ideophones, 102 rounds`)
 `spring-boot:run` startup with `ddl-auto=validate`. Live curl reproduced `201`/array/`409`/`400`/`400`/`401`/`404`
 against the running backend.
 
+2026-06-20 evidence (docker-compose packaging): added root `Dockerfile` (multi-stage Temurin-21 +
+Maven build -> `eclipse-temurin:21-jre` runtime, non-root user, expose 8081), `docker-compose.yml`
+(`db` mysql:8.4 with the schema/seed mounted into `/docker-entrypoint-initdb.d` and a `mysqladmin
+ping` healthcheck; `api` built from the Dockerfile, `depends_on` db healthy, host port `18081:8081`,
+stimuli bind-mounted read-only into `/srv/stimuli`), `.dockerignore`, and `.env.example`. No
+application code, seed SQL, symlink scheme, `ddl-auto`, or Maven dependencies were changed; the JWT
+fail-fast guard is preserved (compose supplies `APP_JWT_SECRET`, no code default). `./mvnw test` ->
+69 tests, 0 failures, BUILD SUCCESS. All 8 spec verification steps were executed and passed (build
+
+- up, db healthy / api up on `:18081`, `/api/health` 200, register 201 / login 200 + JWT, stimuli
+  HEAD 200 `audio/mp4`, `APP_JWT_SECRET`-unset fail-fast exit 1, `down -v` clean) -- run against a
+  user-space rootless Docker since this box had no daemon; see `docs/progress-log.md` for the full output.
+
 ## Documentation checklist
 
 - [x] `docs/project_guidelines.md` exists.

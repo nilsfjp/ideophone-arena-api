@@ -20,6 +20,40 @@ Quick proof:
 curl -i http://localhost:8081/api/health
 ```
 
+## Start Backend with Docker Compose
+
+As an alternative to the local `./mvnw spring-boot:run` path above, `docker compose` brings up a
+seeded MySQL plus the API jar with one command. The API is published on host port **18081** (not
+8081) so it never collides with a manually-run dev backend on 8081.
+
+First-time setup:
+
+```sh
+cp .env.example .env
+# Fill APP_JWT_SECRET (long random string; no code default), MYSQL_ROOT_PASSWORD,
+# and STIMULI_HOST_DIR (host path to the resolved stimulus dir that contains audio/,
+# e.g. /code/js/ideophone-arena-web/dist/stimuli).
+docker compose up -d --build
+docker compose ps   # db should be healthy, api up
+```
+
+Quick proof against the container (note the 18081 port):
+
+```sh
+curl -i http://localhost:18081/api/health
+curl -I http://localhost:18081/stimuli/audio/a0h-gosogoso.m4a
+```
+
+The full register/login/session/answer curl flow below works unchanged against `:18081`; just swap
+the base URL. Tear down (the `-v` drops the MySQL data volume so the next start reseeds):
+
+```sh
+docker compose down -v
+```
+
+The Vite frontend still runs separately on `npm run dev`; point it at `http://localhost:18081`
+(CORS for `http://localhost:5174` is already configured in the backend).
+
 ## Start Frontend
 
 The Vite app is the only frontend. The legacy Spring-served mini-frontend at `http://localhost:8081/` was removed

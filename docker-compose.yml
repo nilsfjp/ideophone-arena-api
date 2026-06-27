@@ -1,0 +1,53 @@
+# Local spin-up: seeded MySQL + the API jar. One command: docker compose up -d --build.
+# The Vite frontend stays on `npm run dev` and points at the api on :18081.
+# Copy .env.example -> .env and fill APP_JWT_SECRET, MYSQL_ROOT_PASSWORD, STIMULI_HOST_DIR first.
+
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      # The schema + seed must be present before the api boots: ddl-auto=validate
+      # fails fast otherwise. MySQL runs *.sql in /docker-entrypoint-initdb.d on
+      # first init (empty data volume) in filename order.
+      - ./src/main/resources/db/init/ideophone_arena.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # All runtime config arrives via env, so no application-local.properties is
+      # needed inside the image. ddl-auto stays `validate` (from application.properties).
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # No code default for the JWT secret: compose MUST supply it (fail-fast guard).
+      APP_JWT_SECRET: ${APP_JWT_SECRET}
+      # Serve /stimuli/** from the read-only bind mount below (see volumes).
+      APP_STIMULI_LOCATIONS: file:/srv/stimuli/
+    # CORS origin http://localhost:5174 (and :5173) is already configured in
+    # SecurityConfig; no override needed here.
+    ports:
+      # 18081 on the host so the container never collides with a dev backend on 8081.
+      - "18081:8081"
+    volumes:
+      # The app serves /stimuli/** from app.stimuli.locations, which on the host
+      # resolves through symlinks into the frontend repo. Bind-mount the resolved
+      # directory read-only; STIMULI_HOST_DIR is environment-specific (see .env).
+      - ${STIMULI_HOST_DIR}:/srv/stimuli:ro
+
+volumes:
+  db_data:
