@@ -622,3 +622,52 @@ None.
 
 Next single task:
 Frontend rider: honor `targetMeaningListedFirst` (needs a small DTO addition decided at that point) or proceed with the Phase-2 plan; also still pending from Session A: Vite leaderboard switch to `bestSession*` fields.
+
+## 2026-06-20 ("Rating Lab slice")
+
+Session goal:
+Add a standalone `ratings` vertical slice (entity / repository / DTO / mapper / Bean Validation / service / controller / tests) capturing a 1-7 iconicity rating per word per user, keyed `UNIQUE(user_id, ideophone_id)` with a nullable `session_id`, so the guess-vs-rating divergence can be computed later (data only, not the statistic). Minimal standalone table from roadmap step 4 — NOT the Phase-2 model.
+
+Changed:
+
+- `scripts/generate_seed_sql.py` + regenerated `ideophone_arena.sql`: new `ratings` table (`UNIQUE(user_id, ideophone_id)`, nullable `session_id`, `rating SMALLINT NOT NULL`, `response_time_ms INT`, `rated_at TIMESTAMP`, FKs to `app_users`/`ideophones`/`game_sessions`); added the matching `DROP TABLE IF EXISTS ratings;`. Seed data rows unchanged (204 ideophones / 102 rounds).
+- New `model/Rating` (`@UniqueConstraint(user_id, ideophone_id)`, nullable `session` ManyToOne, `short rating`, `@CreationTimestamp ratedAt`).
+- New `repository/RatingRepository` (`existsByUserIdAndIdeophoneId`, `findByUserIdOrderByRatedAtDesc` with `@EntityGraph(ideophone)`).
+- New DTOs `RatingRequest` (`ideophoneId` `@NotNull @Positive`; `rating` `@NotNull @Min(1) @Max(7)`; `responseTimeMs` optional `@Min(0) @Max(600000)`; `sessionUuid` optional) and `RatingResponse` (`id`/`ideophoneId`/`rating`/`responseTimeMs`/`ratedAt` only — no `user_id`/`session_id`, no entity).
+- New `mapper/RatingMapper`, `service/RatingService` (`@Transactional` create: resolve user, 404 unknown ideophone, resolve optional session with 404 unknown / 403 unowned, pre-check duplicate -> 409, `saveAndFlush` + `DataIntegrityViolationException` -> 409 backstop; `@Transactional(readOnly = true)` getMyRatings), `controller/RatingController` (`POST /api/ratings` -> 201, `GET /api/game/me/ratings`; both `@Valid`/thin, authenticated via the existing `anyRequest().authenticated()` catch-all — no SecurityConfig change).
+- New `RatingHttpTests` (3 tests). No changes to the guessing flow, conditions, difficulty, admin stats DTO, or any experiment invariant.
+- Docs: contract (new "Ratings" section + changelog), runbook (rating curl flow), grading checklist (Bean Validation + build/test evidence), punch list ticked.
+
+Proof:
+
+- `python3 scripts/generate_seed_sql.py --check` -> "SQL is up to date: 204 ideophones, 102 rounds".
+- Reseed via mysql.exe; `./mvnw spring-boot:run` with `ddl-auto=validate` -> clean start ("Started IdeophoneArenaApiApplication ... Tomcat started on port 8081").
+- `./mvnw test` -> 72 tests, 0 failures (was 69).
+- Live curl against the running backend: register -> login -> `POST /api/ratings` (rating 6) -> `201 {"id":...,"ideophoneId":1,"rating":6,"responseTimeMs":1500,"ratedAt":...}`; `GET /api/game/me/ratings` returned both ratings, most recent first; duplicate `POST` ideophone 1 -> `409`; `rating:8` -> `400 {"validationErrors":{"rating":"must be less than or equal to 7"}}`; `rating:0` -> `400`; unauthenticated `POST` -> `401`; unknown `ideophoneId` -> `404`.
+
+Result:
+Rating Lab slice complete. The `ratings` table is user-keyed (`UNIQUE(user_id, ideophone_id)`) with nullable `session_id` provenance, so a user's rating of word W can later be joined against their guess accuracy on W via `player_answers.target_ideophone_id`. Additive and non-breaking; standalone table only, Phase-2 model not started.
+
+Commit:
+Not committed (proposed message below).
+
+Blocker:
+None.
+
+Next single task:
+If/when the guess-vs-rating divergence UI is wanted, add a read-only endpoint or admin aggregate that joins `ratings` against `player_answers.target_ideophone_id` per user/word (still data, not the Phase-2 refactor).
+
+Proposed commit message:
+
+    Add standalone ratings vertical slice (1-7 iconicity rating per word per user)
+
+    User-keyed ratings table (UNIQUE(user_id, ideophone_id), nullable session_id
+    for provenance) added through scripts/generate_seed_sql.py so the guess-vs-
+    rating divergence can be computed later. POST /api/ratings (authenticated,
+    @Valid 1-7 rating, saveAndFlush + DataIntegrityViolationException -> 409 on
+    duplicate, 404 unknown ideophone, 403/404 unowned/unknown sessionUuid) returns
+    201 with the rating DTO; GET /api/game/me/ratings returns the caller's own
+    ratings. Entity/repository/DTOs/mapper/service/controller follow house style;
+    RatingHttpTests covers the round trip (suite: 72). Standalone table only - not
+    the Phase-2 model; divergence statistic not computed. Contract, runbook, and
+    grading checklist updated.

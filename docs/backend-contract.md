@@ -377,7 +377,57 @@ GET /api/game/me/attempts
 
 This is enough for minimal personal progress/history.
 
+## Ratings (2026-06-20)
+
+A standalone `ratings` table captures a 1-7 iconicity rating per word per user (mirrors the thesis Rating Task).
+It is keyed `UNIQUE(user_id, ideophone_id)` — one rating per word per user — with a nullable `session_id` for
+provenance, so a user's rating of word W can later be joined against their guess accuracy on W
+(`player_answers.target_ideophone_id`). This is the minimal standalone table only; it does **not** start the Phase-2
+`GameMode`/`PresentationMode`/`RoundTemplate`/`StimulusAsset`/`RatingAttempt` model. The divergence statistic itself is
+not computed here — only the data, with the right keys, is stored.
+
+Submit a rating (authenticated):
+
+```text
+POST /api/ratings
+```
+
+Request body (`responseTimeMs` and `sessionUuid` optional):
+
+```json
+{
+  "ideophoneId": 1,
+  "rating": 6,
+  "responseTimeMs": 1500,
+  "sessionUuid": "8e3c93f3-9ea4-4257-abd4-a9fded012ea6"
+}
+```
+
+- `ideophoneId` is required; `rating` is required and must be between `1` and `7`; `responseTimeMs`, if present, must
+  be between `0` and `600000`. Out-of-range or missing required values return `400` with a `validationErrors` map.
+- `sessionUuid` is optional; the public identifier is the UUID, never the internal id. If present it is resolved to
+  `game_sessions.id`; an unknown UUID returns `404`, and a session owned by another user returns `403`.
+- An unknown `ideophoneId` returns `404`.
+- `201 Created` returns `{ id, ideophoneId, rating, responseTimeMs, ratedAt }` (no entity, no `user_id`/`session_id`).
+- Rating the same word twice as the same user returns `409 Conflict` (mirrors the answer-race pattern: `saveAndFlush`
+  + `DataIntegrityViolationException` translation), including under concurrent duplicate submissions.
+
+Read the caller's own ratings (authenticated; mirrors `GET /api/game/me/attempts`):
+
+```text
+GET /api/game/me/ratings
+```
+
+Returns a JSON array of `{ id, ideophoneId, rating, responseTimeMs, ratedAt }`, most recent first.
+
 ## Changelog
+
+- 2026-06-20: new `ratings` table and vertical slice — `POST /api/ratings` (authenticated) stores a 1-7 rating per
+  word per user (`UNIQUE(user_id, ideophone_id)`, nullable `session_id`), returns `201` with the rating DTO, `409` on
+  duplicate, `400` on out-of-range `rating`/`responseTimeMs`, `404` on unknown ideophone, `403`/`404` on an
+  unowned/unknown `sessionUuid`. `GET /api/game/me/ratings` returns the caller's own ratings. Schema went through
+  `scripts/generate_seed_sql.py` (`--check` clean). Standalone table only — not the Phase-2 model. Non-breaking;
+  additive.
 
 - 2026-06-12 (Session B): deterministic per-session shuffle — `game_sessions.shuffle_seed` (server-generated,
   never exposed) derives round order, target identity, target side, and meaning order per the spec above;

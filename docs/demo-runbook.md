@@ -233,6 +233,27 @@ Practice audio proof:
 curl -I http://localhost:8081/stimuli/audio/p0h-sotto.m4a
 ```
 
+## Ratings (2026-06-20)
+
+Submit a 1-7 iconicity rating for a word (one per word per user). `responseTimeMs` and `sessionUuid` are optional:
+
+```sh
+curl -i -X POST http://localhost:8081/api/ratings \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"ideophoneId":1,"rating":6,"responseTimeMs":1500}'
+```
+
+Expected `201 Created` with `{ id, ideophoneId, rating, responseTimeMs, ratedAt }`. Read the caller's own ratings:
+
+```sh
+curl -i http://localhost:8081/api/game/me/ratings \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Re-rating the same word returns `409`; `rating` outside `1..7` returns `400` with a `validationErrors.rating` entry;
+an unknown `ideophoneId` returns `404`; an unauthenticated `POST` returns `401`.
+
 ## Deterministic shuffle proofs (2026-06-12)
 
 Each session derives its round order, target identities, sides, and meaning order from `game_sessions.shuffle_seed`

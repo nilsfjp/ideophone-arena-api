@@ -183,6 +183,12 @@ rg -n "@Entity" src/main/java/io/github/nilsfjp/ideophonearena/dto
 
 2026-06-07 evidence: request DTOs use Bean Validation, including required session-start `conditionName`, required positive `difficultyLevel`, and positive answer IDs; DTO package grep found no JPA annotations; password fields appear only on login/register request DTOs, not responses.
 
+2026-06-20 evidence (ratings slice): `RatingRequest` uses Bean Validation — `ideophoneId` `@NotNull @Positive`,
+`rating` `@NotNull @Min(1) @Max(7)`, `responseTimeMs` optional `@Min(0) @Max(600000)`, `sessionUuid` optional. The
+controller (`RatingController`) carries `@Valid`; `RatingResponse` exposes only `id`/`ideophoneId`/`rating`/
+`responseTimeMs`/`ratedAt` (no `user_id`/`session_id`, no entity). `RatingHttpTests` proves `rating: 8` and
+`rating: 0` return `400` with a `validationErrors.rating` entry.
+
 2026-06-10 evidence: Bean Validation completed — `SubmitAnswerRequest.responseTimeMs` is now `@NotNull @Min(0) @Max(600000)`; redundant null presence checks were removed from `GameService.validateSupportedStartRequest` (business rules — supported condition set and difficulty value — remain in the service). `RoundResponse.completed(...)` static factory removed; completion and answer-result mapping live in `GameMapper`. `GameLoopHttpTests.submitAnswerRequiresResponseTimeWithinBounds` proves missing and out-of-range `responseTimeMs` return `400` with a `validationErrors.responseTimeMs` entry.
 
 ### Mappers
@@ -506,6 +512,14 @@ loop against the derivation with stored-target verification and 409 duplicates),
 continuity and derived-target judging tests. `python scripts/generate_seed_sql.py --check` clean after the
 `shuffle_seed`/`target_ideophone_id` migration; reseed + `ddl-auto=validate` clean startup; browser loop
 (`verify-browser-loop.mjs`) played 2 practice + 30 scored rounds with zero frontend changes and zero console errors.
+
+2026-06-20 evidence (ratings slice, current): `./mvnw test` -> 72 tests, 0 failures (was 69). New `RatingHttpTests`
+(3 tests): register -> `POST /api/ratings` valid -> `201` with the rating DTO -> `GET /api/game/me/ratings` contains
+it -> duplicate `POST` -> `409` -> `rating: 8` -> `400` with `validationErrors.rating` -> `rating: 0` -> `400`;
+unauthenticated `POST` -> `401`; unknown `ideophoneId` -> `404`. `python3 scripts/generate_seed_sql.py --check` clean
+after adding the `ratings` table to the generator (`204 ideophones, 102 rounds`). Reseed via mysql.exe; clean
+`spring-boot:run` startup with `ddl-auto=validate`. Live curl reproduced `201`/array/`409`/`400`/`400`/`401`/`404`
+against the running backend.
 
 ## Documentation checklist
 
