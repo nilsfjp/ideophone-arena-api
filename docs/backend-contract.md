@@ -1,6 +1,6 @@
 # Ideophone Arena demo contract
 
-Date: 2026-06-11
+Date: 2026-06-28
 Deadline: 2026-06-05 (passed)
 
 ## Purpose

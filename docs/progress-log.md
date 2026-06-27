@@ -675,7 +675,7 @@ Proposed commit message:
 ## 2026-06-20 ("Docker compose spin-up")
 
 Session goal:
-Per `docs/SPEC-docker-compose.md`: one `docker compose up` brings up the API jar plus a seeded MySQL with the stimulus assets so a reviewer can hit the running backend on host port 18081. Packaging only -- no application-code, seed-SQL, symlink-scheme, `ddl-auto`, or Maven-dependency changes.
+Per `docs/archive/SPEC-docker-compose.md` (archived 2026-06-28): one `docker compose up` brings up the API jar plus a seeded MySQL with the stimulus assets so a reviewer can hit the running backend on host port 18081. Packaging only -- no application-code, seed-SQL, symlink-scheme, `ddl-auto`, or Maven-dependency changes.
 
 Changed:
 
@@ -708,3 +708,32 @@ None. (This machine had no container runtime; rather than punt, a rootless Docke
 
 Next single task:
 Commit the packaging files (Dockerfile, docker-compose.yml, .dockerignore, .env.example) and the doc updates with the proposed message below.
+
+## 2026-06-28 ("Docs cleanup: archive implemented specs")
+
+Session goal:
+Docs-only housekeeping on `dev`: archive the two now-implemented design specs and confirm the 2026-06-20 Docker + Rating Lab worktrees are integrated. No code, schema, or seed changes.
+
+Changed:
+
+- Moved `docs/SPEC-docker-compose.md` and `docs/SPEC-rating-lab.md` into `docs/archive/` via `git mv` (history preserved). Both features shipped on `dev` (Docker compose spin-up + standalone Rating Lab slice), so the specs are now reference history, not pending work.
+- Updated the one inbound reference (progress-log.md Docker session goal) to the new `docs/archive/SPEC-docker-compose.md` path.
+- Refreshed the `Date:` line in `docs/backend-contract.md` to 2026-06-28 (content already current through 06-20).
+
+Proof:
+
+- `grep -rn '^<<<<<<<\|^=======\|^>>>>>>>' .` -> no output (no conflict markers).
+- `./mvnw test` -> 72 tests, 0 failures, BUILD SUCCESS (no code touched).
+- `python3 scripts/generate_seed_sql.py --check` -> "SQL is up to date".
+
+Result:
+Done. The 2026-06-20 Docker and Rating Lab worktrees are integrated on `dev`; their specs are archived under `docs/archive/`. Working tree changes are docs-only.
+
+Commit:
+Not committed (proposed message below).
+
+Blocker:
+None.
+
+Next single task:
+Commit the docs cleanup with the proposed message below.
