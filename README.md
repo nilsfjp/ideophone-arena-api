@@ -44,6 +44,51 @@ Quick health check:
 curl -i http://localhost:8081/api/health
 ```
 
+## Run with Docker
+
+`docker compose up` brings up a seeded MySQL plus the API jar so a reviewer can hit the running
+backend without a local Java/MySQL setup. The Vite frontend still runs separately on `npm run dev`
+and points at the container; full-stack containerization is a separate later task.
+
+The API is published on host port **18081** (not 8081) so the container never collides with a
+manually-run dev backend on 8081.
+
+1. Create your env file from the template and fill in the blanks:
+
+   ```sh
+   cp .env.example .env
+   ```
+
+   - `APP_JWT_SECRET` — a long random string. There is no code default; compose must supply it or
+     the app fails fast.
+   - `MYSQL_ROOT_PASSWORD` — any local password for the throwaway MySQL.
+   - `STIMULI_HOST_DIR` — host path to the resolved stimulus directory that contains `audio/`
+     (e.g. `/code/js/ideophone-arena-web/dist/stimuli`). It is bind-mounted read-only into the
+     container at `/srv/stimuli`.
+
+2. Build and start:
+
+   ```sh
+   docker compose up -d --build
+   docker compose ps
+   ```
+
+3. Health check (note the 18081 port):
+
+   ```sh
+   curl -i http://localhost:18081/api/health
+   ```
+
+4. Tear down (the `-v` removes the MySQL data volume so the next start reseeds):
+
+   ```sh
+   docker compose down -v
+   ```
+
+The schema and seed are loaded by mounting `src/main/resources/db/init/ideophone_arena.sql` into the
+db container's init directory; `ddl-auto` stays `validate`. CORS for `http://localhost:5174` is
+already configured in the app, so the Vite frontend works against `http://localhost:18081`.
+
 ## Test
 
 ```sh

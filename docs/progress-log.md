@@ -622,3 +622,40 @@ None.
 
 Next single task:
 Frontend rider: honor `targetMeaningListedFirst` (needs a small DTO addition decided at that point) or proceed with the Phase-2 plan; also still pending from Session A: Vite leaderboard switch to `bestSession*` fields.
+
+## 2026-06-20 ("Docker compose spin-up")
+
+Session goal:
+Per `docs/SPEC-docker-compose.md`: one `docker compose up` brings up the API jar plus a seeded MySQL with the stimulus assets so a reviewer can hit the running backend on host port 18081. Packaging only -- no application-code, seed-SQL, symlink-scheme, `ddl-auto`, or Maven-dependency changes.
+
+Changed:
+
+- `Dockerfile` (repo root): multi-stage. Build stage on `maven:3.9-eclipse-temurin-21` copies `.mvn`/`mvnw`/`pom.xml`/`src` and runs `./mvnw -q -DskipTests package`; runtime stage on `eclipse-temurin:21-jre` copies the jar, creates a non-root `arena` user, exposes 8081, and runs `java -jar /app/app.jar`.
+- `docker-compose.yml` (repo root): `db` (mysql:8.4) mounts `src/main/resources/db/init/ideophone_arena.sql` -> `/docker-entrypoint-initdb.d/01-schema.sql:ro` (mandatory: `ddl-auto=validate` needs the schema/seed present at boot), named `db_data` volume, `mysqladmin ping` healthcheck. `api` builds from the Dockerfile, `depends_on: db { condition: service_healthy }`, env supplies `SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${MYSQL_DATABASE}` + root user/pw, `APP_JWT_SECRET=${APP_JWT_SECRET}` (no code default), `APP_STIMULI_LOCATIONS=file:/srv/stimuli/`; publishes `18081:8081`; bind-mounts `${STIMULI_HOST_DIR}` read-only at `/srv/stimuli`. `ddl-auto` left at `validate`.
+- `.dockerignore`: excludes `target/`, `.git/`, IDE files, `application-local.properties`, `.env*` (keeps `.env.example`), docs.
+- `.env.example`: `APP_JWT_SECRET=`, `MYSQL_ROOT_PASSWORD=`, `MYSQL_DATABASE=ideophone_arena`, `STIMULI_HOST_DIR=`.
+- Docs: README "Run with Docker" section; demo-runbook "Start Backend with Docker Compose" section; grading-checklist 2026-06-20 evidence note. No app code, seed SQL, symlinks, `ddl-auto`, or `pom.xml` dependencies touched. CORS for `http://localhost:5174` was already configured in `SecurityConfig`, so no override was needed.
+
+Proof (all 8 spec verification steps executed and green):
+
+- Step 1 -- `./mvnw test` -> 69 tests, 0 failures, BUILD SUCCESS (no app code changed). (This worktree was missing the gitignored `application-local.properties`; copied it from the main checkout `/code/java/ideophone-arena-api` for the local-profile MySQL/JWT config -- gitignored, working tree stays clean.)
+- Steps 2-8 were run against a user-space **rootless Docker** (Docker Engine 29.6.0 static binaries + slirp4netns 1.3.4 + compose v5.1.4, all under `~/dockerbin`/`~/bin`/`~/.docker`; no root, no sudo). Daemon ran on overlay2 with the expected rootless cgroup warnings (no cpuset/io delegation, harmless).
+- Step 2 -- `docker compose up -d --build`: multi-stage image built (Maven build inside the container), `mysql:8.4` pulled, db came up healthy, then api started. `.env` was the pre-filled gitignored file (cp .env.example .env equivalent).
+- Step 3 -- `docker compose ps`: `arena-api-docker-db-1  mysql:8.4 ... Up (healthy)`; `arena-api-docker-api-1 ... Up  0.0.0.0:18081->8081/tcp`.
+- Step 4 -- `curl -i http://localhost:18081/api/health` -> `HTTP/1.1 200`, body `{"status":"ok"}`, `Content-Type: application/json`.
+- Step 5 -- register `POST /api/auth/register` -> `HTTP/1.1 201`; login `POST /api/auth/login` -> `200` with a 3-segment JWT (179 chars).
+- Step 6 -- `curl -I http://localhost:18081/stimuli/audio/a0h-gosogoso.m4a` -> `HTTP/1.1 200`, `Content-Type: audio/mp4`, `Content-Length: 28902` (served from the read-only `/srv/stimuli` bind mount).
+- Step 7 -- `docker compose run --rm -e APP_JWT_SECRET= api` -> container exits 1 with `IllegalStateException: app.jwt.secret must be set to a non-blank value` (JwtService.java:36); the fail-fast guard survives containerization.
+- Step 8 -- `docker compose down -v` -> exit 0; both containers, the `db_data` volume, and the network removed; `docker compose ps -a` empty, no arena volumes remain.
+
+Result:
+Done and fully proven. The compose stack builds the API jar and a seeded MySQL, comes up healthy on host port 18081, serves the API and `/stimuli/**`, and tears down cleanly; the JWT fail-fast guard holds in the container. No application code, seed SQL, symlink scheme, `ddl-auto`, or Maven dependencies were changed.
+
+Commit:
+Not committed (proposed message below).
+
+Blocker:
+None. (This machine had no container runtime; rather than punt, a rootless Docker was set up in the user's home -- no sudo/password needed -- to run the full oracle. It writes only to `~/dockerbin`, `~/bin/slirp4netns`, `~/.docker/cli-plugins/docker-compose`, and the image/build cache at `~/.local/share/docker` (~1.9G). The daemon was stopped after verification (no unattended process left). To reuse: `source ~/dockerbin/env.sh` then `dockerd-rootless.sh &`. To remove entirely: `rm -rf ~/dockerbin ~/bin/slirp4netns ~/.docker/cli-plugins/docker-compose ~/.local/share/docker ~/.config/docker`.)
+
+Next single task:
+Commit the packaging files (Dockerfile, docker-compose.yml, .dockerignore, .env.example) and the doc updates with the proposed message below.
