@@ -1,5 +1,6 @@
 package io.github.nilsfjp.ideophonearena.service;
 
+import io.github.nilsfjp.ideophonearena.dto.RatingPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingRequest;
 import io.github.nilsfjp.ideophonearena.dto.RatingResponse;
 import io.github.nilsfjp.ideophonearena.exception.ConflictException;
@@ -14,7 +15,6 @@ import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
 import io.github.nilsfjp.ideophonearena.repository.RatingRepository;
-import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RatingService {
 
-    private static final int DEFAULT_RATING_LIMIT = 500;
+    private static final int MAX_RATINGS_PAGE_SIZE = 50;
 
     private final AppUserRepository appUserRepository;
     private final IdeophoneRepository ideophoneRepository;
@@ -67,13 +67,15 @@ public class RatingService {
     }
 
     @Transactional(readOnly = true)
-    public List<RatingResponse> getMyRatings(UserDetails userDetails) {
+    public RatingPageResponse getMyRatings(UserDetails userDetails, int page, int size) {
         AppUser user = getCurrentUser(userDetails);
-        return ratingRepository.findByUserIdOrderByRatedAtDesc(user.getId(),
-                        PageRequest.of(0, DEFAULT_RATING_LIMIT))
-                .stream()
-                .map(ratingMapper::toResponse)
-                .toList();
+        // Out-of-range params are clamped rather than rejected; the response
+        // metadata reports the effective values (mirrors ScoreService).
+        int effectivePage = Math.max(page, 0);
+        int effectiveSize = Math.min(Math.max(size, 1), MAX_RATINGS_PAGE_SIZE);
+        return ratingMapper.toPageResponse(
+                ratingRepository.findByUserIdOrderByRatedAtDesc(user.getId(),
+                        PageRequest.of(effectivePage, effectiveSize)));
     }
 
     private GameSession resolveSession(AppUser user, String sessionUuid) {

@@ -103,4 +103,18 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             order by ideophone.modality
             """)
     List<ModalityAnswerStatsProjection> aggregateAnswersByModality();
+
+    // Guess accuracy per ideophone: grouped by the round's derived target
+    // (target_ideophone_id), so this measures how guessable each word's meaning
+    // is. Practice answers are never persisted, so no filter is needed.
+    @Query("""
+            select
+                ideophone.id as ideophoneId,
+                count(answer.id) as guesses,
+                sum(case when answer.correct = true then 1 else 0 end) as correct
+            from PlayerAnswer answer
+            join answer.targetIdeophone ideophone
+            group by ideophone.id
+            """)
+    List<IdeophoneGuessStatsProjection> aggregateGuessStatsByIdeophone();
 }

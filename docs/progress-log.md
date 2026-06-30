@@ -737,3 +737,32 @@ None.
 
 Next single task:
 Commit the docs cleanup with the proposed message below.
+
+## 2026-06-30 ("Rating Lab backend: pagination + divergence (NIL-32/33/34)")
+
+Session goal:
+Finish the Rating Lab backend vertical on `dev`: paginate `GET /api/game/me/ratings` to the leaderboard convention and give `RatingController` Swagger metadata (NIL-32); add a public read-only guess-vs-rating divergence endpoint (NIL-33); cover both with MockMvc tests and update the contract/checklist (NIL-34). No schema change, no new dependencies.
+
+Changed:
+
+- NIL-32: `RatingRepository.findByUserIdOrderByRatedAtDesc` now returns `Page<Rating>` (kept the to-one `@EntityGraph`); new `RatingPageResponse` mirrors `LeaderboardPageResponse`; `RatingMapper.toPageResponse`; `RatingService.getMyRatings(userDetails, page, size)` clamps size to 50 (mirrors `ScoreService`); `RatingController` gained `page`/`size` params, returns the wrapper, and carries `@Tag`/`@Operation`. Response shape changed bare-array -> wrapper (**breaking** for the Vite frontend; needs a `.entries` rider).
+- NIL-33: new `GET /api/research/divergence` (public, mirrors the leaderboard permitAll). Two `GROUP BY` interface projections (`IdeophoneGuessStatsProjection` via `PlayerAnswerRepository.aggregateGuessStatsByIdeophone`, `IdeophoneRatingStatsProjection` via `RatingRepository.aggregateRatingStatsByIdeophone`) merged per ideophone in `ResearchService` the way `AdminStatsService` merges condition stats -- deliberately two queries, not one join, so a cartesian product cannot inflate guess accuracy. New `DivergenceResponse` DTO, `ResearchMapper`, `ResearchController` (`@Tag` "Research"). One row per word with >=1 guess or rating; `guessAccuracy`/`meanRating` are `null` for the zero-count side (clearer than `0.0`). Count fields are `guessCount`/`ratingCount`, not `nGuesses`/`nRatings`: a `getNGuesses` getter serializes as `NGuesses` under the Java Beans two-leading-capitals rule.
+- NIL-34: `RatingHttpTests` GET assertions moved to `.entries` + a pagination/size-clamp test; new `DivergenceHttpTests` (public access + per-row invariants, deterministic rated-word row, guessed-word row through the session/answer flow). Updated `docs/backend-contract.md` (ratings section, new divergence section, changelog) and `docs/backend-grading-checklist.md` (authorization + build/test evidence).
+
+Proof:
+
+- `./mvnw test` -> 76 tests, 0 failures, BUILD SUCCESS (was 72).
+- `python3 scripts/generate_seed_sql.py --check` -> "SQL is up to date: 204 ideophones, 102 rounds" (no schema change).
+- Live curl against `http://localhost:8081`: register -> `201`; `POST /api/ratings` -> `201`; `GET /api/game/me/ratings?page=0&size=5` -> `{entries,page,size,totalElements,totalPages}`; `GET /api/research/divergence` (no auth) -> `200`, 87 rows (a `guessCount=1`/`ratingCount=1` row showed `guessAccuracy:0.0` paired with `meanRating:6.0`); `/v3/api-docs` tags `[Admin, Ratings, Research]`, both new paths present.
+
+Result:
+Done and proven. NIL-32 and NIL-33 are implemented to course conventions; NIL-34 tests and docs are in. Working tree is a clean, reviewable set of additions/edits. The thesis showcase words (dokidoki/sakutto/shobon) have no guesses or ratings in the dev DB yet, so endpoint directionality awaits real participant data; the pairing mechanism is proven.
+
+Commit:
+Not committed (commits are the user's).
+
+Blocker:
+None.
+
+Next single task:
+Frontend rider: update the Vite app's `getMyRatings()` to read `.entries` (breaking pagination change), and optionally surface `/api/research/divergence` on the W29 landing page.

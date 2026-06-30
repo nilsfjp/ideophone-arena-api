@@ -276,6 +276,7 @@ GET  /api/game/sessions/{uuid}/rounds/next  authenticated
 POST /api/game/sessions/{uuid}/answers      authenticated
 GET  /api/game/me/attempts       authenticated
 GET  /api/leaderboard            public (paginated)
+GET  /api/research/divergence    public (read-only aggregate)
 GET  /api/admin/stats            ROLE_ADMIN
 GET  /stimuli/**                 public
 GET  /v3/api-docs, /swagger-ui/** public (demo convenience)
@@ -298,6 +299,14 @@ and `/swagger-ui/**` are deliberately public for the course demo. The ERROR disp
 `sendError` 403 responses are not overwritten to `401` on real Tomcat (live curl previously reproduced the
 overwrite; after the fix the live proof returned `401` unauthenticated, `403` for `ROLE_USER`, `200` for the seeded
 `arena_admin`). Full suite: `./mvnw test` -> 47 tests, 0 failures.
+
+2026-06-30 evidence (research divergence public; ratings pagination): `SecurityConfig` permits
+`GET /api/research/divergence` next to `GET /api/leaderboard` (public read-only population aggregate, no per-user
+data); everything else still falls through to `anyRequest().authenticated()`.
+`DivergenceHttpTests.divergenceIsPublicAndRowsAreWellFormed` proves an unauthenticated `GET` returns `200` with the
+array shape and per-row invariants. `GET /api/game/me/ratings` stays authenticated and now returns a paginated
+`RatingPageResponse` (size clamped to 50). Live curl: unauthenticated `GET /api/research/divergence` -> `200` (87
+rows); `/v3/api-docs` lists the `Ratings` and `Research` tags and both paths.
 
 ### CORS
 
@@ -533,6 +542,20 @@ fail-fast guard is preserved (compose supplies `APP_JWT_SECRET`, no code default
 - up, db healthy / api up on `:18081`, `/api/health` 200, register 201 / login 200 + JWT, stimuli
   HEAD 200 `audio/mp4`, `APP_JWT_SECRET`-unset fail-fast exit 1, `down -v` clean) -- run against a
   user-space rootless Docker since this box had no daemon; see `docs/progress-log.md` for the full output.
+
+2026-06-30 evidence (NIL-32/33/34, current): `./mvnw test` -> 76 tests, 0 failures (was 72).
+`GET /api/game/me/ratings` is paginated into a `RatingPageResponse` wrapper (mirrors `LeaderboardPageResponse`, size
+clamped to 50); `RatingController` gained `@Tag`/`@Operation`. New public read-only `GET /api/research/divergence`
+pairs per-ideophone guess accuracy (`player_answers.target_ideophone_id`) with mean rating (`ratings`) via two merged
+`GROUP BY` projections (`PlayerAnswerRepository.aggregateGuessStatsByIdeophone`,
+`RatingRepository.aggregateRatingStatsByIdeophone`) — no schema change, no cartesian join; zero-count sides encode as
+`null`. New `DivergenceHttpTests` (3: public access + per-row invariants, deterministic rated-word row, guessed-word
+row through the session/answer flow); `RatingHttpTests` gained a pagination/size-clamp test and moved its GET
+assertions to `.entries`. `python3 scripts/generate_seed_sql.py --check` clean (`204 ideophones, 102 rounds`). Live
+curl against `http://localhost:8081`: register -> `201`, `POST /api/ratings` -> `201`,
+`GET /api/game/me/ratings?page=0&size=5` -> wrapper (`entries`/`page`/`size`/`totalElements`/`totalPages`),
+`GET /api/research/divergence` (no auth) -> `200` with 87 rows (a `guessCount=1`/`ratingCount=1` row showed
+`guessAccuracy:0.0` paired with `meanRating:6.0`), `/v3/api-docs` tags `[Admin, Ratings, Research]`.
 
 ## Documentation checklist
 

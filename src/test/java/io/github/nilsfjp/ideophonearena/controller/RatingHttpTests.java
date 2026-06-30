@@ -55,17 +55,17 @@ class RatingHttpTests {
                 .getContentAsString();
         Number createdId = JsonPath.read(createdJson, "$.id");
 
-        // GET /api/game/me/ratings contains the new rating.
+        // GET /api/game/me/ratings returns the paginated wrapper containing the new rating.
         String myRatingsJson = mockMvc.perform(get("/api/game/me/ratings")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        assertEquals(1, ((java.util.List<?>) JsonPath.read(myRatingsJson, "$")).size());
-        assertEquals(createdId.longValue(), ((Number) JsonPath.read(myRatingsJson, "$[0].id")).longValue());
-        assertEquals(ideophoneId, ((Number) JsonPath.read(myRatingsJson, "$[0].ideophoneId")).longValue());
-        assertEquals(5, ((Number) JsonPath.read(myRatingsJson, "$[0].rating")).intValue());
+        assertEquals(1, ((java.util.List<?>) JsonPath.read(myRatingsJson, "$.entries")).size());
+        assertEquals(createdId.longValue(), ((Number) JsonPath.read(myRatingsJson, "$.entries[0].id")).longValue());
+        assertEquals(ideophoneId, ((Number) JsonPath.read(myRatingsJson, "$.entries[0].ideophoneId")).longValue());
+        assertEquals(5, ((Number) JsonPath.read(myRatingsJson, "$.entries[0].rating")).intValue());
 
         // Re-rating the same word for the same user -> 409.
         mockMvc.perform(post("/api/ratings")
@@ -96,6 +96,49 @@ class RatingHttpTests {
                                 """.formatted(ideophoneId)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.validationErrors.rating").exists());
+    }
+
+    @Test
+    void myRatingsArePaginatedAndSizeIsClamped() throws Exception {
+        java.util.List<Long> ideophoneIds = distinctIdeophoneIds(3);
+        String suffix = Long.toString(System.nanoTime());
+        String token = registerAndGetToken("rating_page_" + suffix);
+
+        int[] ratingValues = {5, 4, 6};
+        for (int i = 0; i < ideophoneIds.size(); i++) {
+            mockMvc.perform(post("/api/ratings")
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"ideophoneId":%d,"rating":%d}
+                                    """.formatted(ideophoneIds.get(i), ratingValues[i])))
+                    .andExpect(status().isCreated());
+        }
+
+        // First page of size 2: two of three entries, wrapper metadata present.
+        mockMvc.perform(get("/api/game/me/ratings?page=0&size=2")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.entries.length()").value(2))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalPages").value(2));
+
+        // Second page holds the remaining entry.
+        mockMvc.perform(get("/api/game/me/ratings?page=1&size=2")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.entries.length()").value(1))
+                .andExpect(jsonPath("$.page").value(1));
+
+        // size above the cap is clamped to 50; all three entries fit on one page.
+        mockMvc.perform(get("/api/game/me/ratings?size=999")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size").value(50))
+                .andExpect(jsonPath("$.entries.length()").value(3))
+                .andExpect(jsonPath("$.totalElements").value(3));
     }
 
     @Test
@@ -136,6 +179,14 @@ class RatingHttpTests {
                         "rating-test-" + System.nanoTime() + ".mp4",
                         Modality.AUDITORY
                 )).getId());
+    }
+
+    private java.util.List<Long> distinctIdeophoneIds(int n) {
+        return ideophoneRepository.findAll().stream()
+                .map(Ideophone::getId)
+                .distinct()
+                .limit(n)
+                .toList();
     }
 
     private String registerAndGetToken(String username) throws Exception {

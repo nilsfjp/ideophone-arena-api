@@ -1,6 +1,6 @@
 # Ideophone Arena demo contract
 
-Date: 2026-06-28
+Date: 2026-06-30
 Deadline: 2026-06-05 (passed)
 
 ## Purpose
@@ -412,15 +412,78 @@ Request body (`responseTimeMs` and `sessionUuid` optional):
 - Rating the same word twice as the same user returns `409 Conflict` (mirrors the answer-race pattern: `saveAndFlush`
   + `DataIntegrityViolationException` translation), including under concurrent duplicate submissions.
 
-Read the caller's own ratings (authenticated; mirrors `GET /api/game/me/attempts`):
+Read the caller's own ratings, paginated (authenticated; mirrors the public leaderboard wrapper):
 
 ```text
-GET /api/game/me/ratings
+GET /api/game/me/ratings?page=0&size=10
 ```
 
-Returns a JSON array of `{ id, ideophoneId, rating, responseTimeMs, ratedAt }`, most recent first.
+Query params: `page` (default `0`, clamped to `>= 0`) and `size` (default `10`, clamped to `1..50`). Out-of-range
+values are clamped, not rejected; the response metadata reports the effective values.
+
+Response shape (entries are `{ id, ideophoneId, rating, responseTimeMs, ratedAt }`, most recent first):
+
+```json
+{
+  "entries": [
+    { "id": 15, "ideophoneId": 1, "rating": 6, "responseTimeMs": 1500, "ratedAt": "2026-06-30T19:40:16Z" }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
+**Breaking change for the frontend (2026-06-30):** the response is now a wrapper object instead of a bare array,
+mirroring the leaderboard change. The Vite app must read `.entries`.
+
+## Guess-vs-rating divergence (2026-06-30)
+
+A public, read-only population aggregate for the (upcoming) landing page: per ideophone, how guessable its meaning is
+versus how iconic players rate it.
+
+```text
+GET /api/research/divergence
+```
+
+Public (no authentication), like `GET /api/leaderboard`. Returns a JSON array with one row per ideophone that has at
+least one guess **or** one rating (words with neither are omitted), ordered by `ideophoneId` (illustrative values):
+
+```json
+[
+  {
+    "ideophoneId": 9,
+    "romaji": "dokidoki",
+    "gloss": "...",
+    "modality": "INTEROCEPTIVE",
+    "guessAccuracy": 0.62,
+    "guessCount": 120,
+    "meanRating": 6.1,
+    "ratingCount": 18
+  }
+]
+```
+
+- `guessAccuracy` is the fraction of guesses correct for that word, from `player_answers.target_ideophone_id` (the
+  round's derived target — the word the player had to identify). It is **`null`** when `guessCount` is `0` (no guesses
+  yet), not `0.0`, so "no data" stays distinct from "always wrong". Likewise `meanRating` (mean of the 1-7 `ratings`) is
+  **`null`** when `ratingCount` is `0`. Clients gate on `guessCount`/`ratingCount`.
+- No schema change: both aggregates read existing tables. They are two separate `GROUP BY` queries merged per word in
+  the service (a single join across `player_answers` and `ratings` would form a cartesian product and inflate guess
+  accuracy).
+- The divergence is not reduced to one number server-side; each row pairs the two measures and the client contrasts them.
 
 ## Changelog
+
+- 2026-06-30: `GET /api/game/me/ratings` is now **paginated** — a wrapper object (`entries` + `page`/`size`/
+  `totalElements`/`totalPages`; `page`/`size` query params, size clamped to `1..50`) instead of a bare array.
+  **Breaking for the Vite frontend** until it reads `.entries` (mirrors the leaderboard change). `RatingController`
+  gained Swagger `@Tag`/`@Operation`. New public read-only `GET /api/research/divergence` returns per-ideophone guess
+  accuracy (`player_answers.target_ideophone_id`) vs mean rating (`ratings`), one row per word that has any data,
+  `null` for the zero-count side; no schema change (two merged `GROUP BY` projections, no cartesian join). Tests:
+  `RatingHttpTests` (+1 pagination/size-clamp test; GET assertions moved to `.entries`) and new `DivergenceHttpTests`
+  (3). `./mvnw test` -> 76 tests, 0 failures; `python3 scripts/generate_seed_sql.py --check` clean.
 
 - 2026-06-20: new `ratings` table and vertical slice — `POST /api/ratings` (authenticated) stores a 1-7 rating per
   word per user (`UNIQUE(user_id, ideophone_id)`, nullable `session_id`), returns `201` with the rating DTO, `409` on
