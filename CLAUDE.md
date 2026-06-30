@@ -1,1 +1,1 @@
-.AGENTS.backend.md
+@AGENTS.md
