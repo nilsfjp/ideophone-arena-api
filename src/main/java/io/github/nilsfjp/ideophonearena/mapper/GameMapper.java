@@ -48,6 +48,7 @@ public class GameMapper {
                 round.getConditionName(),
                 round.getDifficultyLevel(),
                 round.isPractice(),
+                derivedRound.isTargetMeaningListedFirst(),
                 new TranslationResponse(derivedRound.getTarget().getGloss(), derivedRound.getOther().getGloss()),
                 toIdeophoneResponse(derivedRound.getLeft()),
                 toIdeophoneResponse(derivedRound.getRight()),
@@ -57,7 +58,7 @@ public class GameMapper {
 
     public RoundResponse toCompletedRoundResponse(GameSession session, String message) {
         return new RoundResponse(true, message, session.getSessionUuid(), null, null,
-                session.getConditionName(), session.getDifficultyLevel(), false, null, null, null, null);
+                session.getConditionName(), session.getDifficultyLevel(), false, false, null, null, null, null);
     }
 
     public AnswerResultResponse toAnswerResultResponse(DerivedRound derivedRound, Ideophone selectedIdeophone,

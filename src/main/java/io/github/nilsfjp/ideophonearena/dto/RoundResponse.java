@@ -12,21 +12,24 @@ public class RoundResponse {
     private ConditionName conditionName;
     private int difficultyLevel;
     private boolean practice;
+    private boolean targetMeaningListedFirst;
     private TranslationResponse translations;
     private IdeophoneChoiceResponse left;
     private IdeophoneChoiceResponse right;
     private TimingResponse timing;
 
     public RoundResponse(String sessionUuid, Long roundId, String targetTranslation, ConditionName conditionName,
-            int difficultyLevel, boolean practice, TranslationResponse translations, IdeophoneChoiceResponse left,
+            int difficultyLevel, boolean practice, boolean targetMeaningListedFirst,
+            TranslationResponse translations, IdeophoneChoiceResponse left,
             IdeophoneChoiceResponse right, TimingResponse timing) {
         this(false, null, sessionUuid, roundId, targetTranslation, conditionName, difficultyLevel, practice,
-                translations, left, right, timing);
+                targetMeaningListedFirst, translations, left, right, timing);
     }
 
     public RoundResponse(boolean completed, String message, String sessionUuid, Long roundId, String targetTranslation,
-            ConditionName conditionName, int difficultyLevel, boolean practice, TranslationResponse translations,
-            IdeophoneChoiceResponse left, IdeophoneChoiceResponse right, TimingResponse timing) {
+            ConditionName conditionName, int difficultyLevel, boolean practice, boolean targetMeaningListedFirst,
+            TranslationResponse translations, IdeophoneChoiceResponse left, IdeophoneChoiceResponse right,
+            TimingResponse timing) {
         this.completed = completed;
         this.message = message;
         this.sessionUuid = sessionUuid;
@@ -35,6 +38,7 @@ public class RoundResponse {
         this.conditionName = conditionName;
         this.difficultyLevel = difficultyLevel;
         this.practice = practice;
+        this.targetMeaningListedFirst = targetMeaningListedFirst;
         this.translations = translations;
         this.left = left;
         this.right = right;
@@ -75,6 +79,13 @@ public class RoundResponse {
 
     public boolean isPractice() {
         return practice;
+    }
+
+    // Seed-drawn presentation flag (see the contract's derivation section):
+    // whether the target meaning is listed first of the two meaning lines.
+    // False on completed-session sentinels, which carry no translations.
+    public boolean isTargetMeaningListedFirst() {
+        return targetMeaningListedFirst;
     }
 
     public TranslationResponse getTranslations() {

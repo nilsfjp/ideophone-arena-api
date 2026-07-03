@@ -1,5 +1,6 @@
 package io.github.nilsfjp.ideophonearena.service;
 
+import io.github.nilsfjp.ideophonearena.dto.RatableWordPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingRequest;
 import io.github.nilsfjp.ideophonearena.dto.RatingResponse;
@@ -14,6 +15,7 @@ import io.github.nilsfjp.ideophonearena.model.Rating;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
+import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import io.github.nilsfjp.ideophonearena.repository.RatingRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -30,15 +32,17 @@ public class RatingService {
     private final IdeophoneRepository ideophoneRepository;
     private final GameSessionRepository gameSessionRepository;
     private final RatingRepository ratingRepository;
+    private final PlayerAnswerRepository playerAnswerRepository;
     private final RatingMapper ratingMapper;
 
     public RatingService(AppUserRepository appUserRepository, IdeophoneRepository ideophoneRepository,
             GameSessionRepository gameSessionRepository, RatingRepository ratingRepository,
-            RatingMapper ratingMapper) {
+            PlayerAnswerRepository playerAnswerRepository, RatingMapper ratingMapper) {
         this.appUserRepository = appUserRepository;
         this.ideophoneRepository = ideophoneRepository;
         this.gameSessionRepository = gameSessionRepository;
         this.ratingRepository = ratingRepository;
+        this.playerAnswerRepository = playerAnswerRepository;
         this.ratingMapper = ratingMapper;
     }
 
@@ -75,6 +79,20 @@ public class RatingService {
         int effectiveSize = Math.min(Math.max(size, 1), MAX_RATINGS_PAGE_SIZE);
         return ratingMapper.toPageResponse(
                 ratingRepository.findByUserIdOrderByRatedAtDesc(user.getId(),
+                        PageRequest.of(effectivePage, effectiveSize)));
+    }
+
+    // The thesis contamination rule, enforced server-side: rating shows a
+    // word's meaning, so only words whose mapping an answered Choosing round
+    // already revealed are ratable. Practice words never qualify (their
+    // answers are never persisted); already-rated words drop out.
+    @Transactional(readOnly = true)
+    public RatableWordPageResponse getMyRatableWords(UserDetails userDetails, int page, int size) {
+        AppUser user = getCurrentUser(userDetails);
+        int effectivePage = Math.max(page, 0);
+        int effectiveSize = Math.min(Math.max(size, 1), MAX_RATINGS_PAGE_SIZE);
+        return ratingMapper.toRatableWordPageResponse(
+                playerAnswerRepository.findRatableWordsByUserId(user.getId(),
                         PageRequest.of(effectivePage, effectiveSize)));
     }
 

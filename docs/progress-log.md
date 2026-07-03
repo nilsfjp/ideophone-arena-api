@@ -766,3 +766,68 @@ None.
 
 Next single task:
 Frontend rider: update the Vite app's `getMyRatings()` to read `.entries` (breaking pagination change), and optionally surface `/api/research/divergence` on the W29 landing page.
+
+## 2026-07-03 ("27E: meaning-order draw exposed + server-side ratable pool (NIL-40)")
+
+Session goal:
+Close W27 on `dev`: (a) expose the already-drawn `targetMeaningListedFirst` on the round DTO so the frontend can
+honor the meaning-line draw — shuffler untouched, the stream consumption stays final; (b) move the Rating Lab's
+word pool server-side as read-only `GET /api/game/me/ratable-words`, enforcing the thesis contamination rule in the
+backend and clearing the W30 multi-device blocker. No schema change, no seed change, no new dependencies.
+
+Changed:
+
+- `RoundResponse` gained the additive boolean `targetMeaningListedFirst` (both constructors; `false` on the
+  completed-session sentinel, which carries no translations); `GameMapper.toRoundResponse` passes
+  `DerivedRound.isTargetMeaningListedFirst()` through. `RoundShuffler` and the draw order are untouched.
+- New authenticated `GET /api/game/me/ratable-words`, paginated `{entries, ...}` wrapper mirroring `/me/ratings`
+  (identical clamps): `PlayerAnswerRepository.findRatableWordsByUserId` is one JPQL `GROUP BY` over both members of
+  the caller's answered rounds with a `NOT EXISTS` against `ratings`, ordered by first encounter (ideophone-id
+  tiebreak) so the pool is byte-identical across devices; `RatableWordProjection` (interface projection per the
+  AdminStats precedent), `RatableWordResponse`/`RatableWordPageResponse` DTOs, `RatingMapper.toRatableWord*`,
+  `RatingService.getMyRatableWords` (`@Transactional(readOnly = true)`), thin `RatingController` endpoint with
+  `@Operation`. The `round.practice = false` predicate is defensive only — practice answers are never persisted.
+  `meaning` is the word's own gloss: exactly the mapping the round feedback revealed.
+- Tests: `RoundResponseSerializationTests` covers the new property; `ShuffledSessionHttpTests.assertServedAsDerived`
+  now asserts the served flag equals the seed derivation on every round; new `RatableWordsHttpTests` (4 tests —
+  pool contents/meanings + practice exclusion + duplicate-encounter dedup + rated-word removal through the real
+  HTTP answer flow; per-user scoping including a foreign rating being a no-op; unauthenticated 401; pagination
+  clamps).
+- `scripts/cleanup-test-accounts.sql`: browser-loop accounts rate a word since 27D, so the `app_users` delete
+  now hits the `ratings` FKs — added a leading `ratings` delete (by user; also unblocks `game_sessions` for
+  pre-27E session-linked ratings). Not executed this session; the two `browser_loop_*` proof accounts from the
+  27E runs are still in the dev DB.
+- Docs: `backend-contract.md` (derivation item 4 and both Consequences bullets updated — the flag is now exposed,
+  not reserved; new "Ratable words (2026-07-03)" section; changelog bullet), `backend-grading-checklist.md`
+  (expected-contract line, authorization evidence, build/test evidence), `demo-runbook.md` (ratable-words curl).
+
+Proof:
+
+- `./mvnw test` -> 80 tests, 0 failures, BUILD SUCCESS (was 76).
+- Live curl against a rebuilt `http://localhost:8081`: register -> `201`; round payloads carry
+  `targetMeaningListedFirst` booleans; after 2 practice + 1 scored answer, `GET /api/game/me/ratable-words` ->
+  `200` wrapper with exactly the scored round's 2 words (practice words absent, `meaning` = each word's gloss);
+  `POST /api/ratings` for one -> `201`; re-fetch -> `totalElements` 1; unauthenticated -> `401`; `/v3/api-docs`
+  lists the path.
+- Frontend end-to-end proof (browser loop, desktop and 375px) recorded in the web repo's progress log: per-round
+  DOM meaning-line order matched each round's own flag, refetch determinism held, and a fresh client saw the
+  identical pool.
+
+Result:
+Done and proven. Both 27E jobs are additive and to house conventions; the contamination rule now lives server-side
+and the round DTO exposes the full derivation. Clean, reviewable tree.
+
+Commit:
+Not committed (commits are the user's). Proposed message:
+"expose the meaning-order draw on the round DTO and serve the ratable-words pool (NIL-40)" — body: RoundResponse
+gains seed-drawn targetMeaningListedFirst (GameMapper pass-through, shuffler untouched, false on the completion
+sentinel); new authed GET /api/game/me/ratable-words serves encountered-but-unrated words in the {entries,...}
+wrapper via one JPQL GROUP BY + NOT EXISTS, first-encounter order; RatableWordsHttpTests + per-round flag
+assertion in ShuffledSessionHttpTests; contract/checklist/runbook updated. No schema change.
+
+Blocker:
+None.
+
+Next single task:
+NIL-62 free-form-entry build, from the kickoff prompt the NIL-57 architecture session emits (NIL-57 itself is a
+chat session, not Claude Code).

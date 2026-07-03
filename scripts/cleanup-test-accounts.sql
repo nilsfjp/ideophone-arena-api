@@ -1,12 +1,19 @@
 -- Removes locally registered browser_loop_* automation accounts (created by
--- browser-based test loops, not by the seed) together with their sessions and
--- answers, so they stop appearing on the leaderboard. Idempotent: running it
--- again deletes nothing. FK order: player_answers -> game_sessions -> app_users.
+-- browser-based test loops, not by the seed) together with their ratings,
+-- sessions, and answers, so they stop appearing on the leaderboard.
+-- Idempotent: running it again deletes nothing. FK order:
+-- ratings -> player_answers -> game_sessions -> app_users (ratings reference
+-- both app_users and, for pre-27E rows, game_sessions).
 --
 -- Usage (Windows mysql.exe from WSL, see docs/demo-runbook.md):
 --   mysql.exe -u root -p"$PW" --default-character-set=utf8mb4 < scripts/cleanup-test-accounts.sql
 
 USE ideophone_arena;
+
+DELETE ratings
+FROM ratings
+         JOIN app_users ON ratings.user_id = app_users.id
+WHERE app_users.username LIKE 'browser\_loop\_%';
 
 DELETE player_answers
 FROM player_answers

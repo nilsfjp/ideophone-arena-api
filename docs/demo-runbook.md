@@ -288,6 +288,18 @@ curl -i http://localhost:8081/api/game/me/ratings \
 Re-rating the same word returns `409`; `rating` outside `1..7` returns `400` with a `validationErrors.rating` entry;
 an unknown `ideophoneId` returns `404`; an unauthenticated `POST` returns `401`.
 
+Ratable words — the Rating Lab pool (2026-07-03; answer at least one scored round first, then):
+
+```sh
+curl -i http://localhost:8081/api/game/me/ratable-words \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Returns the `{entries, page, size, totalElements, totalPages}` wrapper with the caller's encountered-but-unrated
+words (`ideophoneId`, `canonicalForm`, `romaji`, `stimulusFile`, `modality`, `meaning`). Both members of each
+answered scored round appear; practice words never do; rating a word (the `POST` above) removes it from the next
+fetch. Unauthenticated `GET` returns `401`.
+
 ## Deterministic shuffle proofs (2026-06-12)
 
 Each session derives its round order, target identities, sides, and meaning order from `game_sessions.shuffle_seed`

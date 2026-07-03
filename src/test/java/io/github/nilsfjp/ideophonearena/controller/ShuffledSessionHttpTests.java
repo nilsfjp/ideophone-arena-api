@@ -157,6 +157,9 @@ class ShuffledSessionHttpTests {
         assertEquals(expected.getTarget().getGloss(), JsonPath.read(roundJson, "$.targetTranslation"));
         assertEquals(expected.getTarget().getGloss(), JsonPath.read(roundJson, "$.translations.target"));
         assertEquals(expected.getOther().getGloss(), JsonPath.read(roundJson, "$.translations.other"));
+        assertEquals(expected.isTargetMeaningListedFirst(),
+                JsonPath.read(roundJson, "$.targetMeaningListedFirst"),
+                "served meaning-line order flag must match the seed derivation");
         assertEquals(expected.getLeft().getId().longValue(),
                 ((Number) JsonPath.read(roundJson, "$.left.ideophoneId")).longValue());
         assertEquals(expected.getRight().getId().longValue(),

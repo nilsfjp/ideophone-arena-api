@@ -275,6 +275,7 @@ POST /api/game/sessions          authenticated
 GET  /api/game/sessions/{uuid}/rounds/next  authenticated
 POST /api/game/sessions/{uuid}/answers      authenticated
 GET  /api/game/me/attempts       authenticated
+GET  /api/game/me/ratable-words  authenticated (own rating pool)
 GET  /api/leaderboard            public (paginated)
 GET  /api/research/divergence    public (read-only aggregate)
 GET  /api/admin/stats            ROLE_ADMIN
@@ -307,6 +308,13 @@ data); everything else still falls through to `anyRequest().authenticated()`.
 array shape and per-row invariants. `GET /api/game/me/ratings` stays authenticated and now returns a paginated
 `RatingPageResponse` (size clamped to 50). Live curl: unauthenticated `GET /api/research/divergence` -> `200` (87
 rows); `/v3/api-docs` lists the `Ratings` and `Research` tags and both paths.
+
+2026-07-03 evidence (ratable words, NIL-40): new `GET /api/game/me/ratable-words` needs no `SecurityConfig` change —
+it falls under `anyRequest().authenticated()` like the other `/api/game/me/*` reads.
+`RatableWordsHttpTests.ratableWordsRequireAuthentication` proves an unauthenticated `GET` returns `401`;
+`ratableWordsAreScopedPerUser` proves a second user sees an empty pool, never the first user's words, and that
+another user's rating does not shrink the caller's pool. Live curl: unauthenticated `GET` -> `401`; authed `GET`
+after 2 practice + 1 scored answer -> `200` wrapper with exactly the scored round's 2 words.
 
 ### CORS
 
@@ -543,7 +551,20 @@ fail-fast guard is preserved (compose supplies `APP_JWT_SECRET`, no code default
   HEAD 200 `audio/mp4`, `APP_JWT_SECRET`-unset fail-fast exit 1, `down -v` clean) -- run against a
   user-space rootless Docker since this box had no daemon; see `docs/progress-log.md` for the full output.
 
-2026-06-30 evidence (NIL-32/33/34, current): `./mvnw test` -> 76 tests, 0 failures (was 72).
+2026-07-03 evidence (NIL-40, current): `./mvnw test` -> 80 tests, 0 failures (was 76). The round DTO gained the
+additive seed-drawn boolean `targetMeaningListedFirst` (`GameMapper` passes it through from `DerivedRound`; the
+shuffler and draw order are untouched) — asserted per round against the derivation in
+`ShuffledSessionHttpTests.assertServedAsDerived` and present in `RoundResponseSerializationTests`. New authenticated
+`GET /api/game/me/ratable-words` returns the caller's encountered-but-unrated words in the `{entries, ...}` wrapper
+(one JPQL `GROUP BY` + `NOT EXISTS` in `PlayerAnswerRepository.findRatableWordsByUserId`, interface projection,
+clamps mirror `/me/ratings`; no schema change). New `RatableWordsHttpTests` (4: pool contents + practice exclusion +
+dedup + rated-word removal through the real HTTP flow, per-user scoping, 401, pagination clamps). Live curl against
+`http://localhost:8081`: register -> `201`, 2 practice + 1 scored answer, `GET /api/game/me/ratable-words` -> `200`
+wrapper with the scored round's 2 words (practice absent), `POST /api/ratings` for one -> `201`, re-fetch ->
+`totalElements` 1, unauthenticated -> `401`, `/v3/api-docs` lists the path. Round payloads over live HTTP carry
+`targetMeaningListedFirst` booleans.
+
+2026-06-30 evidence (NIL-32/33/34): `./mvnw test` -> 76 tests, 0 failures (was 72).
 `GET /api/game/me/ratings` is paginated into a `RatingPageResponse` wrapper (mirrors `LeaderboardPageResponse`, size
 clamped to 50); `RatingController` gained `@Tag`/`@Operation`. New public read-only `GET /api/research/divergence`
 pairs per-ideophone guess accuracy (`player_answers.target_ideophone_id`) with mean rating (`ratings`) via two merged

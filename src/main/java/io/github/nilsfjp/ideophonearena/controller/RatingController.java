@@ -1,5 +1,6 @@
 package io.github.nilsfjp.ideophonearena.controller;
 
+import io.github.nilsfjp.ideophonearena.dto.RatableWordPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingRequest;
 import io.github.nilsfjp.ideophonearena.dto.RatingResponse;
@@ -47,5 +48,15 @@ public class RatingController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(ratingService.getMyRatings(userDetails, page, size));
+    }
+
+    @GetMapping("/game/me/ratable-words")
+    @Operation(summary = "List the caller's ratable words: met in answered rounds, not yet rated (paginated)")
+    public ResponseEntity<RatableWordPageResponse> getMyRatableWords(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(ratingService.getMyRatableWords(userDetails, page, size));
     }
 }

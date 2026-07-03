@@ -211,7 +211,8 @@ nothing but the seed is persisted, so a session replays identically across serve
 2. which word of each pair is the **target** (identity randomization — a deliberate extension beyond the thesis,
    which fixed targets by pairing parity; decision recorded 2026-06-12),
 3. the target's left/right position,
-4. the order of the two meaning lines in the prompt (currently a reserved draw, see below).
+4. the order of the two meaning lines in the prompt (exposed on the round DTO as `targetMeaningListedFirst`
+   since 2026-07-03, see below).
 
 ### Derivation spec (compatibility contract — do not change once sessions exist)
 
@@ -227,18 +228,19 @@ nothing but the seed is persisted, so a session replays identically across serve
 
 ### Consequences
 
-- **The round DTO shape is unchanged**; only the values vary by seed. `targetTranslation`/`prompt`/
-  `translations.target` are the derived target's gloss, `translations.other` the derived distractor's gloss, and
-  `left`/`right` are the derived sides.
+- **The round DTO shape only ever grew additively** (the `targetMeaningListedFirst` boolean, 2026-07-03); the
+  values vary by seed. `targetTranslation`/`prompt`/`translations.target` are the derived target's gloss,
+  `translations.other` the derived distractor's gloss, and `left`/`right` are the derived sides.
 - **Correctness is judged against the derived target**, never against `arena_rounds.correct_ideophone_id`. That
   column (and `arena_rounds.prompt`, a copy of the same word's gloss) remains in the schema purely as
   documentation of the fixed thesis target and is no longer read in the serving path.
 - `player_answers.target_ideophone_id` stores the derived target at answer time, so analytics can aggregate
   per actually-served target — including the 30 complementary targets the thesis never measured. Recent-attempts
   history replays the stored target, not the thesis target.
-- `targetMeaningListedFirst` is **reserved**: it is drawn (so the stream consumption above is final) but the
-  current Vite frontend always lists the target meaning first, since `translations.target`/`translations.other`
-  are semantic fields. A future frontend rider can honor the draw without any backend change.
+- `targetMeaningListedFirst` is **exposed** (2026-07-03, formerly reserved): the round DTO carries the drawn
+  boolean and the Vite frontend orders its two meaning lines by it. `translations.target`/`translations.other`
+  stay semantic fields — only the display order varies. The draw itself and the stream consumption above are
+  unchanged and final; the field is additive, so older clients that ignore it keep the old target-first display.
 
 ## Completion behavior
 
@@ -474,7 +476,63 @@ least one guess **or** one rating (words with neither are omitted), ordered by `
   accuracy).
 - The divergence is not reduced to one number server-side; each row pairs the two measures and the client contrasts them.
 
+## Ratable words (2026-07-03)
+
+The Rating Lab's word pool, served by the backend so the pool follows the account instead of the browser. The
+thesis contamination rule is enforced server-side: rating shows a word's meaning, so a word becomes ratable only
+once an answered (scored) Choosing round has revealed its mapping at feedback. Both members of each answered round
+qualify — feedback reveals the full pair mapping — and words the caller has already rated drop out.
+
+```text
+GET /api/game/me/ratable-words?page=0&size=10
+```
+
+Authenticated. Query params mirror `GET /api/game/me/ratings`: `page` (default `0`, clamped to `>= 0`) and `size`
+(default `10`, clamped to `1..50`). Out-of-range values are clamped, not rejected; the response metadata reports
+the effective values.
+
+Response shape (`meaning` is the word's own gloss — exactly the mapping the feedback showed):
+
+```json
+{
+  "entries": [
+    {
+      "ideophoneId": 9,
+      "canonicalForm": "...",
+      "romaji": "dokidoki",
+      "stimulusFile": "audio/a09-dokidoki.m4a",
+      "modality": "INTEROCEPTIVE",
+      "meaning": "..."
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
+- Entries are ordered by first encounter (earliest `player_answers.answered_at`, ideophone-id tiebreak) and each
+  word appears once no matter how many rounds served it, so the pool is identical — content and order — on every
+  device the account uses.
+- Practice words never appear: practice answers are never persisted, and the query filters
+  `arena_rounds.is_practice` defensively on top.
+- No schema change: one JPQL `GROUP BY` over `player_answers`/`arena_rounds`/`ideophones` with a `NOT EXISTS`
+  subquery against `ratings`.
+- This retires the Vite app's `ideophone-arena-rating-pool` localStorage pool (27D), which by construction broke
+  for any multi-device hosted user (the W30 deploy blocker). The frontend now sources the pool from this endpoint;
+  the localStorage pool is discarded without migration (only pre-deploy test data existed).
+
 ## Changelog
+
+- 2026-07-03: meaning-order draw exposed + server-side ratable pool (NIL-40). The round DTO gained the additive
+  boolean `targetMeaningListedFirst` (the third per-round draw, until now reserved); the Vite frontend orders its
+  two meaning lines by it — no shuffler or stream change, older clients unaffected. New authenticated
+  `GET /api/game/me/ratable-words` returns the caller's encountered-but-unrated words in the `{entries, ...}`
+  wrapper (page/size clamped like `/me/ratings`), enforcing the contamination rule server-side and replacing the
+  frontend's localStorage pool. No schema change. Tests: flag assertions in `RoundResponseSerializationTests` and
+  `ShuffledSessionHttpTests` (served flag matches the seed derivation) and new `RatableWordsHttpTests` (4).
+  `./mvnw test` -> 80 tests, 0 failures.
 
 - 2026-06-30: `GET /api/game/me/ratings` is now **paginated** — a wrapper object (`entries` + `page`/`size`/
   `totalElements`/`totalPages`; `page`/`size` query params, size clamped to `1..50`) instead of a bare array.

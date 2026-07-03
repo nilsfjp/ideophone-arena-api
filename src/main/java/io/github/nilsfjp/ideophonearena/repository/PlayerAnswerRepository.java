@@ -104,6 +104,55 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             """)
     List<ModalityAnswerStatsProjection> aggregateAnswersByModality();
 
+    // The Rating Lab pool: every word the user met through answered rounds --
+    // both members of each round, since feedback reveals the full
+    // word-to-meaning mapping -- minus words the user has already rated.
+    // Practice answers are never persisted, so the practice predicate is
+    // defensive only. Ordered by first encounter (id tiebreak) so the pool is
+    // identical across devices; callers must pass an unsorted Pageable (see
+    // findLeaderboard).
+    @Query(value = """
+            select
+                ideophone.id as ideophoneId,
+                ideophone.canonicalForm as canonicalForm,
+                ideophone.romaji as romaji,
+                ideophone.stimulusFile as stimulusFile,
+                ideophone.modality as modality,
+                ideophone.gloss as gloss,
+                min(answer.answeredAt) as firstAnsweredAt
+            from PlayerAnswer answer
+            join answer.round round
+            join Ideophone ideophone
+                on ideophone = round.leftIdeophone or ideophone = round.rightIdeophone
+            where answer.session.user.id = :userId
+              and round.practice = false
+              and not exists (
+                  select 1
+                  from Rating rating
+                  where rating.user.id = :userId
+                    and rating.ideophone = ideophone
+              )
+            group by ideophone.id, ideophone.canonicalForm, ideophone.romaji,
+                ideophone.stimulusFile, ideophone.modality, ideophone.gloss
+            order by min(answer.answeredAt) asc, ideophone.id asc
+            """,
+            countQuery = """
+            select count(distinct ideophone.id)
+            from PlayerAnswer answer
+            join answer.round round
+            join Ideophone ideophone
+                on ideophone = round.leftIdeophone or ideophone = round.rightIdeophone
+            where answer.session.user.id = :userId
+              and round.practice = false
+              and not exists (
+                  select 1
+                  from Rating rating
+                  where rating.user.id = :userId
+                    and rating.ideophone = ideophone
+              )
+            """)
+    Page<RatableWordProjection> findRatableWordsByUserId(@Param("userId") Long userId, Pageable pageable);
+
     // Guess accuracy per ideophone: grouped by the round's derived target
     // (target_ideophone_id), so this measures how guessable each word's meaning
     // is. Practice answers are never persisted, so no filter is needed.
