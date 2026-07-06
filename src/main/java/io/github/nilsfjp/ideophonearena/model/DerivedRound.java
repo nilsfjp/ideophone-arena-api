@@ -36,9 +36,11 @@ public final class DerivedRound {
         return targetOnLeft;
     }
 
-    // Currently unused by the frontend (it always lists the target meaning
-    // first); drawn anyway so the derivation spec is final. See the
-    // contract's derivation section.
+    // Whether the target's meaning is listed first (top) of the two stacked
+    // meaning lines -- an independent seed draw, dissociated from the target's
+    // left/right card position so a "top line goes with left card" strategy
+    // can't leak. Exposed on the round DTO and honored by the frontend since
+    // 2026-07-03. See the contract's derivation section.
     public boolean isTargetMeaningListedFirst() {
         return targetMeaningListedFirst;
     }

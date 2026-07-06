@@ -25,4 +25,20 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             group by ideophone.id
             """)
     List<IdeophoneRatingStatsProjection> aggregateRatingStatsByIdeophone();
+
+    // Population distribution of the 1-7 rating values per modality (per-value
+    // counts, not means), for the Observatory raincloud panels. Null-modality
+    // words are excluded -- they cannot belong to a modality panel. Mirrors the
+    // AdminStats modality aggregate.
+    @Query("""
+            select
+                ideophone.modality as modality,
+                rating.rating as ratingValue,
+                count(rating.id) as count
+            from Rating rating
+            join rating.ideophone ideophone
+            where ideophone.modality is not null
+            group by ideophone.modality, rating.rating
+            """)
+    List<ModalityRatingDistributionProjection> aggregateRatingDistribution();
 }

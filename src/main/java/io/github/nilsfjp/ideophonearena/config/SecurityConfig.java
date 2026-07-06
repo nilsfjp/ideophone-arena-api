@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/leaderboard").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/research/divergence").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/research/rating-distributions").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/research/position-bias").permitAll()
                         // Public API docs are a course-demo convenience; see docs/demo-runbook.md.
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

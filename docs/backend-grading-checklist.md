@@ -278,6 +278,8 @@ GET  /api/game/me/attempts       authenticated
 GET  /api/game/me/ratable-words  authenticated (own rating pool)
 GET  /api/leaderboard            public (paginated)
 GET  /api/research/divergence    public (read-only aggregate)
+GET  /api/research/rating-distributions  public (read-only aggregate)
+GET  /api/research/position-bias         public (read-only aggregate)
 GET  /api/admin/stats            ROLE_ADMIN
 GET  /stimuli/**                 public
 GET  /v3/api-docs, /swagger-ui/** public (demo convenience)
@@ -315,6 +317,18 @@ it falls under `anyRequest().authenticated()` like the other `/api/game/me/*` re
 `ratableWordsAreScopedPerUser` proves a second user sees an empty pool, never the first user's words, and that
 another user's rating does not shrink the caller's pool. Live curl: unauthenticated `GET` -> `401`; authed `GET`
 after 2 practice + 1 scored answer -> `200` wrapper with exactly the scored round's 2 words.
+
+2026-07-06 evidence (Observatory research endpoints, NIL-79): `SecurityConfig` permits `GET
+/api/research/rating-distributions` and `GET /api/research/position-bias` next to `GET /api/research/divergence`
+(public read-only population aggregates, no per-user data); everything else still falls through to
+`anyRequest().authenticated()`. `RatingDistributionsHttpTests.distributionsArePublicAndWellFormed` and
+`PositionBiasHttpTests.positionBiasIsPublicAndWellFormed` prove unauthenticated `GET`s return `200` with the
+documented shapes and per-response invariants (dense 1-7 grids summing to `byModalityN`; left+right and
+top+bottom counts summing to `n`; rates/accuracies in `[0,1]` or `null`). `leftPickAndTargetPositionAre
+ReconstructedFromTheSeed` plays a real round and proves the left/right and target-position tallies move by the
+expected before/after deltas — the shuffle replay is correct end-to-end. `PositionBiasCalculatorTests` pins the
+d'/criterion math (log-linear correction, null on an empty stimulus class). No schema change (`ddl-auto=validate`
+still passes). `./mvnw test` -> 88 tests, 0 failures.
 
 ### CORS
 
