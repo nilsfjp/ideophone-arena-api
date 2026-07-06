@@ -166,4 +166,20 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             group by ideophone.id
             """)
     List<IdeophoneGuessStatsProjection> aggregateGuessStatsByIdeophone();
+
+    // Every scored answer with the graph the position-bias aggregate needs to
+    // replay each session's shuffle: the session (seed + condition/difficulty),
+    // the round (matched by id against the derived presentation), and the
+    // selected/target ideophones (matched by id to a side). Practice answers
+    // are never persisted, so the predicate is defensive.
+    @Query("""
+            select answer
+            from PlayerAnswer answer
+            join fetch answer.session
+            join fetch answer.round
+            join fetch answer.selectedIdeophone
+            join fetch answer.targetIdeophone
+            where answer.round.practice = false
+            """)
+    List<PlayerAnswer> findScoredForPositionBias();
 }

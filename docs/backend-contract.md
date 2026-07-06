@@ -457,6 +457,7 @@ least one guess **or** one rating (words with neither are omitted), ordered by `
   {
     "ideophoneId": 9,
     "romaji": "dokidoki",
+    "displayForm": "どきどき",
     "gloss": "...",
     "modality": "INTEROCEPTIVE",
     "guessAccuracy": 0.62,
@@ -475,6 +476,89 @@ least one guess **or** one rating (words with neither are omitted), ordered by `
   the service (a single join across `player_answers` and `ratings` would form a cartesian product and inflate guess
   accuracy).
 - The divergence is not reduced to one number server-side; each row pairs the two measures and the client contrasts them.
+- `displayForm` (added 2026-07-06) is the word's kana label, **verbatim** from `ideophones.display_form` (invariant 1:
+  rendered as stored, never derived/converted); the Observatory renders kana labels. Additive — clients that ignore it
+  are unaffected.
+
+## Rating distributions per modality (2026-07-06)
+
+A public, read-only population aggregate for the Observatory raincloud panels: per modality, how the 1-7 iconicity
+ratings are distributed — **per-value counts, not means**.
+
+```text
+GET /api/research/rating-distributions
+```
+
+Public (no authentication), like `GET /api/research/divergence`. Returns a single object (illustrative values):
+
+```json
+{
+  "distributions": [
+    { "modality": "AUDITORY", "ratingValue": 1, "count": 0 },
+    { "modality": "AUDITORY", "ratingValue": 2, "count": 3 },
+    { "modality": "AUDITORY", "ratingValue": 3, "count": 5 },
+    { "modality": "VISUAL", "ratingValue": 1, "count": 1 }
+  ],
+  "byModalityN": { "AUDITORY": 42, "VISUAL": 51, "INTEROCEPTIVE": 33 }
+}
+```
+
+- `distributions` is a **dense** grid: every modality that has at least one rating carries all seven cells
+  (`ratingValue` 1..7), zero-filled where a value was never given, ordered by `Modality` enum ordinal then
+  `ratingValue`. Modalities with **no** ratings are omitted entirely (no cells, no `byModalityN` key), so the
+  frontend never guesses which cells exist.
+- `byModalityN[modality]` is that modality's total rating count; its seven per-value cells sum to it. Use it for the
+  specimen `n` label so thin tiers stay honest.
+- Words with a `null` modality are excluded — they cannot belong to a modality panel.
+- No schema change: one JPQL `GROUP BY ideophone.modality, rating.rating` over `ratings` joined to `ideophones`.
+  NIL-68 (M2 re-key) later re-points the aggregate to word-grain **without changing this shape**.
+
+## Position bias (2026-07-06)
+
+A public, read-only SDT-flavored fairness check on the Choosing task's forced choice, for the Observatory's
+integrity strip. Position is **derived** by replaying the deterministic per-session shuffle (see "Deterministic
+per-session shuffle" above) against the stored answers — **no schema change**, no persisted `selected_position`
+column.
+
+```text
+GET /api/research/position-bias
+```
+
+Public (no authentication). Returns a single object (illustrative values):
+
+```json
+{
+  "n": 612,
+  "leftPickCount": 312,
+  "rightPickCount": 300,
+  "leftPickRate": 0.510,
+  "dPrime": 1.42,
+  "criterion": -0.03,
+  "targetTopN": 305,
+  "targetTopCorrect": 192,
+  "targetTopAccuracy": 0.630,
+  "targetBottomN": 307,
+  "targetBottomCorrect": 187,
+  "targetBottomAccuracy": 0.609
+}
+```
+
+Two dissociated axes of the shuffle are checked (they are independent seed draws — see the derivation section):
+
+- **Word-card left/right** (salience fairness): `leftPickCount`/`rightPickCount` sum to `n`; `leftPickRate` is the
+  headline vs 0.50. `dPrime`/`criterion` are the signal-detection view of the **same left/right axis** — signal =
+  target on the left, response = pick left, so `dPrime` is sensitivity and `criterion` is the left/right response
+  bias (0 = unbiased). Computed with the log-linear correction (Hautus 1995: +0.5 per response cell, +1 per stimulus
+  total) so the z-scores never diverge.
+- **Target-meaning top/bottom** (reading-order fairness): the two candidate meanings are always vertically stacked,
+  and which is on top is randomized independently of the card side. `targetTopAccuracy`/`targetBottomAccuracy` are
+  accuracy conditioned on where the **target** meaning sat; the choice is fair iff the two are comparable.
+  `targetTop{N,Correct}` and `targetBottom{N,Correct}` sum to `n` and back the accuracies.
+- Rates and accuracies are **`null`** (not `0.0`) when their denominator is `0`; `dPrime`/`criterion` are `null`
+  when a stimulus class is empty. Only scored answers count (practice is never persisted; the query also filters
+  `is_practice = false` defensively).
+- No schema change: the aggregate is `RoundShuffler` replayed per session in the service and tallied against
+  `player_answers`. NIL-68 later re-points it **without changing this shape**.
 
 ## Ratable words (2026-07-03)
 
@@ -524,6 +608,16 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
   the localStorage pool is discarded without migration (only pre-deploy test data existed).
 
 ## Changelog
+
+- 2026-07-06: Observatory research endpoints (NIL-79). Two new public read-only `ResearchController` siblings:
+  `GET /api/research/rating-distributions` (per-modality 1-7 rating-value counts — dense grid + `byModalityN`) and
+  `GET /api/research/position-bias` (SDT fairness check reconstructed from the per-session shuffle: left/right pick
+  rate + d'/criterion, plus target-meaning top/bottom accuracy). `DivergenceResponse` gained an additive
+  `displayForm` (kana, verbatim). No schema change; `ddl-auto=validate` unchanged. `position-bias` carries
+  `targetTopCorrect`/`targetBottomCorrect` beyond the originally-drafted shape (additive, so the accuracies are
+  reconstructable). Stale `DerivedRound` comment corrected (the meaning-order flag has been frontend-honored since
+  2026-07-03). Tests: `RatingDistributionsHttpTests` (2), `PositionBiasHttpTests` (2), `PositionBiasCalculatorTests`
+  (4). `./mvnw test` -> 88 tests, 0 failures.
 
 - 2026-07-03: meaning-order draw exposed + server-side ratable pool (NIL-40). The round DTO gained the additive
   boolean `targetMeaningListedFirst` (the third per-round draw, until now reserved); the Vite frontend orders its
