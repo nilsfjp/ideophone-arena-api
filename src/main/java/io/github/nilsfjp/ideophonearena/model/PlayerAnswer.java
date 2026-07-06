@@ -16,7 +16,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(
         name = "player_answers",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"session_id", "round_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"session_id", "trial_id"})
 )
 public class PlayerAnswer {
 
@@ -29,19 +29,20 @@ public class PlayerAnswer {
     private GameSession session;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "round_id", nullable = false)
-    private ArenaRound round;
+    @JoinColumn(name = "trial_id", nullable = false)
+    private Trial trial;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "selected_ideophone_id", nullable = false)
-    private Ideophone selectedIdeophone;
+    @JoinColumn(name = "selected_word_id", nullable = false)
+    private Word selectedWord;
 
-    // The seed-derived target of this round in this session, stored at
-    // answer time so analytics can aggregate per actually-served target
-    // (arena_rounds.correct_ideophone_id only documents the thesis target).
+    // The seed-derived target of this trial in this session, stored at answer
+    // time so analytics can aggregate per actually-served target -- including the
+    // complementary targets the thesis never measured (trials.correct_word_id
+    // only documents the thesis fixed target).
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "target_ideophone_id", nullable = false)
-    private Ideophone targetIdeophone;
+    @JoinColumn(name = "target_word_id", nullable = false)
+    private Word targetWord;
 
     @Column(name = "is_correct", nullable = false)
     private boolean correct;
@@ -56,12 +57,12 @@ public class PlayerAnswer {
     protected PlayerAnswer() {
     }
 
-    public PlayerAnswer(GameSession session, ArenaRound round, Ideophone selectedIdeophone, Ideophone targetIdeophone,
+    public PlayerAnswer(GameSession session, Trial trial, Word selectedWord, Word targetWord,
             Integer responseTimeMs, boolean correct) {
         this.session = session;
-        this.round = round;
-        this.selectedIdeophone = selectedIdeophone;
-        this.targetIdeophone = targetIdeophone;
+        this.trial = trial;
+        this.selectedWord = selectedWord;
+        this.targetWord = targetWord;
         this.responseTimeMs = responseTimeMs;
         this.correct = correct;
     }
@@ -78,28 +79,28 @@ public class PlayerAnswer {
         this.session = session;
     }
 
-    public ArenaRound getRound() {
-        return round;
+    public Trial getTrial() {
+        return trial;
     }
 
-    public void setRound(ArenaRound round) {
-        this.round = round;
+    public void setTrial(Trial trial) {
+        this.trial = trial;
     }
 
-    public Ideophone getSelectedIdeophone() {
-        return selectedIdeophone;
+    public Word getSelectedWord() {
+        return selectedWord;
     }
 
-    public void setSelectedIdeophone(Ideophone selectedIdeophone) {
-        this.selectedIdeophone = selectedIdeophone;
+    public void setSelectedWord(Word selectedWord) {
+        this.selectedWord = selectedWord;
     }
 
-    public Ideophone getTargetIdeophone() {
-        return targetIdeophone;
+    public Word getTargetWord() {
+        return targetWord;
     }
 
-    public void setTargetIdeophone(Ideophone targetIdeophone) {
-        this.targetIdeophone = targetIdeophone;
+    public void setTargetWord(Word targetWord) {
+        this.targetWord = targetWord;
     }
 
     public boolean isCorrect() {

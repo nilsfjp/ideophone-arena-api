@@ -11,19 +11,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
+import io.github.nilsfjp.ideophonearena.model.Trial;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
-import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
-import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
+import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import io.github.nilsfjp.ideophonearena.service.RoundShuffler;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,23 +32,22 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Practice-round flow against an isolated fixture: two practice rounds plus a
- * single scored round under a unique difficulty level, so the seeded data and
- * other tests cannot interfere. Sessions are created through the repository
- * because the public API locks difficulty to 1.
+ * Practice-round flow against the regenerated WORD-grain seed. The game is
+ * condition-free, so every session serves the same 30 scored trials (ids 1-30)
+ * and, with the practice flag, the first two seeded practice trials
+ * (31=p0 auditory, 32=p1 visual) first. Sessions are created through the
+ * repository with a known seed so the derived order is deterministic; no Trial
+ * or Word fixtures are ever created (every trial is served by every session and
+ * needs its seeded presentations).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 class PracticeRoundHttpTests {
 
+    private static final long KNOWN_SEED = 424242L;
+
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private IdeophoneRepository ideophoneRepository;
-
-    @Autowired
-    private ArenaRoundRepository arenaRoundRepository;
 
     @Autowired
     private AppUserRepository appUserRepository;
@@ -61,11 +59,10 @@ class PracticeRoundHttpTests {
     private PlayerAnswerRepository playerAnswerRepository;
 
     @Autowired
-    private RoundShuffler roundShuffler;
+    private TrialRepository trialRepository;
 
-    private record PracticeFixture(ArenaRound firstPractice, ArenaRound secondPractice, ArenaRound scoredRound,
-            int difficulty) {
-    }
+    @Autowired
+    private RoundShuffler roundShuffler;
 
     @Test
     void practiceSessionServesTwoPracticeRoundsThenScoredRoundsWithoutPersistingPracticeAnswers() throws Exception {
@@ -73,66 +70,55 @@ class PracticeRoundHttpTests {
         String username = "practice_http_" + suffix;
         String token = registerAndGetToken(username);
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
-        PracticeFixture fixture = createFixture(suffix);
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.TEXT_ONLY, fixture.difficulty(), true));
+                user, ConditionName.CONDITION_1_SOKUON, 1, true, KNOWN_SEED));
         String sessionUuid = session.getSessionUuid();
-        List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(session.getShuffleSeed(),
-                List.of(fixture.firstPractice(), fixture.secondPractice()));
-        DerivedRound derivedScored = roundShuffler.deriveScoredRounds(session.getShuffleSeed(),
-                List.of(fixture.scoredRound())).get(0);
 
-        // First practice round, answered correctly (per the derived target):
-        // feedback comes back but the scored totals stay zero and no
-        // PlayerAnswer row is written.
-        String firstRoundJson = getNextRound(token, sessionUuid);
-        assertEquals(fixture.firstPractice().getId().longValue(),
-                ((Number) JsonPath.read(firstRoundJson, "$.roundId")).longValue());
-        assertEquals(Boolean.TRUE, JsonPath.read(firstRoundJson, "$.practice"));
-        assertEquals(Boolean.FALSE, JsonPath.read(firstRoundJson, "$.completed"));
-        assertEquals(derivedPractice.get(0).getTarget().getGloss(),
-                JsonPath.read(firstRoundJson, "$.targetTranslation"));
+        List<Trial> scored = trialRepository.findByPracticeFalseOrderByIdAsc();
+        List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();
+        List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(KNOWN_SEED, practice.subList(0, 2));
+        List<DerivedRound> derivedScored = roundShuffler.deriveScoredRounds(KNOWN_SEED, scored);
 
-        String firstAnswerJson = submitAnswer(token, sessionUuid, fixture.firstPractice().getId(),
-                derivedPractice.get(0).getTarget().getId());
-        assertEquals(Boolean.TRUE, JsonPath.read(firstAnswerJson, "$.practice"));
-        assertEquals(Boolean.TRUE, JsonPath.read(firstAnswerJson, "$.correct"));
-        assertEquals(0, ((Number) JsonPath.read(firstAnswerJson, "$.totalAnswered")).intValue());
-        assertEquals(0, ((Number) JsonPath.read(firstAnswerJson, "$.totalCorrect")).intValue());
-        assertEquals(0L, playerAnswerRepository.countBySessionId(session.getId()),
-                "practice answers must not create PlayerAnswer rows");
+        // The two served practice rounds: feedback comes back but the scored
+        // totals stay zero and no PlayerAnswer row is written, and the session
+        // never completes off a practice answer.
+        for (int i = 0; i < 2; i++) {
+            DerivedRound expected = derivedPractice.get(i);
+            String roundJson = getNextRound(token, sessionUuid);
+            assertEquals(expected.getTrial().getId().longValue(),
+                    ((Number) JsonPath.read(roundJson, "$.roundId")).longValue());
+            assertEquals(Boolean.TRUE, JsonPath.read(roundJson, "$.practice"));
+            assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.completed"));
 
-        // Second practice round, answered incorrectly: feedback says wrong,
-        // totals still untouched.
-        String secondRoundJson = getNextRound(token, sessionUuid);
-        assertEquals(fixture.secondPractice().getId().longValue(),
-                ((Number) JsonPath.read(secondRoundJson, "$.roundId")).longValue());
-        assertEquals(Boolean.TRUE, JsonPath.read(secondRoundJson, "$.practice"));
+            String answerJson = submitAnswer(token, sessionUuid, expected.getTrial().getId(),
+                    expected.getTarget().getId());
+            assertEquals(Boolean.TRUE, JsonPath.read(answerJson, "$.practice"));
+            assertEquals(0, ((Number) JsonPath.read(answerJson, "$.totalAnswered")).intValue());
+            assertEquals(0, ((Number) JsonPath.read(answerJson, "$.totalCorrect")).intValue());
+            assertEquals(0L, playerAnswerRepository.countBySessionId(session.getId()),
+                    "practice answers must not create PlayerAnswer rows");
+            assertNull(gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getCompletedAt(),
+                    "practice answers must not complete the session");
+        }
 
-        Long wrongChoice = derivedPractice.get(1).getOther().getId();
-        String secondAnswerJson = submitAnswer(token, sessionUuid, fixture.secondPractice().getId(), wrongChoice);
-        assertEquals(Boolean.TRUE, JsonPath.read(secondAnswerJson, "$.practice"));
-        assertEquals(Boolean.FALSE, JsonPath.read(secondAnswerJson, "$.correct"));
-        assertEquals(0, ((Number) JsonPath.read(secondAnswerJson, "$.totalAnswered")).intValue());
-        assertEquals(0L, playerAnswerRepository.countBySessionId(session.getId()));
-        assertNull(gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getCompletedAt(),
-                "practice answers must not complete the session");
+        // All 30 scored rounds follow; answering them counts and the session
+        // completes on the final scored answer even though practice ran first.
+        Map<Long, Long> targetByTrialId = new HashMap<>();
+        for (DerivedRound derived : derivedScored) {
+            targetByTrialId.put(derived.getTrial().getId(), derived.getTarget().getId());
+        }
+        for (int i = 0; i < scored.size(); i++) {
+            String roundJson = getNextRound(token, sessionUuid);
+            assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.practice"));
+            long roundId = ((Number) JsonPath.read(roundJson, "$.roundId")).longValue();
+            submitAnswer(token, sessionUuid, roundId, targetByTrialId.get(roundId));
+        }
 
-        // Scored round follows; answering it counts and completes the
-        // single-round session even though practice rounds were served first.
-        String scoredRoundJson = getNextRound(token, sessionUuid);
-        assertEquals(fixture.scoredRound().getId().longValue(),
-                ((Number) JsonPath.read(scoredRoundJson, "$.roundId")).longValue());
-        assertEquals(Boolean.FALSE, JsonPath.read(scoredRoundJson, "$.practice"));
-
-        String scoredAnswerJson = submitAnswer(token, sessionUuid, fixture.scoredRound().getId(),
-                derivedScored.getTarget().getId());
-        assertEquals(Boolean.FALSE, JsonPath.read(scoredAnswerJson, "$.practice"));
-        assertEquals(1, ((Number) JsonPath.read(scoredAnswerJson, "$.totalAnswered")).intValue());
-        assertEquals(1, ((Number) JsonPath.read(scoredAnswerJson, "$.totalCorrect")).intValue());
+        assertEquals(30L, playerAnswerRepository.countBySessionId(session.getId()),
+                "exactly the 30 scored answers must be persisted");
         assertNotNull(gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getCompletedAt(),
-                "the scored answer must complete the session regardless of practice rounds");
+                "the 30 scored answers must complete the session regardless of practice rounds");
     }
 
     @Test
@@ -141,13 +127,15 @@ class PracticeRoundHttpTests {
         String username = "no_practice_http_" + suffix;
         String token = registerAndGetToken(username);
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
-        PracticeFixture fixture = createFixture(suffix);
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.TEXT_ONLY, fixture.difficulty()));
+                user, ConditionName.CONDITION_1_SOKUON, 1, false, KNOWN_SEED));
+
+        List<Trial> scored = trialRepository.findByPracticeFalseOrderByIdAsc();
+        DerivedRound firstScored = roundShuffler.deriveScoredRounds(KNOWN_SEED, scored).get(0);
 
         String roundJson = getNextRound(token, session.getSessionUuid());
-        assertEquals(fixture.scoredRound().getId().longValue(),
+        assertEquals(firstScored.getTrial().getId().longValue(),
                 ((Number) JsonPath.read(roundJson, "$.roundId")).longValue());
         assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.practice"));
     }
@@ -158,11 +146,15 @@ class PracticeRoundHttpTests {
         String username = "practice_order_" + suffix;
         String token = registerAndGetToken(username);
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
-        PracticeFixture fixture = createFixture(suffix);
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.TEXT_ONLY, fixture.difficulty(), true));
+                user, ConditionName.CONDITION_1_SOKUON, 1, true, KNOWN_SEED));
         String sessionUuid = session.getSessionUuid();
+
+        List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();
+        List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(KNOWN_SEED, practice.subList(0, 2));
+        long firstPracticeTrialId = derivedPractice.get(0).getTrial().getId();
+        long secondPracticeTrialId = derivedPractice.get(1).getTrial().getId();
 
         // Second practice round before the first: 400.
         mockMvc.perform(post("/api/game/sessions/{sessionUuid}/answers", sessionUuid)
@@ -170,13 +162,12 @@ class PracticeRoundHttpTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":500}
-                                """.formatted(fixture.secondPractice().getId(),
-                                fixture.secondPractice().getCorrectIdeophone().getId())))
+                                """.formatted(secondPracticeTrialId,
+                                derivedPractice.get(1).getTarget().getId())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Practice rounds must be answered in order"));
 
-        submitAnswer(token, sessionUuid, fixture.firstPractice().getId(),
-                fixture.firstPractice().getCorrectIdeophone().getId());
+        submitAnswer(token, sessionUuid, firstPracticeTrialId, derivedPractice.get(0).getTarget().getId());
 
         // Repeating the first practice round after advancing: 409.
         mockMvc.perform(post("/api/game/sessions/{sessionUuid}/answers", sessionUuid)
@@ -184,8 +175,8 @@ class PracticeRoundHttpTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":500}
-                                """.formatted(fixture.firstPractice().getId(),
-                                fixture.firstPractice().getCorrectIdeophone().getId())))
+                                """.formatted(firstPracticeTrialId,
+                                derivedPractice.get(0).getTarget().getId())))
                 .andExpect(status().isConflict());
     }
 
@@ -278,42 +269,5 @@ class PracticeRoundHttpTests {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-    }
-
-    private PracticeFixture createFixture(String suffix) {
-        int difficulty = Math.toIntExact(200_000L + (System.nanoTime() % 1_000_000L));
-        ArenaRound firstPractice = practiceRound("p1", suffix, difficulty, true);
-        ArenaRound secondPractice = practiceRound("p2", suffix, difficulty, true);
-        ArenaRound scoredRound = practiceRound("sr", suffix, difficulty, false);
-        return new PracticeFixture(firstPractice, secondPractice, scoredRound, difficulty);
-    }
-
-    private ArenaRound practiceRound(String tag, String suffix, int difficulty, boolean practice) {
-        String prompt = tag + " target " + suffix;
-        Ideophone correct = ideophone(tag + "l", suffix, prompt);
-        Ideophone distractor = ideophone(tag + "r", suffix, tag + " distractor " + suffix);
-        return arenaRoundRepository.save(new ArenaRound(
-                prompt,
-                correct,
-                distractor,
-                correct,
-                ConditionName.TEXT_ONLY,
-                difficulty,
-                practice
-        ));
-    }
-
-    private Ideophone ideophone(String tag, String suffix, String gloss) {
-        String kana = tag + suffix.substring(suffix.length() - 6);
-        return ideophoneRepository.save(new Ideophone(
-                kana,
-                kana,
-                kana,
-                tag + "-" + suffix,
-                gloss,
-                tag.toUpperCase() + suffix.substring(suffix.length() - 8),
-                tag + "-" + suffix + ".m4a",
-                Modality.AUDITORY
-        ));
     }
 }

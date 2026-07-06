@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.DerivedRound;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
-import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
+import io.github.nilsfjp.ideophonearena.model.Pairing;
+import io.github.nilsfjp.ideophonearena.model.Trial;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -23,12 +23,12 @@ class RoundShufflerTests {
     private final RoundShuffler roundShuffler = new RoundShuffler();
 
     @Test
-    void sameSeedAndRoundsDeriveIdenticalSequenceOnRepeatedCalls() {
-        List<ArenaRound> rounds = rounds(10);
+    void sameSeedAndTrialsDeriveIdenticalSequenceOnRepeatedCalls() {
+        List<Trial> trials = trials(10);
 
-        List<DerivedRound> first = roundShuffler.deriveScoredRounds(7L, rounds);
-        List<DerivedRound> second = roundShuffler.deriveScoredRounds(7L, rounds);
-        List<DerivedRound> fromFreshInstance = new RoundShuffler().deriveScoredRounds(7L, rounds);
+        List<DerivedRound> first = roundShuffler.deriveScoredRounds(7L, trials);
+        List<DerivedRound> second = roundShuffler.deriveScoredRounds(7L, trials);
+        List<DerivedRound> fromFreshInstance = new RoundShuffler().deriveScoredRounds(7L, trials);
 
         assertEquals(signature(first), signature(second));
         assertEquals(signature(first), signature(fromFreshInstance));
@@ -36,91 +36,86 @@ class RoundShufflerTests {
 
     @Test
     void differentSeedsDeriveDifferentSequences() {
-        List<ArenaRound> rounds = rounds(30);
+        List<Trial> trials = trials(30);
 
-        List<DerivedRound> seedOne = roundShuffler.deriveScoredRounds(1L, rounds);
-        List<DerivedRound> seedTwo = roundShuffler.deriveScoredRounds(2L, rounds);
+        List<DerivedRound> seedOne = roundShuffler.deriveScoredRounds(1L, trials);
+        List<DerivedRound> seedTwo = roundShuffler.deriveScoredRounds(2L, trials);
 
         assertNotEquals(signature(seedOne), signature(seedTwo));
     }
 
     @Test
-    void derivationShufflesOrderButKeepsTheSameRounds() {
-        List<ArenaRound> rounds = rounds(10);
+    void derivationShufflesOrderButKeepsTheSameTrials() {
+        List<Trial> trials = trials(10);
 
-        List<DerivedRound> derived = roundShuffler.deriveScoredRounds(99L, rounds);
+        List<DerivedRound> derived = roundShuffler.deriveScoredRounds(99L, trials);
 
         Set<Long> inputIds = new HashSet<>();
-        rounds.forEach(round -> inputIds.add(round.getId()));
+        trials.forEach(trial -> inputIds.add(trial.getId()));
         Set<Long> derivedIds = new HashSet<>();
-        derived.forEach(round -> derivedIds.add(round.getRound().getId()));
+        derived.forEach(round -> derivedIds.add(round.getTrial().getId()));
         assertEquals(inputIds, derivedIds);
-        assertEquals(rounds.size(), derived.size());
+        assertEquals(trials.size(), derived.size());
     }
 
-    // "Pair second" is defined on ideophone ids, not on the left/right
-    // columns: swapping the stored columns must not change which word the
-    // seed picks as target.
+    // "Pair second" is defined on word ids, not on which member is word_a vs
+    // word_b: swapping the pairing's stored members must not change which word
+    // the seed picks as target.
     @Test
-    void targetIdentityIsStableUnderSwappedLeftRightColumns() {
-        List<ArenaRound> rounds = rounds(10);
-        List<ArenaRound> swapped = new ArrayList<>();
-        for (ArenaRound round : rounds) {
-            ArenaRound copy = new ArenaRound(
-                    round.getPrompt(),
-                    round.getRightIdeophone(),
-                    round.getLeftIdeophone(),
-                    round.getCorrectIdeophone(),
-                    round.getConditionName(),
-                    round.getDifficultyLevel()
-            );
-            setId(copy, round.getId());
+    void targetIdentityIsStableUnderSwappedPairingMembers() {
+        List<Trial> trials = trials(10);
+        List<Trial> swapped = new ArrayList<>();
+        for (Trial trial : trials) {
+            Pairing original = trial.getPairing();
+            Pairing swappedPairing = pairing(original.getWordB(), original.getWordA());
+            Trial copy = new Trial(swappedPairing, trial.getCorrectWord(), trial.isPractice());
+            setId(copy, trial.getId());
             swapped.add(copy);
         }
 
-        List<DerivedRound> original = roundShuffler.deriveScoredRounds(5L, rounds);
+        List<DerivedRound> original = roundShuffler.deriveScoredRounds(5L, trials);
         List<DerivedRound> derivedFromSwapped = roundShuffler.deriveScoredRounds(5L, swapped);
 
         assertEquals(signature(original), signature(derivedFromSwapped));
     }
 
-    // Across ~200 seeds, every round's target must take both pair identities
+    // Across ~200 seeds, every trial's target must take both pair identities
     // and both sides, and both meaning orders must occur: no fixed-point bug.
     @Test
-    void acrossManySeedsEveryRoundTakesBothIdentitiesAndBothSides() {
-        List<ArenaRound> rounds = rounds(4);
-        Map<Long, Set<Long>> targetsPerRound = new HashMap<>();
-        Map<Long, Set<Boolean>> sidesPerRound = new HashMap<>();
+    void acrossManySeedsEveryTrialTakesBothIdentitiesAndBothSides() {
+        List<Trial> trials = trials(4);
+        Map<Long, Set<Long>> targetsPerTrial = new HashMap<>();
+        Map<Long, Set<Boolean>> sidesPerTrial = new HashMap<>();
         Set<Boolean> meaningOrders = new HashSet<>();
 
         for (long seed = 0; seed < 200; seed++) {
-            for (DerivedRound derived : roundShuffler.deriveScoredRounds(seed, rounds)) {
-                Long roundId = derived.getRound().getId();
-                targetsPerRound.computeIfAbsent(roundId, key -> new HashSet<>()).add(derived.getTarget().getId());
-                sidesPerRound.computeIfAbsent(roundId, key -> new HashSet<>()).add(derived.isTargetOnLeft());
+            for (DerivedRound derived : roundShuffler.deriveScoredRounds(seed, trials)) {
+                Long trialId = derived.getTrial().getId();
+                targetsPerTrial.computeIfAbsent(trialId, key -> new HashSet<>()).add(derived.getTarget().getId());
+                sidesPerTrial.computeIfAbsent(trialId, key -> new HashSet<>()).add(derived.isTargetOnLeft());
                 meaningOrders.add(derived.isTargetMeaningListedFirst());
             }
         }
 
-        for (ArenaRound round : rounds) {
-            assertEquals(2, targetsPerRound.get(round.getId()).size(),
-                    "round " + round.getId() + " target must take both pair identities");
-            assertEquals(2, sidesPerRound.get(round.getId()).size(),
-                    "round " + round.getId() + " target must appear on both sides");
+        for (Trial trial : trials) {
+            assertEquals(2, targetsPerTrial.get(trial.getId()).size(),
+                    "trial " + trial.getId() + " target must take both pair identities");
+            assertEquals(2, sidesPerTrial.get(trial.getId()).size(),
+                    "trial " + trial.getId() + " target must appear on both sides");
         }
         assertEquals(2, meaningOrders.size(), "both meaning orders must occur");
     }
 
     @Test
-    void practiceRoundsKeepFixedOrderAndUseAStreamIndependentOfScoredRounds() {
-        List<ArenaRound> practice = rounds(2);
-        List<ArenaRound> scoredFew = rounds(3);
-        List<ArenaRound> scoredMany = rounds(30);
+    void practiceTrialsKeepFixedOrderAndUseAStreamIndependentOfScoredTrials() {
+        List<Trial> practice = trials(2);
+        List<Trial> scoredFew = trials(3);
+        List<Trial> scoredMany = trials(30);
 
         List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(11L, practice);
         for (int index = 0; index < practice.size(); index++) {
-            assertEquals(practice.get(index).getId(), derivedPractice.get(index).getRound().getId(),
-                    "practice rounds must keep their input order");
+            assertEquals(practice.get(index).getId(), derivedPractice.get(index).getTrial().getId(),
+                    "practice trials must keep their input order");
         }
         assertEquals(signature(derivedPractice), signature(roundShuffler.derivePracticeRounds(11L, practice)));
 
@@ -139,13 +134,13 @@ class RoundShufflerTests {
     }
 
     @Test
-    void everyDerivedRoundPairsTargetAndOtherFromTheSameRound() {
-        List<ArenaRound> rounds = rounds(10);
+    void everyDerivedRoundPairsTargetAndOtherFromTheSameTrial() {
+        List<Trial> trials = trials(10);
 
-        for (DerivedRound derived : roundShuffler.deriveScoredRounds(123L, rounds)) {
+        for (DerivedRound derived : roundShuffler.deriveScoredRounds(123L, trials)) {
             Set<Long> members = Set.of(
-                    derived.getRound().getLeftIdeophone().getId(),
-                    derived.getRound().getRightIdeophone().getId()
+                    derived.getTrial().getPairing().getWordA().getId(),
+                    derived.getTrial().getPairing().getWordB().getId()
             );
             assertTrue(members.contains(derived.getTarget().getId()));
             assertTrue(members.contains(derived.getOther().getId()));
@@ -155,12 +150,12 @@ class RoundShufflerTests {
         }
     }
 
-    // The derived presentation as a comparable string: round order, target
+    // The derived presentation as a comparable string: trial order, target
     // identity, side, and meaning order.
     private String signature(List<DerivedRound> derived) {
         StringBuilder builder = new StringBuilder();
         for (DerivedRound round : derived) {
-            builder.append(round.getRound().getId())
+            builder.append(round.getTrial().getId())
                     .append(':')
                     .append(round.getTarget().getId())
                     .append(':')
@@ -172,30 +167,27 @@ class RoundShufflerTests {
         return builder.toString();
     }
 
-    private List<ArenaRound> rounds(int count) {
-        List<ArenaRound> rounds = new ArrayList<>();
+    private List<Trial> trials(int count) {
+        List<Trial> trials = new ArrayList<>();
         for (int index = 0; index < count; index++) {
-            Ideophone lower = ideophone(1000L + index * 2, "word" + (index * 2));
-            Ideophone higher = ideophone(1000L + index * 2 + 1, "word" + (index * 2 + 1));
-            ArenaRound round = new ArenaRound(
-                    lower.getGloss(),
-                    lower,
-                    higher,
-                    lower,
-                    ConditionName.CONDITION_1_SOKUON,
-                    1
-            );
-            setId(round, 100L + index);
-            rounds.add(round);
+            Word wordA = word(1000L + index * 2, "word" + (index * 2));
+            Word wordB = word(1000L + index * 2 + 1, "word" + (index * 2 + 1));
+            Trial trial = new Trial(pairing(wordA, wordB), wordA, false);
+            setId(trial, 100L + index);
+            trials.add(trial);
         }
-        return rounds;
+        return trials;
     }
 
-    private Ideophone ideophone(long id, String name) {
-        Ideophone ideophone = new Ideophone(name, name, name, name, "meaning of " + name, "HU",
-                "audio/" + name + ".m4a", Modality.AUDITORY);
-        setId(ideophone, id);
-        return ideophone;
+    private Pairing pairing(Word wordA, Word wordB) {
+        return new Pairing("code", null, wordA, wordB, Modality.AUDITORY, true, "THESIS");
+    }
+
+    private Word word(long id, String name) {
+        Word word = new Word(null, name, name, name, "H", "meaning of " + name, Modality.AUDITORY,
+                "audio/" + name + ".m4a");
+        setId(word, id);
+        return word;
     }
 
     private void setId(Object target, Long id) {

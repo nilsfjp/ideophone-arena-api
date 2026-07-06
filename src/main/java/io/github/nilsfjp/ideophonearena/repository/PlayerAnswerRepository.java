@@ -11,19 +11,19 @@ import org.springframework.data.repository.query.Param;
 
 public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long> {
 
-    boolean existsBySessionIdAndRoundId(Long sessionId, Long roundId);
+    boolean existsBySessionIdAndTrialId(Long sessionId, Long trialId);
 
-    @EntityGraph(attributePaths = {"round", "targetIdeophone", "selectedIdeophone"})
+    @EntityGraph(attributePaths = {"trial", "targetWord", "selectedWord"})
     List<PlayerAnswer> findBySessionId(Long sessionId);
 
-    @EntityGraph(attributePaths = {"round", "targetIdeophone", "selectedIdeophone"})
+    @EntityGraph(attributePaths = {"trial", "targetWord", "selectedWord"})
     List<PlayerAnswer> findBySessionIdOrderByAnsweredAtAsc(Long sessionId);
 
-    @EntityGraph(attributePaths = {"session", "round", "targetIdeophone", "selectedIdeophone"})
+    @EntityGraph(attributePaths = {"session", "trial", "targetWord", "selectedWord"})
     List<PlayerAnswer> findBySessionUserIdOrderByAnsweredAtDesc(Long userId, Pageable pageable);
 
-    @Query("select answer.round.id from PlayerAnswer answer where answer.session.id = :sessionId")
-    List<Long> findAnsweredRoundIdsBySessionId(@Param("sessionId") Long sessionId);
+    @Query("select answer.trial.id from PlayerAnswer answer where answer.session.id = :sessionId")
+    List<Long> findAnsweredTrialIdsBySessionId(@Param("sessionId") Long sessionId);
 
     long countBySessionId(Long sessionId);
 
@@ -93,93 +93,102 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
 
     @Query("""
             select
-                ideophone.modality as modality,
+                word.modality as modality,
                 count(answer.id) as answers,
                 sum(case when answer.correct = true then 1 else 0 end) as correct
             from PlayerAnswer answer
-            join answer.targetIdeophone ideophone
-            where ideophone.modality is not null
-            group by ideophone.modality
-            order by ideophone.modality
+            join answer.targetWord word
+            where word.modality is not null
+            group by word.modality
+            order by word.modality
             """)
     List<ModalityAnswerStatsProjection> aggregateAnswersByModality();
 
-    // The Rating Lab pool: every word the user met through answered rounds --
-    // both members of each round, since feedback reveals the full
-    // word-to-meaning mapping -- minus words the user has already rated.
-    // Practice answers are never persisted, so the practice predicate is
-    // defensive only. Ordered by first encounter (id tiebreak) so the pool is
-    // identical across devices; callers must pass an unsorted Pageable (see
-    // findLeaderboard).
+    // The Rating Lab pool, word-keyed (ADR-0 grain-heal): every word the user met
+    // through answered rounds -- both pairing members, since feedback reveals the
+    // full word-to-meaning mapping -- minus words the user has already rated.
+    // Grouping by the word (not a condition row) closes the cross-condition
+    // double-offer: a word met under any condition appears once. Practice answers
+    // are never persisted, so the practice predicate is defensive. Ordered by
+    // first encounter (word-id tiebreak) so the pool is identical across devices;
+    // callers must pass an unsorted Pageable (see findLeaderboard).
     @Query(value = """
             select
-                ideophone.id as ideophoneId,
-                ideophone.canonicalForm as canonicalForm,
-                ideophone.romaji as romaji,
-                ideophone.stimulusFile as stimulusFile,
-                ideophone.modality as modality,
-                ideophone.gloss as gloss,
+                word.id as ideophoneId,
+                word.canonicalForm as canonicalForm,
+                word.romaji as romaji,
+                word.stimulusFile as stimulusFile,
+                word.modality as modality,
+                word.gloss as gloss,
                 min(answer.answeredAt) as firstAnsweredAt
             from PlayerAnswer answer
-            join answer.round round
-            join Ideophone ideophone
-                on ideophone = round.leftIdeophone or ideophone = round.rightIdeophone
+            join answer.trial trial
+            join trial.pairing pairing
+            join Word word
+                on word = pairing.wordA or word = pairing.wordB
             where answer.session.user.id = :userId
-              and round.practice = false
+              and trial.practice = false
               and not exists (
                   select 1
                   from Rating rating
                   where rating.user.id = :userId
-                    and rating.ideophone = ideophone
+                    and rating.word = word
               )
-            group by ideophone.id, ideophone.canonicalForm, ideophone.romaji,
-                ideophone.stimulusFile, ideophone.modality, ideophone.gloss
-            order by min(answer.answeredAt) asc, ideophone.id asc
+            group by word.id, word.canonicalForm, word.romaji,
+                word.stimulusFile, word.modality, word.gloss
+            order by min(answer.answeredAt) asc, word.id asc
             """,
             countQuery = """
-            select count(distinct ideophone.id)
+            select count(distinct word.id)
             from PlayerAnswer answer
-            join answer.round round
-            join Ideophone ideophone
-                on ideophone = round.leftIdeophone or ideophone = round.rightIdeophone
+            join answer.trial trial
+            join trial.pairing pairing
+            join Word word
+                on word = pairing.wordA or word = pairing.wordB
             where answer.session.user.id = :userId
-              and round.practice = false
+              and trial.practice = false
               and not exists (
                   select 1
                   from Rating rating
                   where rating.user.id = :userId
-                    and rating.ideophone = ideophone
+                    and rating.word = word
               )
             """)
     Page<RatableWordProjection> findRatableWordsByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    // Guess accuracy per ideophone: grouped by the round's derived target
-    // (target_ideophone_id), so this measures how guessable each word's meaning
-    // is. Practice answers are never persisted, so no filter is needed.
+    // Guess accuracy per word: grouped by the round's derived target
+    // (target_word_id), so this measures how guessable each word's meaning is.
+    // Divergence heals to one row per word (ADR-0). Rider A excludes practice
+    // trials (defensive) and browser_loop_* automation accounts (the same rows
+    // scripts/cleanup-test-accounts.sql deletes) -- no response-shape change.
     @Query("""
             select
-                ideophone.id as ideophoneId,
+                word.id as ideophoneId,
                 count(answer.id) as guesses,
                 sum(case when answer.correct = true then 1 else 0 end) as correct
             from PlayerAnswer answer
-            join answer.targetIdeophone ideophone
-            group by ideophone.id
+            join answer.targetWord word
+            where answer.trial.practice = false
+              and answer.session.user.username not like 'browser!_loop!_%' escape '!'
+            group by word.id
             """)
-    List<IdeophoneGuessStatsProjection> aggregateGuessStatsByIdeophone();
+    List<IdeophoneGuessStatsProjection> aggregateGuessStatsByWord();
 
-    // Every scored answer with the graph the position-bias aggregate needs to
-    // replay each session's shuffle: the session (seed + condition/difficulty),
-    // the round (matched by id against the derived presentation), and the
-    // selected/target ideophones (matched by id to a side). Practice answers
-    // are never persisted, so the predicate is defensive.
+    // Every scored, non-automation answer with the graph the position-bias
+    // aggregate needs to replay each session's shuffle: the session (seed), the
+    // trial (matched by id against the derived presentation), and the
+    // selected/target words (matched by id to a side). The shuffle replay itself
+    // (RoundShuffler) is byte-for-byte unchanged; only these joins move to word
+    // grain, and Rider A adds the browser_loop_* exclusion.
     @Query("""
             select answer
             from PlayerAnswer answer
             join fetch answer.session
-            join fetch answer.round
-            join fetch answer.selectedIdeophone
-            join fetch answer.targetIdeophone
-            where answer.round.practice = false
+            join fetch answer.trial
+            join fetch answer.selectedWord
+            join fetch answer.targetWord
+            where answer.trial.practice = false
+              and answer.session.user.username not like 'browser!_loop!_%' escape '!'
             """)
     List<PlayerAnswer> findScoredForPositionBias();
 }

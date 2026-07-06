@@ -1,8 +1,8 @@
 package io.github.nilsfjp.ideophonearena.service;
 
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.DerivedRound;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
+import io.github.nilsfjp.ideophonearena.model.Trial;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,50 +15,51 @@ import org.springframework.stereotype.Component;
 // a compatibility contract (documented in docs/backend-contract.md) and must
 // not change once real sessions exist:
 //
-// 1. Scored rounds for the session's condition and difficulty, ordered by
-//    round id ascending, are shuffled with
+// 1. Scored trials, ordered by trial id ascending, are shuffled with
 //    Collections.shuffle(list, new Random(shuffleSeed)).
-// 2. Iterating the shuffled list in order, three draws per round are taken
+// 2. Iterating the shuffled list in order, three draws per trial are taken
 //    from the same Random stream, in this order: targetIsPairSecond,
-//    targetOnLeft, targetMeaningListedFirst. "Pair second" is the round
-//    member with the higher ideophone id.
-// 3. Practice rounds keep their fixed seed order; the same three per-round
+//    targetOnLeft, targetMeaningListedFirst. "Pair second" is the trial's
+//    pairing member with the higher WORD id (M2 re-key: word ids assigned in
+//    CSV order put word_a before word_b, so this is the same k-word member the
+//    pre-M2 "higher ideophone id" rule selected -- the draws are byte-identical).
+// 3. Practice trials keep their fixed seed order; the same three per-trial
 //    draws come from a separate stream, new Random(shuffleSeed + 1), so the
 //    scored derivation is unaffected by practice on/off.
 @Component
 public class RoundShuffler {
 
-    public List<DerivedRound> deriveScoredRounds(long shuffleSeed, List<ArenaRound> roundsOrderedById) {
-        List<ArenaRound> shuffled = new ArrayList<>(roundsOrderedById);
+    public List<DerivedRound> deriveScoredRounds(long shuffleSeed, List<Trial> trialsOrderedById) {
+        List<Trial> shuffled = new ArrayList<>(trialsOrderedById);
         Random random = new Random(shuffleSeed);
         Collections.shuffle(shuffled, random);
         return drawPresentation(shuffled, random);
     }
 
-    public List<DerivedRound> derivePracticeRounds(long shuffleSeed, List<ArenaRound> practiceRoundsInOrder) {
-        return drawPresentation(practiceRoundsInOrder, new Random(shuffleSeed + 1));
+    public List<DerivedRound> derivePracticeRounds(long shuffleSeed, List<Trial> practiceTrialsInOrder) {
+        return drawPresentation(practiceTrialsInOrder, new Random(shuffleSeed + 1));
     }
 
-    private List<DerivedRound> drawPresentation(List<ArenaRound> rounds, Random random) {
-        List<DerivedRound> derived = new ArrayList<>(rounds.size());
-        for (ArenaRound round : rounds) {
+    private List<DerivedRound> drawPresentation(List<Trial> trials, Random random) {
+        List<DerivedRound> derived = new ArrayList<>(trials.size());
+        for (Trial trial : trials) {
             boolean targetIsPairSecond = random.nextBoolean();
             boolean targetOnLeft = random.nextBoolean();
             boolean targetMeaningListedFirst = random.nextBoolean();
-            Ideophone pairFirst = pairMember(round, true);
-            Ideophone pairSecond = pairMember(round, false);
-            Ideophone target = targetIsPairSecond ? pairSecond : pairFirst;
-            Ideophone other = targetIsPairSecond ? pairFirst : pairSecond;
-            derived.add(new DerivedRound(round, target, other, targetOnLeft, targetMeaningListedFirst));
+            Word pairFirst = pairMember(trial, true);
+            Word pairSecond = pairMember(trial, false);
+            Word target = targetIsPairSecond ? pairSecond : pairFirst;
+            Word other = targetIsPairSecond ? pairFirst : pairSecond;
+            derived.add(new DerivedRound(trial, target, other, targetOnLeft, targetMeaningListedFirst));
         }
         return derived;
     }
 
-    private Ideophone pairMember(ArenaRound round, boolean first) {
-        Ideophone lower = round.getLeftIdeophone();
-        Ideophone higher = round.getRightIdeophone();
+    private Word pairMember(Trial trial, boolean first) {
+        Word lower = trial.getPairing().getWordA();
+        Word higher = trial.getPairing().getWordB();
         if (lower.getId() > higher.getId()) {
-            Ideophone swap = lower;
+            Word swap = lower;
             lower = higher;
             higher = swap;
         }

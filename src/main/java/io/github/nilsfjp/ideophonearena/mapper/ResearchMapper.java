@@ -4,7 +4,7 @@ import io.github.nilsfjp.ideophonearena.dto.DivergenceResponse;
 import io.github.nilsfjp.ideophonearena.dto.PositionBiasResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingDistributionCell;
 import io.github.nilsfjp.ideophonearena.dto.RatingDistributionsResponse;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,17 +15,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResearchMapper {
 
-    public DivergenceResponse toDivergenceResponse(Ideophone ideophone, long guessCount, long correct,
+    public DivergenceResponse toDivergenceResponse(Word word, long guessCount, long correct,
             long ratingCount, Double meanRating) {
         // No guesses or no ratings encodes as null (not 0.0) so the client can
         // tell "no data" apart from "always wrong" / "lowest rating".
         Double guessAccuracy = guessCount == 0 ? null : (double) correct / guessCount;
-        String modality = ideophone.getModality() == null ? null : ideophone.getModality().name();
+        String modality = word.getModality() == null ? null : word.getModality().name();
+        // displayForm is the word's kana label -- the presentation-invariant
+        // canonical form (divergence is word-grained now, so there is no single
+        // per-condition display_form; ADR-0/ADR-5 heal the row split). Verbatim,
+        // invariant 1: for the two long-vowel words this carries the chouonpu.
         return new DivergenceResponse(
-                ideophone.getId(),
-                ideophone.getRomaji(),
-                ideophone.getDisplayForm(),
-                ideophone.getGloss(),
+                word.getId(),
+                word.getRomaji(),
+                word.getCanonicalForm(),
+                word.getGloss(),
                 modality,
                 guessAccuracy,
                 guessCount,

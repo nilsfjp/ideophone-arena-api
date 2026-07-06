@@ -831,3 +831,85 @@ None.
 Next single task:
 NIL-62 free-form-entry build, from the kickoff prompt the NIL-57 architecture session emits (NIL-57 itself is a
 chat session, not Claude Code).
+
+## 2026-07-06
+
+Session goal:
+Execute M2 "The Re-key" (NIL-68, ADR-0/-1/-3/-6): normalize `ideophones` into `words` + `presentations`, add
+`languages` + `pairings` (thesis backfill), rename/collapse `arena_rounds` -> `trials` (102 -> 34), and re-key
+`player_answers` + `ratings` to word grain -- with every public response shape frozen. Fixes the event-plane grain
+defect (row-grain ratings/pool accept the same word twice across conditions).
+
+Changed:
+- `scripts/generate_seed_sql.py`: restructured to emit `languages`(1) + `words`(68) + `presentations`(204) +
+  `pairings`(34) + `trials`(34) instead of `ideophones`(204) + `arena_rounds`(102); added `THESIS_PAIR_ACCURACY`
+  (correct/36 from thesis-facts §4); `validate_unique_constraints` re-targeted (words UNIQUE(language,romaji),
+  presentations UNIQUE(word,condition), pair_code, is_core invariant-4, and the `word_a id < word_b id`
+  shuffle-order invariant). `--check` clean; regenerated `db/init/ideophone_arena.sql`.
+- Schema (via the generator only): 4 new tables (`languages`,`words`,`presentations`,`pairings`), `arena_rounds`
+  -> `trials` (drop prompt/condition_name/difficulty_level/left/right/correct_ideophone_id; add round_type/
+  pairing_id/correct_word_id/feature_axis), `player_answers` -> trial_id/selected_word_id/target_word_id,
+  `ratings` -> word_id + **UNIQUE(user_id, word_id)**; `ideophones` dropped.
+- Entities: new `Language`/`Word`/`Presentation`/`Pairing`/`Trial`(+`RoundType`); re-keyed `PlayerAnswer`/`Rating`/
+  `DerivedRound`; deleted `Ideophone`/`ArenaRound`.
+- Repositories: `IdeophoneRepository`->`WordRepository`, `ArenaRoundRepository`->`TrialRepository`, new
+  `PresentationRepository`; every JPQL re-pointed to word grain; the ratable-pool query grain-heals (GROUP BY
+  word.id) so a word met under any condition appears once.
+- Services/mappers: `RoundShuffler.pairMember` -> higher **word** id (algorithm byte-for-byte identical -- word
+  ids are CSV-ordered so word_b is the k-word, exactly as before); `GameService` serves condition-free trials and
+  resolves `presentation(word, session.condition)` for rendering; `GameMapper` takes displayForm/canonicalScript
+  from the presentation, the rest from the word; `RatingService` guards UNIQUE(user,word); `ResearchService`
+  word-grains divergence (one row per word) and replays position-bias over the condition-free trial list (shuffle
+  untouched); `ResearchMapper` maps divergence `displayForm` -> `words.canonical_form`.
+- Rider A: the three research aggregates (divergence guess+rating sides, rating-distributions, position-bias) now
+  exclude practice trials (defensive) and `browser_loop_%` automation accounts -- no response-shape change.
+- Tests re-pointed to word-grain seed-replay (no Trial fixtures; every session uses CONDITION_1_SOKUON seeded
+  trials); `IdeophoneSeedIntegrityTests` rewritten to parse the new tables (+1 M2 assertion: every trial maps to a
+  pairing whose members include its correct word, word_a<word_b); new grain-heal cross-condition test in
+  `RatableWordsHttpTests`.
+
+Proof:
+- `python3 scripts/generate_seed_sql.py --check` clean -> regen -> fresh dev re-init via mysql.exe -> app boots
+  under `ddl-auto=validate` (Hibernate 7.2.12 EntityManagerFactory built, zero schema-validation errors).
+- `./mvnw test` -> **90 tests, 0 failures, 0 errors, 0 skips** (was 88; +1 seed assertion, +1 grain-heal test).
+- Live curl-diff against a rebuilt backend (:8082): round + answer + divergence + rating-distributions +
+  position-bias + leaderboard shapes byte-match `docs/backend-contract.md` (field names, casing, nesting;
+  `canonicalScript` = 2-letter `HU`, `displayForm` verbatim kana, `dPrime` casing, `targetTop/BottomCorrect`).
+- Grain defect closed: rate word 47 in CONDITION_1, encounter it again under CONDITION_2, re-rate -> **409**;
+  divergence returns exactly **1 row** for word 47 (not 3).
+- Rider A: a `browser_loop_%` account rated word 40 (POST 201) yet divergence `ratingCount` stayed 0; it played a
+  full 30-answer session yet only the 2 non-loop guesses appear in divergence. Excluded on both sides.
+- Rider B: position-bias seed-replay survives (shuffle bytes untouched, only joins moved) -- green in
+  `PositionBiasHttpTests` + `ShuffledSessionHttpTests` (byte-identical derivation over the wire).
+- **Frontend battery green against the migrated backend on :8081, web repo unedited** (`ideophone-arena-web`):
+  `pnpm vitest run` -> 24 files / 153 tests pass; `verify-browser-loop.mjs` desktop **and** 375px both exit 0 with
+  `relevantConsoleErrorCount: 0`. The loop played a full 2-practice + 30-scored `CONDITION_1_SOKUON` session,
+  asserted DOM meaning-line order against each round's `targetMeaningListedFirst` (32 rounds, stable on refetch),
+  rendered choice cards from the migrated word/presentation shapes (0 muted stimuli, 193 successful audio fetches),
+  and proved the grain-heal live: ratable pool = **60 distinct words**, deterministic order, cross-device parity,
+  drops to 59 after one rating, legacy localStorage pool absent. No horizontal overflow at 375px
+  (scrollWidth == innerWidth). The only failures are the documented-benign StrictMode `net::ERR_ABORTED` duplicate
+  blob aborts.
+
+Result:
+Backend re-key done and proven end-to-end (backend + real frontend). All public shapes frozen; the event plane
+enforces one-rating-per-word at the DB layer. Clean, reviewable tree (commits are the user's).
+
+Commit:
+Not committed. Proposed message:
+"M2 re-key: normalize ideophones into words+presentations, collapse arena_rounds into trials, word-key the event
+plane (NIL-68)" — body: languages/words/presentations/pairings + trials (ADR-0/-1/-3/-6) via generate_seed_sql.py;
+player_answers/ratings re-keyed to word grain with UNIQUE(user_id, word_id); RoundShuffler id-vocabulary re-bind
+(algorithm byte-identical); serving path resolves presentation(word, condition); research aggregates word-grained
++ Rider A browser_loop/practice exclusion; ddl-auto=validate; 90 tests green; public shapes frozen.
+
+Blocker:
+None. Process note for the user: the stale pre-M2 backend (a `java -jar target/...jar` from before this session)
+was stopped, and the migrated backend now runs on :8081 via `./mvnw spring-boot:run` (current sources). For the
+normal jar-based workflow, rebuild with `./mvnw -q package -DskipTests` and run that jar. A dedicated Edge CDP
+instance (profile `C:\Temp\edge-cdp-ideophone`) was launched for the browser proof and left running; the web
+repo's own Vite dev server on :5174 was reused (not restarted) and never edited.
+
+Next single task:
+NIL-54 thesis ingestion (`trials.correct_word_id` is its reconstruction key; ingest with `completed_at = NULL`,
+no flag column -- mechanism decided in chat first).

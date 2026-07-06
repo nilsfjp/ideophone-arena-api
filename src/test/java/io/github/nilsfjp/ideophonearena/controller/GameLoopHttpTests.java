@@ -11,16 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import io.github.nilsfjp.ideophonearena.model.AppUser;
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
-import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
-import io.github.nilsfjp.ideophonearena.model.enums.Modality;
-import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
-import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
-import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
+import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +36,10 @@ class GameLoopHttpTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private IdeophoneRepository ideophoneRepository;
-
-    @Autowired
-    private ArenaRoundRepository arenaRoundRepository;
-
-    @Autowired
-    private AppUserRepository appUserRepository;
-
-    @Autowired
-    private GameSessionRepository gameSessionRepository;
+    private TrialRepository trialRepository;
 
     @Test
     void authenticatedHttpFlowCanStartRoundAndSubmitAnswer() throws Exception {
-        ensureDemoRoundExists();
-
         String suffix = Long.toString(System.nanoTime());
         String username = "loop_http_" + suffix;
         String token = registerAndGetToken(username);
@@ -246,16 +227,13 @@ class GameLoopHttpTests {
     }
 
     @Test
-    void seedDataContainsDifficultyOneRoundsForSupportedSokuonConditions() {
-        for (ConditionName conditionName : SUPPORTED_SOKUON_CONDITIONS) {
-            long roundCount = arenaRoundRepository.countByConditionNameAndDifficultyLevel(conditionName, 1);
-            assertTrue(roundCount > 0, conditionName + " must have seeded difficulty-1 rounds");
-        }
+    void seedDataContainsThirtyScoredConditionFreeTrials() {
+        assertEquals(30L, trialRepository.countByPracticeFalse(),
+                "seed must expose exactly 30 scored (condition-free) trials served to every session");
     }
 
     @Test
     void submitAnswerRequiresResponseTimeWithinBounds() throws Exception {
-        ensureDemoRoundExists();
         String username = "answer_validation_" + System.nanoTime();
         String token = registerAndGetToken(username);
 
@@ -311,89 +289,72 @@ class GameLoopHttpTests {
         String suffix = Long.toString(System.nanoTime());
         String username = "complete_http_" + suffix;
         String token = registerAndGetToken(username);
-        AppUser user = appUserRepository.findByUsername(username).orElseThrow();
-        int isolatedDifficulty = Math.toIntExact(100_000L + (System.nanoTime() % 1_000_000L));
 
-        String correctKana = "完了左" + suffix.substring(suffix.length() - 6);
-        String distractorKana = "完了右" + suffix.substring(suffix.length() - 6);
-        Ideophone correct = ideophoneRepository.save(new Ideophone(
-                correctKana,
-                correctKana,
-                correctKana,
-                "complete-left-" + suffix,
-                "completion target " + suffix,
-                "CL" + suffix.substring(suffix.length() - 8),
-                "complete-left-" + suffix + ".mp4",
-                Modality.AUDITORY
-        ));
-        Ideophone distractor = ideophoneRepository.save(new Ideophone(
-                distractorKana,
-                distractorKana,
-                distractorKana,
-                "complete-right-" + suffix,
-                "completion distractor " + suffix,
-                "CR" + suffix.substring(suffix.length() - 8),
-                "complete-right-" + suffix + ".mp4",
-                Modality.AUDITORY
-        ));
-        ArenaRound isolatedRound = arenaRoundRepository.save(new ArenaRound(
-                "completion target " + suffix,
-                correct,
-                distractor,
-                correct,
-                ConditionName.TEXT_ONLY,
-                isolatedDifficulty
-        ));
-        GameSession session = gameSessionRepository.save(new GameSession(
-                user,
-                ConditionName.TEXT_ONLY,
-                isolatedDifficulty
-        ));
-
-        String sessionUuid = session.getSessionUuid();
-        String roundJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        assertEquals(isolatedRound.getId().longValue(), ((Number) JsonPath.read(roundJson, "$.roundId")).longValue());
-        assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.completed"));
-
-        mockMvc.perform(post("/api/game/sessions/{sessionUuid}/answers", sessionUuid)
+        String sessionJson = mockMvc.perform(post("/api/game/sessions")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":789}
-                                """.formatted(isolatedRound.getId(), correct.getId())))
-                .andExpect(status().isOk());
-
-        GameSession afterFinalAnswer = gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow();
-        assertNotNull(afterFinalAnswer.getCompletedAt(), "final submitAnswer must mark the session complete");
-
-        mockMvc.perform(post("/api/game/sessions/{sessionUuid}/answers", sessionUuid)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":789}
-                                """.formatted(isolatedRound.getId(), correct.getId())))
-                .andExpect(status().isConflict());
-
-        String completionJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isOk())
+                                {"conditionName":"CONDITION_1_SOKUON","difficultyLevel":1}
+                                """))
+                .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+        String sessionUuid = JsonPath.read(sessionJson, "$.sessionUuid");
+
+        // Play the whole condition-free session (30 scored rounds) to completion,
+        // answering each round with its own left choice. Remember the first
+        // answered round so we can prove a replay is rejected after completion.
+        Long firstRoundId = null;
+        Long firstSelectedId = null;
+        String completionJson = null;
+        for (int i = 0; i < 40; i++) {
+            String roundJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+
+            if (Boolean.TRUE.equals(JsonPath.read(roundJson, "$.completed"))) {
+                completionJson = roundJson;
+                break;
+            }
+
+            long roundId = ((Number) JsonPath.read(roundJson, "$.roundId")).longValue();
+            long selectedId = ((Number) JsonPath.read(roundJson, "$.left.ideophoneId")).longValue();
+            if (firstRoundId == null) {
+                firstRoundId = roundId;
+                firstSelectedId = selectedId;
+            }
+
+            mockMvc.perform(post("/api/game/sessions/{sessionUuid}/answers", sessionUuid)
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":456}
+                                    """.formatted(roundId, selectedId)))
+                    .andExpect(status().isOk());
+        }
+
+        assertNotNull(completionJson, "session must reach an explicit completion body");
+        assertNotNull(firstRoundId, "at least one scored round must have been served");
 
         assertEquals(Boolean.TRUE, JsonPath.read(completionJson, "$.completed"));
         assertEquals("Game session is complete", JsonPath.read(completionJson, "$.message"));
         assertEquals(sessionUuid, JsonPath.read(completionJson, "$.sessionUuid"));
-        assertEquals("TEXT_ONLY", JsonPath.read(completionJson, "$.conditionName"));
-        assertEquals(isolatedDifficulty, ((Number) JsonPath.read(completionJson, "$.difficultyLevel")).intValue());
+        assertEquals("CONDITION_1_SOKUON", JsonPath.read(completionJson, "$.conditionName"));
+        assertEquals(1, ((Number) JsonPath.read(completionJson, "$.difficultyLevel")).intValue());
         assertNull(JsonPath.read(completionJson, "$.roundId"));
-        GameSession completedSession = gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow();
-        assertNotNull(completedSession.getCompletedAt());
+
+        // Re-answering an already-answered round is a conflict.
+        mockMvc.perform(post("/api/game/sessions/{sessionUuid}/answers", sessionUuid)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":456}
+                                """.formatted(firstRoundId, firstSelectedId)))
+                .andExpect(status().isConflict());
     }
 
     private String registerAndGetToken(String username) throws Exception {
@@ -407,45 +368,5 @@ class GameLoopHttpTests {
                 .getResponse()
                 .getContentAsString();
         return JsonPath.read(authJson, "$.token");
-    }
-
-    private void ensureDemoRoundExists() {
-        if (arenaRoundRepository.countByConditionNameAndDifficultyLevel(ConditionName.CONDITION_1_SOKUON, 1) > 0) {
-            return;
-        }
-
-        String suffix = Long.toString(System.nanoTime());
-        String targetTranslation = "target meaning " + suffix;
-        String distractorTranslation = "distractor meaning " + suffix;
-        String correctKana = "テスト左" + suffix.substring(suffix.length() - 6);
-        String distractorKana = "テスト右" + suffix.substring(suffix.length() - 6);
-        Ideophone correct = ideophoneRepository.save(new Ideophone(
-                correctKana,
-                correctKana,
-                correctKana,
-                "test-left-" + suffix,
-                targetTranslation,
-                "TL" + suffix.substring(suffix.length() - 8),
-                "test-left-" + suffix + ".mp4",
-                Modality.AUDITORY
-        ));
-        Ideophone distractor = ideophoneRepository.save(new Ideophone(
-                distractorKana,
-                distractorKana,
-                distractorKana,
-                "test-right-" + suffix,
-                distractorTranslation,
-                "TR" + suffix.substring(suffix.length() - 8),
-                "test-right-" + suffix + ".mp4",
-                Modality.AUDITORY
-        ));
-        arenaRoundRepository.save(new ArenaRound(
-                targetTranslation,
-                correct,
-                distractor,
-                correct,
-                ConditionName.CONDITION_1_SOKUON,
-                1
-        ));
     }
 }

@@ -10,35 +10,39 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
 
-    boolean existsByUserIdAndIdeophoneId(Long userId, Long ideophoneId);
+    boolean existsByUserIdAndWordId(Long userId, Long wordId);
 
-    @EntityGraph(attributePaths = "ideophone")
+    @EntityGraph(attributePaths = "word")
     Page<Rating> findByUserIdOrderByRatedAtDesc(Long userId, Pageable pageable);
 
+    // Mean rating per word (divergence rating side), word-keyed (ADR-0). Rider A
+    // excludes browser_loop_* automation accounts -- no response-shape change.
     @Query("""
             select
-                ideophone.id as ideophoneId,
+                word.id as ideophoneId,
                 count(rating.id) as ratingCount,
                 avg(rating.rating) as meanRating
             from Rating rating
-            join rating.ideophone ideophone
-            group by ideophone.id
+            join rating.word word
+            where rating.user.username not like 'browser!_loop!_%' escape '!'
+            group by word.id
             """)
-    List<IdeophoneRatingStatsProjection> aggregateRatingStatsByIdeophone();
+    List<IdeophoneRatingStatsProjection> aggregateRatingStatsByWord();
 
     // Population distribution of the 1-7 rating values per modality (per-value
     // counts, not means), for the Observatory raincloud panels. Null-modality
-    // words are excluded -- they cannot belong to a modality panel. Mirrors the
-    // AdminStats modality aggregate.
+    // words are excluded -- they cannot belong to a modality panel. Word-keyed
+    // (ADR-0); Rider A excludes browser_loop_* automation accounts.
     @Query("""
             select
-                ideophone.modality as modality,
+                word.modality as modality,
                 rating.rating as ratingValue,
                 count(rating.id) as count
             from Rating rating
-            join rating.ideophone ideophone
-            where ideophone.modality is not null
-            group by ideophone.modality, rating.rating
+            join rating.word word
+            where word.modality is not null
+              and rating.user.username not like 'browser!_loop!_%' escape '!'
+            group by word.modality, rating.rating
             """)
     List<ModalityRatingDistributionProjection> aggregateRatingDistribution();
 }

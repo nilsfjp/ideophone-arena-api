@@ -1,7 +1,7 @@
 package io.github.nilsfjp.ideophonearena.controller;
 
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.isA;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,9 +9,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
+import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import io.github.nilsfjp.ideophonearena.model.enums.Role;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,29 +56,58 @@ class AdminStatsHttpTests {
         String token = registerAndGetToken(username);
         promoteToAdmin(username);
 
-        // One real session with one answer makes every aggregate non-trivial.
+        // One real CONDITION_1_SOKUON answer makes every aggregate non-trivial
+        // and guarantees at least one row in each breakdown.
         submitOneAnswer(token);
 
         // The pre-promotion token keeps working: the JWT filter reloads the
         // user (and role) from the database on every request.
-        mockMvc.perform(get("/api/admin/stats")
+        String statsJson = mockMvc.perform(get("/api/admin/stats")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totals.users").value(greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.totals.sessions").value(greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.totals.completedSessions").value(greaterThanOrEqualTo(0)))
-                .andExpect(jsonPath("$.totals.answers").value(greaterThanOrEqualTo(1)))
-                .andExpect(jsonPath("$.byCondition").value(isA(List.class)))
-                .andExpect(jsonPath("$.byCondition[0].conditionName").exists())
-                .andExpect(jsonPath("$.byCondition[0].sessions").exists())
-                .andExpect(jsonPath("$.byCondition[0].answers").exists())
-                .andExpect(jsonPath("$.byCondition[0].correct").exists())
-                .andExpect(jsonPath("$.byCondition[0].accuracy").exists())
-                .andExpect(jsonPath("$.byModality").value(isA(List.class)))
-                .andExpect(jsonPath("$.byModality[0].modality").exists())
-                .andExpect(jsonPath("$.byModality[0].answers").exists())
-                .andExpect(jsonPath("$.byModality[0].correct").exists())
-                .andExpect(jsonPath("$.byModality[0].accuracy").exists());
+                // Totals are shared, mutated by other tests: assert lower bounds only.
+                .andExpect(jsonPath("$.totals.users").value(greaterOrEqual(1)))
+                .andExpect(jsonPath("$.totals.sessions").value(greaterOrEqual(1)))
+                .andExpect(jsonPath("$.totals.completedSessions").value(greaterOrEqual(0)))
+                .andExpect(jsonPath("$.totals.answers").value(greaterOrEqual(1)))
+                .andExpect(jsonPath("$.byCondition").isArray())
+                .andExpect(jsonPath("$.byModality").isArray())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Find our own condition row rather than trusting an index: the shared
+        // table always contains a CONDITION_1_SOKUON row with answers >= 1.
+        List<Map<String, Object>> byCondition = JsonPath.read(statsJson, "$.byCondition");
+        Map<String, Object> sokuonRow = byCondition.stream()
+                .filter(row -> "CONDITION_1_SOKUON".equals(row.get("conditionName")))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "byCondition is missing a CONDITION_1_SOKUON row: " + byCondition));
+        assertTrue(asLong(sokuonRow.get("answers")) >= 1,
+                "CONDITION_1_SOKUON answers should be >= 1 but was " + sokuonRow);
+        assertTrue(asLong(sokuonRow.get("correct")) >= 0, "correct should be >= 0");
+        double conditionAccuracy = asDouble(sokuonRow.get("accuracy"));
+        assertTrue(conditionAccuracy >= 0.0 && conditionAccuracy <= 1.0,
+                "condition accuracy out of range: " + conditionAccuracy);
+
+        // byModality is a well-formed array: every modality name is a real enum
+        // constant and every accuracy sits in [0, 1].
+        List<Map<String, Object>> byModality = JsonPath.read(statsJson, "$.byModality");
+        assertFalse(byModality.isEmpty(), "byModality should not be empty after an answer");
+        Set<String> validModalities = Arrays.stream(Modality.values())
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+        for (Map<String, Object> row : byModality) {
+            String modality = (String) row.get("modality");
+            assertTrue(validModalities.contains(modality),
+                    "unknown modality in byModality: " + modality);
+            assertTrue(asLong(row.get("answers")) >= 0, "modality answers should be >= 0");
+            assertTrue(asLong(row.get("correct")) >= 0, "modality correct should be >= 0");
+            double accuracy = asDouble(row.get("accuracy"));
+            assertTrue(accuracy >= 0.0 && accuracy <= 1.0,
+                    "modality accuracy out of range: " + accuracy);
+        }
     }
 
     @Test
@@ -88,6 +122,18 @@ class AdminStatsHttpTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.role").value("ROLE_ADMIN"));
+    }
+
+    private static org.hamcrest.Matcher<Integer> greaterOrEqual(int lowerBound) {
+        return org.hamcrest.Matchers.greaterThanOrEqualTo(lowerBound);
+    }
+
+    private static long asLong(Object value) {
+        return ((Number) value).longValue();
+    }
+
+    private static double asDouble(Object value) {
+        return ((Number) value).doubleValue();
     }
 
     private String registerAndGetToken(String username) throws Exception {

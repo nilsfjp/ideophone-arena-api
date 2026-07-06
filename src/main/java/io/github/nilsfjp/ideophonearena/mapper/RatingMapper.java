@@ -16,7 +16,7 @@ public class RatingMapper {
     public RatingResponse toResponse(Rating rating) {
         return new RatingResponse(
                 rating.getId(),
-                rating.getIdeophone().getId(),
+                rating.getWord().getId(),
                 rating.getRating(),
                 rating.getResponseTimeMs(),
                 rating.getRatedAt()

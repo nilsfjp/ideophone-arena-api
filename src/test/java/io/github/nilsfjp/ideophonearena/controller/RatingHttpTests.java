@@ -9,9 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
-import io.github.nilsfjp.ideophonearena.model.enums.Modality;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
+import io.github.nilsfjp.ideophonearena.model.Word;
+import io.github.nilsfjp.ideophonearena.repository.WordRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +27,7 @@ class RatingHttpTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private IdeophoneRepository ideophoneRepository;
+    private WordRepository wordRepository;
 
     @Test
     void ratingRoundTripCreatesPersistsAndRejectsDuplicatesAndOutOfRange() throws Exception {
@@ -166,24 +165,15 @@ class RatingHttpTests {
     }
 
     private long anyIdeophoneId() {
-        return ideophoneRepository.findAll().stream()
+        return wordRepository.findAll().stream()
                 .findFirst()
-                .map(Ideophone::getId)
-                .orElseGet(() -> ideophoneRepository.save(new Ideophone(
-                        "テスト" + System.nanoTime(),
-                        "テスト",
-                        "テスト",
-                        "rating-test-" + System.nanoTime(),
-                        "rating test gloss",
-                        "RT" + System.nanoTime(),
-                        "rating-test-" + System.nanoTime() + ".mp4",
-                        Modality.AUDITORY
-                )).getId());
+                .map(Word::getId)
+                .orElseThrow();
     }
 
     private java.util.List<Long> distinctIdeophoneIds(int n) {
-        return ideophoneRepository.findAll().stream()
-                .map(Ideophone::getId)
+        return wordRepository.findAll().stream()
+                .map(Word::getId)
                 .distinct()
                 .limit(n)
                 .toList();

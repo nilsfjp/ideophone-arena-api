@@ -11,20 +11,24 @@ import io.github.nilsfjp.ideophonearena.exception.ConflictException;
 import io.github.nilsfjp.ideophonearena.exception.ResourceNotFoundException;
 import io.github.nilsfjp.ideophonearena.mapper.GameMapper;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
+import io.github.nilsfjp.ideophonearena.model.Presentation;
+import io.github.nilsfjp.ideophonearena.model.Trial;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
-import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
+import io.github.nilsfjp.ideophonearena.repository.PresentationRepository;
+import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import java.security.SecureRandom;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,18 +49,20 @@ public class GameService {
 
     private final AppUserRepository appUserRepository;
     private final GameSessionRepository gameSessionRepository;
-    private final ArenaRoundRepository arenaRoundRepository;
+    private final TrialRepository trialRepository;
+    private final PresentationRepository presentationRepository;
     private final PlayerAnswerRepository playerAnswerRepository;
     private final GameMapper gameMapper;
     private final RoundShuffler roundShuffler;
     private final SecureRandom shuffleSeedSource = new SecureRandom();
 
     public GameService(AppUserRepository appUserRepository, GameSessionRepository gameSessionRepository,
-            ArenaRoundRepository arenaRoundRepository, PlayerAnswerRepository playerAnswerRepository,
-            GameMapper gameMapper, RoundShuffler roundShuffler) {
+            TrialRepository trialRepository, PresentationRepository presentationRepository,
+            PlayerAnswerRepository playerAnswerRepository, GameMapper gameMapper, RoundShuffler roundShuffler) {
         this.appUserRepository = appUserRepository;
         this.gameSessionRepository = gameSessionRepository;
-        this.arenaRoundRepository = arenaRoundRepository;
+        this.trialRepository = trialRepository;
+        this.presentationRepository = presentationRepository;
         this.playerAnswerRepository = playerAnswerRepository;
         this.gameMapper = gameMapper;
         this.roundShuffler = roundShuffler;
@@ -83,7 +89,8 @@ public class GameService {
         if (session.isIncludePractice()) {
             List<DerivedRound> practiceRounds = derivedPracticeRoundsForSession(session);
             if (session.getPracticeAnswered() < practiceRounds.size()) {
-                return gameMapper.toRoundResponse(session, practiceRounds.get(session.getPracticeAnswered()));
+                DerivedRound round = practiceRounds.get(session.getPracticeAnswered());
+                return gameMapper.toRoundResponse(session, round, presentationsForRound(session, round));
             }
         }
 
@@ -92,11 +99,11 @@ public class GameService {
             throw new ResourceNotFoundException("No rounds found for this session");
         }
 
-        Set<Long> answeredRoundIds = new HashSet<>(playerAnswerRepository.findAnsweredRoundIdsBySessionId(
+        Set<Long> answeredTrialIds = new HashSet<>(playerAnswerRepository.findAnsweredTrialIdsBySessionId(
                 session.getId()));
         for (DerivedRound round : rounds) {
-            if (!answeredRoundIds.contains(round.getRound().getId())) {
-                return gameMapper.toRoundResponse(session, round);
+            if (!answeredTrialIds.contains(round.getTrial().getId())) {
+                return gameMapper.toRoundResponse(session, round, presentationsForRound(session, round));
             }
         }
 
@@ -107,27 +114,25 @@ public class GameService {
     public AnswerResultResponse submitAnswer(UserDetails userDetails, String sessionUuid, SubmitAnswerRequest request) {
         AppUser user = getCurrentUser(userDetails);
         GameSession session = getOwnedSession(user, sessionUuid);
-        ArenaRound round = arenaRoundRepository.findByIdWithIdeophones(request.getRoundId())
+        Trial trial = trialRepository.findByIdWithPairingWords(request.getRoundId())
                 .orElseThrow(() -> new ResourceNotFoundException("Round not found"));
 
-        if (round.getConditionName() != session.getConditionName()
-                || round.getDifficultyLevel() != session.getDifficultyLevel()) {
-            throw new BadRequestException("Round does not belong to this session condition and difficulty");
+        // Trials are condition-free (ADR-3): every scored trial belongs to every
+        // session, so there is no cross-condition round to reject here.
+        if (trial.isPractice()) {
+            return submitPracticeAnswer(session, trial, request);
         }
-        if (round.isPractice()) {
-            return submitPracticeAnswer(session, round, request);
-        }
-        if (playerAnswerRepository.existsBySessionIdAndRoundId(session.getId(), round.getId())) {
+        if (playerAnswerRepository.existsBySessionIdAndTrialId(session.getId(), trial.getId())) {
             throw new ConflictException("This round has already been answered in this session");
         }
 
-        DerivedRound derivedRound = derivedScoredRound(session, round);
-        Ideophone selectedIdeophone = getSelectedIdeophone(round, request.getSelectedIdeophoneId());
-        boolean correct = isCorrectChoice(derivedRound, selectedIdeophone);
-        PlayerAnswer answer = new PlayerAnswer(session, round, selectedIdeophone, derivedRound.getTarget(),
+        DerivedRound derivedRound = derivedScoredRound(session, trial);
+        Word selectedWord = getSelectedWord(trial, request.getSelectedIdeophoneId());
+        boolean correct = isCorrectChoice(derivedRound, selectedWord);
+        PlayerAnswer answer = new PlayerAnswer(session, trial, selectedWord, derivedRound.getTarget(),
                 request.getResponseTimeMs(), correct);
         try {
-            // Flush now so a concurrent duplicate hits UNIQUE(session_id, round_id)
+            // Flush now so a concurrent duplicate hits UNIQUE(session_id, trial_id)
             // here instead of surfacing at commit as a 500.
             playerAnswerRepository.saveAndFlush(answer);
         } catch (DataIntegrityViolationException ex) {
@@ -137,19 +142,18 @@ public class GameService {
         long totalAnswered = playerAnswerRepository.countBySessionId(session.getId());
         long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
 
-        long totalRounds = arenaRoundRepository.countByConditionNameAndDifficultyLevelAndPracticeFalse(
-                session.getConditionName(), session.getDifficultyLevel());
+        long totalRounds = trialRepository.countByPracticeFalse();
         if (session.getCompletedAt() == null && totalAnswered == totalRounds) {
             session.complete();
         }
 
-        return gameMapper.toAnswerResultResponse(derivedRound, selectedIdeophone, answer, totalAnswered, totalCorrect);
+        return gameMapper.toAnswerResultResponse(derivedRound, selectedWord, answer, totalAnswered, totalCorrect);
     }
 
     // Practice answers return feedback but are never persisted: they do not
     // create PlayerAnswer rows and cannot affect score, completion, or the
     // leaderboard. Only the session's practice cursor advances.
-    private AnswerResultResponse submitPracticeAnswer(GameSession session, ArenaRound round,
+    private AnswerResultResponse submitPracticeAnswer(GameSession session, Trial trial,
             SubmitAnswerRequest request) {
         if (!session.isIncludePractice()) {
             throw new BadRequestException("This session was started without practice rounds");
@@ -158,7 +162,7 @@ public class GameService {
         List<DerivedRound> practiceRounds = derivedPracticeRoundsForSession(session);
         int roundIndex = -1;
         for (int index = 0; index < practiceRounds.size(); index++) {
-            if (practiceRounds.get(index).getRound().getId().equals(round.getId())) {
+            if (practiceRounds.get(index).getTrial().getId().equals(trial.getId())) {
                 roundIndex = index;
                 break;
             }
@@ -174,43 +178,50 @@ public class GameService {
         }
 
         DerivedRound derivedRound = practiceRounds.get(roundIndex);
-        Ideophone selectedIdeophone = getSelectedIdeophone(round, request.getSelectedIdeophoneId());
-        boolean correct = isCorrectChoice(derivedRound, selectedIdeophone);
+        Word selectedWord = getSelectedWord(trial, request.getSelectedIdeophoneId());
+        boolean correct = isCorrectChoice(derivedRound, selectedWord);
         session.recordPracticeAnswer();
 
         long totalAnswered = playerAnswerRepository.countBySessionId(session.getId());
         long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
-        return gameMapper.toPracticeAnswerResultResponse(derivedRound, selectedIdeophone, correct, totalAnswered,
+        return gameMapper.toPracticeAnswerResultResponse(derivedRound, selectedWord, correct, totalAnswered,
                 totalCorrect);
     }
 
-    // The session serves the first PRACTICE_ROUNDS_PER_SESSION practice rounds
-    // of its condition, in seed order (p0 auditory, p1 visual); only the
-    // per-round presentation draws come from the practice stream.
+    // The session serves the first PRACTICE_ROUNDS_PER_SESSION practice trials
+    // in seed order (p0 auditory, p1 visual); only the per-round presentation
+    // draws come from the practice stream.
     private List<DerivedRound> derivedPracticeRoundsForSession(GameSession session) {
-        List<ArenaRound> practiceRounds = arenaRoundRepository
-                .findByConditionNameAndDifficultyLevelAndPracticeTrueOrderByIdAsc(
-                        session.getConditionName(), session.getDifficultyLevel());
-        List<ArenaRound> served = practiceRounds.subList(0,
-                Math.min(PRACTICE_ROUNDS_PER_SESSION, practiceRounds.size()));
+        List<Trial> practiceTrials = trialRepository.findByPracticeTrueOrderByIdAsc();
+        List<Trial> served = practiceTrials.subList(0,
+                Math.min(PRACTICE_ROUNDS_PER_SESSION, practiceTrials.size()));
         return roundShuffler.derivePracticeRounds(session.getShuffleSeed(), served);
     }
 
     private List<DerivedRound> derivedScoredRoundsForSession(GameSession session) {
-        List<ArenaRound> rounds = arenaRoundRepository.findByConditionNameAndDifficultyLevelAndPracticeFalseOrderByIdAsc(
-                session.getConditionName(),
-                session.getDifficultyLevel()
-        );
-        return roundShuffler.deriveScoredRounds(session.getShuffleSeed(), rounds);
+        List<Trial> trials = trialRepository.findByPracticeFalseOrderByIdAsc();
+        return roundShuffler.deriveScoredRounds(session.getShuffleSeed(), trials);
     }
 
-    private DerivedRound derivedScoredRound(GameSession session, ArenaRound round) {
+    private DerivedRound derivedScoredRound(GameSession session, Trial trial) {
         for (DerivedRound derived : derivedScoredRoundsForSession(session)) {
-            if (derived.getRound().getId().equals(round.getId())) {
+            if (derived.getTrial().getId().equals(trial.getId())) {
                 return derived;
             }
         }
-        throw new BadRequestException("Round does not belong to this session condition and difficulty");
+        throw new BadRequestException("Round does not belong to this session's scored trials");
+    }
+
+    // Resolves the two served words' presentations for this session's condition,
+    // keyed by word id -- the display_form/script_code the round DTO renders.
+    private Map<Long, Presentation> presentationsForRound(GameSession session, DerivedRound round) {
+        List<Long> wordIds = List.of(round.getLeft().getId(), round.getRight().getId());
+        Map<Long, Presentation> byWordId = new HashMap<>();
+        for (Presentation presentation : presentationRepository.findByWordIdInAndConditionName(
+                wordIds, session.getConditionName())) {
+            byWordId.put(presentation.getWord().getId(), presentation);
+        }
+        return byWordId;
     }
 
     private AppUser getCurrentUser(UserDetails userDetails) {
@@ -239,19 +250,23 @@ public class GameService {
         return session;
     }
 
-    private Ideophone getSelectedIdeophone(ArenaRound round, Long selectedIdeophoneId) {
-        if (round.getLeftIdeophone().getId().equals(selectedIdeophoneId)) {
-            return round.getLeftIdeophone();
+    // The selected id is a word id (frozen field name: selectedIdeophoneId),
+    // matched against the trial's pairing members.
+    private Word getSelectedWord(Trial trial, Long selectedWordId) {
+        Word wordA = trial.getPairing().getWordA();
+        Word wordB = trial.getPairing().getWordB();
+        if (wordA.getId().equals(selectedWordId)) {
+            return wordA;
         }
-        if (round.getRightIdeophone().getId().equals(selectedIdeophoneId)) {
-            return round.getRightIdeophone();
+        if (wordB.getId().equals(selectedWordId)) {
+            return wordB;
         }
-        throw new BadRequestException("Selected ideophone is not an option for this round");
+        throw new BadRequestException("Selected word is not an option for this round");
     }
 
     // Correctness is judged against the seed-derived target, never against
-    // arena_rounds.correct_ideophone_id (which documents the thesis target).
-    private boolean isCorrectChoice(DerivedRound derivedRound, Ideophone selectedIdeophone) {
-        return derivedRound.getTarget().getId().equals(selectedIdeophone.getId());
+    // trials.correct_word_id (which documents the thesis target).
+    private boolean isCorrectChoice(DerivedRound derivedRound, Word selectedWord) {
+        return derivedRound.getTarget().getId().equals(selectedWord.getId());
     }
 }

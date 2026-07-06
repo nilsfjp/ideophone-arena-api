@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
+import io.github.nilsfjp.ideophonearena.repository.WordRepository;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -23,9 +23,9 @@ import org.springframework.test.web.servlet.MockMvc;
 /**
  * Per-modality distribution of the 1-7 iconicity ratings: public, read-only,
  * per-value counts. A modality that has any ratings gets a dense 1-7 grid;
- * `byModalityN` carries each present modality's total. Assertions use
- * before/after deltas because the aggregate is population-wide over a shared,
- * non-rolled-back database.
+ * `byModalityN` carries each present modality's total. Because the aggregate is
+ * population-wide over a shared, non-rolled-back database, assertions use
+ * before/after deltas and structural invariants only -- never exact totals.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,7 +35,7 @@ class RatingDistributionsHttpTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private IdeophoneRepository ideophoneRepository;
+    private WordRepository wordRepository;
 
     @Test
     void distributionsArePublicAndWellFormed() throws Exception {
@@ -74,16 +74,14 @@ class RatingDistributionsHttpTests {
     @Test
     void ratingLandsInItsModalityValueCellAndBumpsModalityN() throws Exception {
         String suffix = Long.toString(System.nanoTime());
+        // Rate a SEEDED AUDITORY word of a known modality; never create one.
+        Word word = auditoryWord();
+
         String before = getDistributions();
         long cellBefore = cellCount(before, "AUDITORY", 5);
         long nBefore = modalityN(before, "AUDITORY");
 
-        Ideophone word = ideophoneRepository.save(new Ideophone(
-                "テD" + suffix, "テD" + suffix, "てD" + suffix,
-                "rdist-" + suffix, "rating distribution gloss " + suffix,
-                "HH", "rdist-" + suffix + ".m4a", Modality.AUDITORY));
         String token = registerAndGetToken("rdist_" + suffix);
-
         mockMvc.perform(post("/api/ratings")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,12 +91,23 @@ class RatingDistributionsHttpTests {
                 .andExpect(status().isCreated());
 
         String after = getDistributions();
+
+        // The AUDITORY tier is present and its 7 cells sum to byModalityN.AUDITORY.
+        long nAfter = modalityN(after, "AUDITORY");
+        assertTrue(nAfter >= 1, "byModalityN.AUDITORY must be at least 1 after a rating");
+        assertEquals(nBefore + 1, nAfter, "byModalityN.AUDITORY must grow by one");
         assertEquals(cellBefore + 1, cellCount(after, "AUDITORY", 5),
                 "the new rating must land in the (AUDITORY, 5) cell");
-        assertEquals(nBefore + 1, modalityN(after, "AUDITORY"),
-                "byModalityN.AUDITORY must grow by one");
         assertEquals(7L, cellsForModality(after, "AUDITORY"),
                 "AUDITORY now has ratings, so its grid must be dense 1-7");
+        assertEquals(nAfter, summedCount(after, "AUDITORY"),
+                "the AUDITORY 1-7 cells must sum to byModalityN.AUDITORY");
+    }
+
+    private Word auditoryWord() {
+        List<Word> auditory = wordRepository.findByModality(Modality.AUDITORY);
+        assertTrue(!auditory.isEmpty(), "seed must contain at least one AUDITORY word");
+        return auditory.get(0);
     }
 
     private long cellCount(String json, String modality, int ratingValue) {
@@ -109,6 +118,14 @@ class RatingDistributionsHttpTests {
                 .mapToLong(cell -> ((Number) cell.get("count")).longValue())
                 .findFirst()
                 .orElse(0L);
+    }
+
+    private long summedCount(String json, String modality) {
+        List<Map<String, Object>> cells = JsonPath.read(json, "$.distributions");
+        return cells.stream()
+                .filter(cell -> modality.equals(cell.get("modality")))
+                .mapToLong(cell -> ((Number) cell.get("count")).longValue())
+                .sum();
     }
 
     private long modalityN(String json, String modality) {

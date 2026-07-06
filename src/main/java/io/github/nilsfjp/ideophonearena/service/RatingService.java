@@ -10,13 +10,13 @@ import io.github.nilsfjp.ideophonearena.exception.ResourceNotFoundException;
 import io.github.nilsfjp.ideophonearena.mapper.RatingMapper;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.Rating;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import io.github.nilsfjp.ideophonearena.repository.RatingRepository;
+import io.github.nilsfjp.ideophonearena.repository.WordRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,17 +29,17 @@ public class RatingService {
     private static final int MAX_RATINGS_PAGE_SIZE = 50;
 
     private final AppUserRepository appUserRepository;
-    private final IdeophoneRepository ideophoneRepository;
+    private final WordRepository wordRepository;
     private final GameSessionRepository gameSessionRepository;
     private final RatingRepository ratingRepository;
     private final PlayerAnswerRepository playerAnswerRepository;
     private final RatingMapper ratingMapper;
 
-    public RatingService(AppUserRepository appUserRepository, IdeophoneRepository ideophoneRepository,
+    public RatingService(AppUserRepository appUserRepository, WordRepository wordRepository,
             GameSessionRepository gameSessionRepository, RatingRepository ratingRepository,
             PlayerAnswerRepository playerAnswerRepository, RatingMapper ratingMapper) {
         this.appUserRepository = appUserRepository;
-        this.ideophoneRepository = ideophoneRepository;
+        this.wordRepository = wordRepository;
         this.gameSessionRepository = gameSessionRepository;
         this.ratingRepository = ratingRepository;
         this.playerAnswerRepository = playerAnswerRepository;
@@ -49,19 +49,21 @@ public class RatingService {
     @Transactional
     public RatingResponse createRating(UserDetails userDetails, RatingRequest request) {
         AppUser user = getCurrentUser(userDetails);
-        Ideophone ideophone = ideophoneRepository.findById(request.getIdeophoneId())
+        Word word = wordRepository.findById(request.getIdeophoneId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Ideophone not found: " + request.getIdeophoneId()));
         GameSession session = resolveSession(user, request.getSessionUuid());
 
-        if (ratingRepository.existsByUserIdAndIdeophoneId(user.getId(), ideophone.getId())) {
+        // Word-keyed uniqueness (ADR-0): one rating per word per user holds across
+        // conditions -- the grain the instrument means.
+        if (ratingRepository.existsByUserIdAndWordId(user.getId(), word.getId())) {
             throw new ConflictException("This ideophone has already been rated by this user");
         }
 
-        Rating rating = new Rating(user, ideophone, session, request.getRating().shortValue(),
+        Rating rating = new Rating(user, word, session, request.getRating().shortValue(),
                 request.getResponseTimeMs());
         try {
-            // Flush now so a concurrent duplicate hits UNIQUE(user_id, ideophone_id)
+            // Flush now so a concurrent duplicate hits UNIQUE(user_id, word_id)
             // here instead of surfacing at commit as a 500.
             ratingRepository.saveAndFlush(rating);
         } catch (DataIntegrityViolationException ex) {

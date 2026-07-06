@@ -16,7 +16,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(
         name = "ratings",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "ideophone_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "word_id"})
 )
 public class Rating {
 
@@ -28,12 +28,14 @@ public class Rating {
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
 
+    // Word-keyed (ADR-0): UNIQUE(user_id, word_id) means the instrument's grain,
+    // so one rating per word holds across conditions at the DB layer.
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ideophone_id", nullable = false)
-    private Ideophone ideophone;
+    @JoinColumn(name = "word_id", nullable = false)
+    private Word word;
 
     // Provenance only: the session the rating was made during, if any. Ratings
-    // are keyed by (user, ideophone), so session_id stays nullable.
+    // are keyed by (user, word), so session_id stays nullable.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id")
     private GameSession session;
@@ -51,9 +53,9 @@ public class Rating {
     protected Rating() {
     }
 
-    public Rating(AppUser user, Ideophone ideophone, GameSession session, short rating, Integer responseTimeMs) {
+    public Rating(AppUser user, Word word, GameSession session, short rating, Integer responseTimeMs) {
         this.user = user;
-        this.ideophone = ideophone;
+        this.word = word;
         this.session = session;
         this.rating = rating;
         this.responseTimeMs = responseTimeMs;
@@ -71,12 +73,12 @@ public class Rating {
         this.user = user;
     }
 
-    public Ideophone getIdeophone() {
-        return ideophone;
+    public Word getWord() {
+        return word;
     }
 
-    public void setIdeophone(Ideophone ideophone) {
-        this.ideophone = ideophone;
+    public void setWord(Word word) {
+        this.word = word;
     }
 
     public GameSession getSession() {

@@ -1,34 +1,34 @@
 package io.github.nilsfjp.ideophonearena.model;
 
-// One round as a specific session presents it: which pair member is the
-// target, which side it sits on, and whether its meaning is listed first.
-// Derived from the session's shuffle seed on every request, never persisted.
+// One trial as a specific session presents it: which pair member is the target,
+// which side it sits on, and whether its meaning is listed first. Derived from
+// the session's shuffle seed on every request, never persisted.
 public final class DerivedRound {
 
-    private final ArenaRound round;
-    private final Ideophone target;
-    private final Ideophone other;
+    private final Trial trial;
+    private final Word target;
+    private final Word other;
     private final boolean targetOnLeft;
     private final boolean targetMeaningListedFirst;
 
-    public DerivedRound(ArenaRound round, Ideophone target, Ideophone other, boolean targetOnLeft,
+    public DerivedRound(Trial trial, Word target, Word other, boolean targetOnLeft,
             boolean targetMeaningListedFirst) {
-        this.round = round;
+        this.trial = trial;
         this.target = target;
         this.other = other;
         this.targetOnLeft = targetOnLeft;
         this.targetMeaningListedFirst = targetMeaningListedFirst;
     }
 
-    public ArenaRound getRound() {
-        return round;
+    public Trial getTrial() {
+        return trial;
     }
 
-    public Ideophone getTarget() {
+    public Word getTarget() {
         return target;
     }
 
-    public Ideophone getOther() {
+    public Word getOther() {
         return other;
     }
 
@@ -45,11 +45,11 @@ public final class DerivedRound {
         return targetMeaningListedFirst;
     }
 
-    public Ideophone getLeft() {
+    public Word getLeft() {
         return targetOnLeft ? target : other;
     }
 
-    public Ideophone getRight() {
+    public Word getRight() {
         return targetOnLeft ? other : target;
     }
 }

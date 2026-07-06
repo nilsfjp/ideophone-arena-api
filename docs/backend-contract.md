@@ -609,6 +609,22 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
 
 ## Changelog
 
+- 2026-07-06: **M2 "The Re-key" (NIL-68)** — internal schema normalized to word grain with **every public response
+  shape frozen** (verified by byte-level curl-diff). `ideophones` split into `words` + `presentations`;
+  `arena_rounds` renamed/collapsed into `trials` (condition-free); `player_answers`/`ratings` re-keyed to word grain
+  with **`UNIQUE(user_id, word_id)`** (closes the cross-condition double-rating: rating a word again under a
+  different condition now returns `409`). Public id **semantics** become word ids while the frozen field **names**
+  stay (`ideophoneId`, `selectedIdeophoneId`, `correctIdeophoneId`, divergence/ratable `ideophoneId`). Round-card
+  `displayForm`/`canonicalScript` now resolve from `presentation(word, session.condition)`; everything else is a
+  word-level fact. `GET /api/research/divergence` heals to **one row per word** (the pre-M2 row-split across
+  condition rows was the accident) and its `displayForm` is `words.canonical_form`; `rating-distributions` and
+  `position-bias` re-point to word grain unchanged. Rider A (research aggregates only): divergence,
+  rating-distributions, and position-bias now exclude practice trials (defensive) and `browser_loop_%` automation
+  accounts — no shape change. The deterministic per-session shuffle is **byte-for-byte unchanged** (id vocabulary
+  re-binds to word ids: "pair second = higher word id" selects the same k-word member as before). `ddl-auto=validate`
+  unchanged; all seed via `generate_seed_sql.py --check`. Tests: word-grain seed-replay re-point + grain-heal
+  regression; `./mvnw test` -> 90 tests, 0 failures.
+
 - 2026-07-06: Observatory research endpoints (NIL-79). Two new public read-only `ResearchController` siblings:
   `GET /api/research/rating-distributions` (per-modality 1-7 rating-value counts — dense grid + `byModalityN`) and
   `GET /api/research/position-bias` (SDT fairness check reconstructed from the per-session shuffle: left/right pick

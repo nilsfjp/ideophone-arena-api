@@ -9,13 +9,15 @@ import io.github.nilsfjp.ideophonearena.dto.LeaderboardPageResponse;
 import io.github.nilsfjp.ideophonearena.dto.RoundResponse;
 import io.github.nilsfjp.ideophonearena.dto.TimingResponse;
 import io.github.nilsfjp.ideophonearena.dto.TranslationResponse;
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
+import io.github.nilsfjp.ideophonearena.model.Presentation;
+import io.github.nilsfjp.ideophonearena.model.Trial;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.repository.LeaderboardEntryProjection;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -37,21 +39,24 @@ public class GameMapper {
     }
 
     // The served prompt, translations, and sides all come from the session's
-    // seed-derived presentation, not from the arena_rounds row (whose prompt
-    // and correct_ideophone_id document the fixed thesis target).
-    public RoundResponse toRoundResponse(GameSession session, DerivedRound derivedRound) {
-        ArenaRound round = derivedRound.getRound();
+    // seed-derived presentation. Condition/difficulty are session facts (they
+    // left the trial in the ADR-3 collapse). Each card's display_form and the
+    // frozen 2-letter canonicalScript come from presentation(word, condition);
+    // everything else is a word-level fact.
+    public RoundResponse toRoundResponse(GameSession session, DerivedRound derivedRound,
+            Map<Long, Presentation> presentationsByWordId) {
+        Trial trial = derivedRound.getTrial();
         return new RoundResponse(
                 session.getSessionUuid(),
-                round.getId(),
+                trial.getId(),
                 derivedRound.getTarget().getGloss(),
-                round.getConditionName(),
-                round.getDifficultyLevel(),
-                round.isPractice(),
+                session.getConditionName(),
+                session.getDifficultyLevel(),
+                trial.isPractice(),
                 derivedRound.isTargetMeaningListedFirst(),
                 new TranslationResponse(derivedRound.getTarget().getGloss(), derivedRound.getOther().getGloss()),
-                toIdeophoneResponse(derivedRound.getLeft()),
-                toIdeophoneResponse(derivedRound.getRight()),
+                toIdeophoneResponse(derivedRound.getLeft(), presentationsByWordId),
+                toIdeophoneResponse(derivedRound.getRight(), presentationsByWordId),
                 new TimingResponse(FIXATION_MS, PRE_CHOICE_DELAY_MS)
         );
     }
@@ -61,17 +66,17 @@ public class GameMapper {
                 session.getConditionName(), session.getDifficultyLevel(), false, false, null, null, null, null);
     }
 
-    public AnswerResultResponse toAnswerResultResponse(DerivedRound derivedRound, Ideophone selectedIdeophone,
+    public AnswerResultResponse toAnswerResultResponse(DerivedRound derivedRound, Word selectedWord,
             PlayerAnswer answer, long totalAnswered, long totalCorrect) {
         return new AnswerResultResponse(
-                derivedRound.getRound().getId(),
-                selectedIdeophone.getId(),
+                derivedRound.getTrial().getId(),
+                selectedWord.getId(),
                 derivedRound.getTarget().getId(),
                 answer.isCorrect(),
                 false,
                 derivedRound.getTarget().getGloss(),
                 derivedRound.getTarget().getKana(),
-                selectedIdeophone.getKana(),
+                selectedWord.getKana(),
                 totalAnswered,
                 totalCorrect
         );
@@ -79,30 +84,30 @@ public class GameMapper {
 
     // Practice answers are never persisted, so there is no PlayerAnswer to map
     // from; totals stay the session's scored counts.
-    public AnswerResultResponse toPracticeAnswerResultResponse(DerivedRound derivedRound, Ideophone selectedIdeophone,
+    public AnswerResultResponse toPracticeAnswerResultResponse(DerivedRound derivedRound, Word selectedWord,
             boolean correct, long totalAnswered, long totalCorrect) {
         return new AnswerResultResponse(
-                derivedRound.getRound().getId(),
-                selectedIdeophone.getId(),
+                derivedRound.getTrial().getId(),
+                selectedWord.getId(),
                 derivedRound.getTarget().getId(),
                 correct,
                 true,
                 derivedRound.getTarget().getGloss(),
                 derivedRound.getTarget().getKana(),
-                selectedIdeophone.getKana(),
+                selectedWord.getKana(),
                 totalAnswered,
                 totalCorrect
         );
     }
 
     // History replays what the session actually asked: the stored derived
-    // target, not the round row's thesis target.
+    // target, not the trial row's thesis target.
     public AttemptResponse toAttemptResponse(PlayerAnswer answer) {
         return new AttemptResponse(
                 answer.getAnsweredAt(),
-                answer.getTargetIdeophone().getGloss(),
-                answer.getSelectedIdeophone().getKana(),
-                answer.getTargetIdeophone().getKana(),
+                answer.getTargetWord().getGloss(),
+                answer.getSelectedWord().getKana(),
+                answer.getTargetWord().getKana(),
                 answer.isCorrect(),
                 answer.getResponseTimeMs()
         );
@@ -130,17 +135,22 @@ public class GameMapper {
         return value == null ? 0L : value;
     }
 
-    private IdeophoneChoiceResponse toIdeophoneResponse(Ideophone ideophone) {
+    // The card renders word-level facts (kana, canonical form, romaji, audio,
+    // modality) plus this session-condition's script manipulation: display_form
+    // (invariant 1, verbatim) and the frozen 2-letter script_code exposed as
+    // canonicalScript. The id keeps its frozen name ideophoneId (= the word id).
+    private IdeophoneChoiceResponse toIdeophoneResponse(Word word, Map<Long, Presentation> presentationsByWordId) {
+        Presentation presentation = presentationsByWordId.get(word.getId());
         return new IdeophoneChoiceResponse(
-                ideophone.getId(),
-                ideophone.getKana(),
-                ideophone.getDisplayForm(),
-                ideophone.getCanonicalForm(),
-                ideophone.getRomaji(),
-                ideophone.getStimulusFile(),
-                STIMULUS_URL_PREFIX + ideophone.getStimulusFile(),
-                ideophone.getModality(),
-                ideophone.getCanonicalScript()
+                word.getId(),
+                word.getKana(),
+                presentation.getDisplayForm(),
+                word.getCanonicalForm(),
+                word.getRomaji(),
+                word.getStimulusFile(),
+                STIMULUS_URL_PREFIX + word.getStimulusFile(),
+                word.getModality(),
+                presentation.getScriptCode()
         );
     }
 }

@@ -13,18 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
 import io.github.nilsfjp.ideophonearena.model.PlayerAnswer;
+import io.github.nilsfjp.ideophonearena.model.Trial;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
-import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
-import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
-import java.util.ArrayList;
+import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -44,10 +41,7 @@ class LeaderboardPaginationHttpTests {
     private AppUserRepository appUserRepository;
 
     @Autowired
-    private IdeophoneRepository ideophoneRepository;
-
-    @Autowired
-    private ArenaRoundRepository arenaRoundRepository;
+    private TrialRepository trialRepository;
 
     @Autowired
     private GameSessionRepository gameSessionRepository;
@@ -94,20 +88,20 @@ class LeaderboardPaginationHttpTests {
     @Test
     void leaderboardRanksByBestCompletedSessionAndIgnoresIncompleteSessions() throws Exception {
         String suffix = Long.toString(System.nanoTime());
-        List<ArenaRound> rounds = createIsolatedRounds(suffix, 3);
+        List<Trial> trials = createIsolatedRounds(suffix, 3);
 
         // improver: first completed session 1/2, second completed session 2/2.
         // The best (2/2) must win over both the earlier session and an
         // incomplete 3/3 session, which must not count at all.
         AppUser improver = registerUser("lb_improver_" + suffix);
-        completedSession(improver, rounds, 2, 1);
-        completedSession(improver, rounds, 2, 2);
-        incompleteSession(improver, rounds, 3, 3);
+        completedSession(improver, trials, 2, 1);
+        completedSession(improver, trials, 2, 2);
+        incompleteSession(improver, trials, 3, 3);
 
         // runnerUp: same best correct count (2) but out of 3 answers, so the
         // accuracy tiebreak ranks them below the improver.
         AppUser runnerUp = registerUser("lb_runner_" + suffix);
-        completedSession(runnerUp, rounds, 3, 2);
+        completedSession(runnerUp, trials, 3, 2);
 
         Map<String, Map<String, Object>> entries = fetchAllEntries();
 
@@ -130,12 +124,12 @@ class LeaderboardPaginationHttpTests {
     @Test
     void leaderboardBreaksFullTiesByUsername() throws Exception {
         String suffix = Long.toString(System.nanoTime());
-        List<ArenaRound> rounds = createIsolatedRounds(suffix, 2);
+        List<Trial> trials = createIsolatedRounds(suffix, 2);
 
         AppUser alpha = registerUser("lb_tie_a_" + suffix);
         AppUser beta = registerUser("lb_tie_b_" + suffix);
-        completedSession(beta, rounds, 2, 1);
-        completedSession(alpha, rounds, 2, 1);
+        completedSession(beta, trials, 2, 1);
+        completedSession(alpha, trials, 2, 1);
 
         Map<String, Map<String, Object>> entries = fetchAllEntries();
         Map<String, Object> alphaEntry = entries.get(alpha.getUsername());
@@ -149,10 +143,10 @@ class LeaderboardPaginationHttpTests {
     @Test
     void leaderboardOmitsUsersWithoutCompletedSessions() throws Exception {
         String suffix = Long.toString(System.nanoTime());
-        List<ArenaRound> rounds = createIsolatedRounds(suffix, 2);
+        List<Trial> trials = createIsolatedRounds(suffix, 2);
 
         AppUser unfinished = registerUser("lb_unfinished_" + suffix);
-        incompleteSession(unfinished, rounds, 2, 2);
+        incompleteSession(unfinished, trials, 2, 2);
 
         Map<String, Map<String, Object>> entries = fetchAllEntries();
         assertNull(entries.get(unfinished.getUsername()),
@@ -197,52 +191,34 @@ class LeaderboardPaginationHttpTests {
         return appUserRepository.findByUsername(username).orElseThrow();
     }
 
-    private void completedSession(AppUser user, List<ArenaRound> rounds, int answered, int correct) {
-        GameSession session = session(user, rounds, answered, correct);
+    private void completedSession(AppUser user, List<Trial> trials, int answered, int correct) {
+        GameSession session = session(user, trials, answered, correct);
         session.complete();
         gameSessionRepository.save(session);
     }
 
-    private void incompleteSession(AppUser user, List<ArenaRound> rounds, int answered, int correct) {
-        session(user, rounds, answered, correct);
+    private void incompleteSession(AppUser user, List<Trial> trials, int answered, int correct) {
+        session(user, trials, answered, correct);
     }
 
-    private GameSession session(AppUser user, List<ArenaRound> rounds, int answered, int correct) {
+    private GameSession session(AppUser user, List<Trial> trials, int answered, int correct) {
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.TEXT_ONLY, rounds.get(0).getDifficultyLevel()));
+                user, ConditionName.CONDITION_1_SOKUON, 1));
         for (int index = 0; index < answered; index++) {
-            ArenaRound round = rounds.get(index);
+            Trial trial = trials.get(index);
+            Word word = trial.getPairing().getWordA();
             playerAnswerRepository.save(new PlayerAnswer(
-                    session, round, round.getCorrectIdeophone(), round.getCorrectIdeophone(), 500, index < correct));
+                    session, trial, word, word, 500, index < correct));
         }
         return session;
     }
 
-    private List<ArenaRound> createIsolatedRounds(String suffix, int count) {
-        int difficulty = Math.toIntExact(300_000L + (System.nanoTime() % 1_000_000L));
-        List<ArenaRound> rounds = new ArrayList<>();
-        for (int index = 0; index < count; index++) {
-            String tag = "lb" + index;
-            String prompt = tag + " target " + suffix;
-            Ideophone correct = ideophone(tag + "l", suffix, prompt);
-            Ideophone distractor = ideophone(tag + "r", suffix, tag + " distractor " + suffix);
-            rounds.add(arenaRoundRepository.save(new ArenaRound(
-                    prompt, correct, distractor, correct, ConditionName.TEXT_ONLY, difficulty)));
-        }
-        return rounds;
-    }
-
-    private Ideophone ideophone(String tag, String suffix, String gloss) {
-        String kana = tag + suffix.substring(suffix.length() - 6);
-        return ideophoneRepository.save(new Ideophone(
-                kana,
-                kana,
-                kana,
-                tag + "-" + suffix,
-                gloss,
-                tag.toUpperCase() + suffix.substring(suffix.length() - 8),
-                tag + "-" + suffix + ".m4a",
-                Modality.AUDITORY
-        ));
+    // Reference the seeded scored trials rather than creating fixtures: every
+    // session serves the same 30 scored trials, so a fixture trial would be
+    // served to unrelated sessions and NPE. The UNIQUE(session_id, trial_id)
+    // constraint is respected because each session answers distinct trials and
+    // answered <= 30.
+    private List<Trial> createIsolatedRounds(String suffix, int count) {
+        return trialRepository.findByPracticeFalseOrderByIdAsc().subList(0, count);
     }
 }

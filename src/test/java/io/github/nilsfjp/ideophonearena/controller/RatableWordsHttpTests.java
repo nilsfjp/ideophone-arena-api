@@ -9,16 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import io.github.nilsfjp.ideophonearena.model.AppUser;
-import io.github.nilsfjp.ideophonearena.model.ArenaRound;
-import io.github.nilsfjp.ideophonearena.model.GameSession;
-import io.github.nilsfjp.ideophonearena.model.Ideophone;
+import io.github.nilsfjp.ideophonearena.model.Trial;
+import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
-import io.github.nilsfjp.ideophonearena.model.enums.Modality;
-import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
-import io.github.nilsfjp.ideophonearena.repository.ArenaRoundRepository;
-import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
-import io.github.nilsfjp.ideophonearena.repository.IdeophoneRepository;
+import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
+import io.github.nilsfjp.ideophonearena.repository.WordRepository;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,84 +29,59 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * The Rating Lab pool endpoint against an isolated fixture (unique difficulty,
- * sessions created through the repository): answered scored rounds contribute
- * both members exactly once, practice words never appear (their answers are
- * never persisted), rated words drop out, and the pool is scoped per user.
- * Rounds are played through the real HTTP flow so the pool reflects genuine
- * player_answers rows.
+ * The Rating Lab pool endpoint, played entirely through the real HTTP flow
+ * against the seeded, condition-free trials (M2 word grain, ADR-0). Every
+ * session serves the same 30 scored trials; answering a scored round makes both
+ * members of its pair ratable, practice words never persist an answer, rated
+ * words drop out, and the pool is scoped per user. The M2 grain-heal regression
+ * (Test E) proves that answering the same words again under a different script
+ * condition does not double-offer them: the pool heals to one row per word.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 class RatableWordsHttpTests {
 
+    // The seed has 30 scored trials covering words 1-60, both members of every
+    // pair distinct, so a completed session makes exactly 60 words ratable.
+    private static final int SCORED_WORDS = 60;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private IdeophoneRepository ideophoneRepository;
+    private WordRepository wordRepository;
 
     @Autowired
-    private ArenaRoundRepository arenaRoundRepository;
-
-    @Autowired
-    private AppUserRepository appUserRepository;
-
-    @Autowired
-    private GameSessionRepository gameSessionRepository;
+    private TrialRepository trialRepository;
 
     @Test
     void answeredRoundsFeedThePoolPracticeExcludedAndRatingRemovesWords() throws Exception {
         String suffix = Long.toString(System.nanoTime());
-        String username = "ratable_http_" + suffix;
-        String token = registerAndGetToken(username);
-        AppUser user = appUserRepository.findByUsername(username).orElseThrow();
-        int difficulty = Math.toIntExact(600_000L + (System.nanoTime() % 1_000_000L));
+        String token = registerAndGetToken("ratable_http_" + suffix);
 
-        ArenaRound practiceOne = fixtureRound("rp0", suffix, difficulty, true);
-        ArenaRound practiceTwo = fixtureRound("rp1", suffix, difficulty, true);
-        ArenaRound scoredOne = fixtureRound("rs0", suffix, difficulty, false);
-        ArenaRound scoredTwo = fixtureRound("rs1", suffix, difficulty, false);
-        // A third scored round reusing the first round's pair: encountering a
-        // word twice must not duplicate it in the pool.
-        arenaRoundRepository.save(new ArenaRound(
-                scoredOne.getPrompt(),
-                scoredOne.getLeftIdeophone(),
-                scoredOne.getRightIdeophone(),
-                scoredOne.getLeftIdeophone(),
-                ConditionName.TEXT_ONLY,
-                difficulty,
-                false
-        ));
+        String sessionUuid = startSession(token, ConditionName.CONDITION_1_SOKUON, true);
+        playSessionToCompletion(token, sessionUuid);
 
-        GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.TEXT_ONLY, difficulty, true));
-        playSessionToCompletion(token, session.getSessionUuid());
+        Set<Long> expectedScoredIds = expectedScoredWordIds();
+        Set<Long> practiceIds = expectedPracticeWordIds();
 
-        Set<Long> scoredIds = Set.of(
-                scoredOne.getLeftIdeophone().getId(), scoredOne.getRightIdeophone().getId(),
-                scoredTwo.getLeftIdeophone().getId(), scoredTwo.getRightIdeophone().getId());
-        Set<Long> practiceIds = Set.of(
-                practiceOne.getLeftIdeophone().getId(), practiceOne.getRightIdeophone().getId(),
-                practiceTwo.getLeftIdeophone().getId(), practiceTwo.getRightIdeophone().getId());
-
-        String poolJson = getRatableWords(token, "?size=50");
-        assertEquals(4, ((Number) JsonPath.read(poolJson, "$.totalElements")).intValue(),
-                "both members of each answered scored round, deduplicated: " + poolJson);
-        List<Map<String, Object>> entries = JsonPath.read(poolJson, "$.entries");
-        Set<Long> returnedIds = entries.stream()
-                .map(entry -> ((Number) entry.get("ideophoneId")).longValue())
-                .collect(Collectors.toSet());
-        assertEquals(scoredIds, returnedIds);
+        // The whole pool (paged past the size-50 cap): both members of every
+        // answered scored pair, each word exactly once, practice never present.
+        List<Map<String, Object>> entries = collectAllPoolEntries(token);
+        assertEquals(SCORED_WORDS, poolTotal(token, "?size=50"),
+                "both members of every answered scored round, deduplicated to word grain");
+        Set<Long> returnedIds = idsOf(entries);
+        assertEquals(SCORED_WORDS, returnedIds.size(), "no word appears twice");
+        assertEquals(expectedScoredIds, returnedIds);
         for (Long practiceId : practiceIds) {
             assertFalse(returnedIds.contains(practiceId),
                     "practice words must never enter the pool: " + practiceId);
         }
 
-        Map<Long, Ideophone> byId = ideophoneRepository.findAllById(scoredIds).stream()
-                .collect(Collectors.toMap(Ideophone::getId, ideophone -> ideophone));
+        Map<Long, Word> byId = wordRepository.findAllById(expectedScoredIds).stream()
+                .collect(Collectors.toMap(Word::getId, word -> word));
         for (Map<String, Object> entry : entries) {
-            Ideophone expected = byId.get(((Number) entry.get("ideophoneId")).longValue());
+            Word expected = byId.get(((Number) entry.get("ideophoneId")).longValue());
             assertEquals(expected.getGloss(), entry.get("meaning"),
                     "the meaning must be the word's own gloss, as feedback revealed it");
             assertEquals(expected.getCanonicalForm(), entry.get("canonicalForm"));
@@ -118,46 +90,33 @@ class RatableWordsHttpTests {
             assertEquals(expected.getModality().name(), entry.get("modality"));
         }
 
-        // The order is deterministic (first encounter, id tiebreak), so a
-        // second read returns the identical sequence -- the property the
-        // multi-device pool parity relies on.
-        List<Long> firstOrder = entryIds(poolJson);
-        assertEquals(firstOrder, entryIds(getRatableWords(token, "?size=50")));
+        // The order is deterministic (first-answered, id tiebreak), so a second
+        // read returns the identical sequence -- the property multi-device pool
+        // parity relies on.
+        List<Long> firstOrder = orderedIdsOf(collectAllPoolEntries(token));
+        List<Long> secondOrder = orderedIdsOf(collectAllPoolEntries(token));
+        assertEquals(firstOrder, secondOrder);
 
-        // Rating one word removes it from the pool and leaves the rest.
-        Long ratedId = scoredOne.getLeftIdeophone().getId();
-        mockMvc.perform(post("/api/ratings")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"ideophoneId":%d,"rating":6,"responseTimeMs":1500}
-                                """.formatted(ratedId)))
-                .andExpect(status().isCreated());
+        // Rating one word removes it from the pool and leaves the rest (60 -> 59).
+        Long ratedId = firstOrder.get(0);
+        rate(token, ratedId, 6);
 
-        String afterRatingJson = getRatableWords(token, "?size=50");
-        assertEquals(3, ((Number) JsonPath.read(afterRatingJson, "$.totalElements")).intValue());
-        assertFalse(entryIds(afterRatingJson).contains(ratedId),
+        assertEquals(SCORED_WORDS - 1, poolTotal(token, "?size=50"));
+        assertFalse(idsOf(collectAllPoolEntries(token)).contains(ratedId),
                 "a rated word must drop out of the pool");
     }
 
     @Test
     void ratableWordsAreScopedPerUser() throws Exception {
         String suffix = Long.toString(System.nanoTime());
-        String firstUsername = "ratable_owner_" + suffix;
-        String firstToken = registerAndGetToken(firstUsername);
-        AppUser firstUser = appUserRepository.findByUsername(firstUsername).orElseThrow();
-        int difficulty = Math.toIntExact(700_000L + (System.nanoTime() % 1_000_000L));
-        ArenaRound scoredRound = fixtureRound("iso", suffix, difficulty, false);
+        String firstToken = registerAndGetToken("ratable_owner_" + suffix);
 
-        GameSession session = gameSessionRepository.save(new GameSession(
-                firstUser, ConditionName.TEXT_ONLY, difficulty));
-        playSessionToCompletion(firstToken, session.getSessionUuid());
+        String sessionUuid = startSession(firstToken, ConditionName.CONDITION_1_SOKUON, false);
+        playSessionToCompletion(firstToken, sessionUuid);
+        assertEquals(SCORED_WORDS, poolTotal(firstToken, "?size=50"));
 
-        String ownerJson = getRatableWords(firstToken, "");
-        assertEquals(2, ((Number) JsonPath.read(ownerJson, "$.totalElements")).intValue());
-
-        // A second user who has answered nothing sees an empty pool -- never
-        // the first user's words.
+        // A second user who has answered nothing sees an empty pool -- never the
+        // first user's words.
         String secondToken = registerAndGetToken("ratable_other_" + suffix);
         mockMvc.perform(get("/api/game/me/ratable-words")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + secondToken))
@@ -165,16 +124,11 @@ class RatableWordsHttpTests {
                 .andExpect(jsonPath("$.totalElements").value(0))
                 .andExpect(jsonPath("$.entries").isEmpty());
 
-        // The second user rating one of the first user's words must not
-        // change the first user's pool.
-        mockMvc.perform(post("/api/ratings")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + secondToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"ideophoneId":%d,"rating":3,"responseTimeMs":1200}
-                                """.formatted(scoredRound.getLeftIdeophone().getId())))
-                .andExpect(status().isCreated());
-        assertEquals(2, ((Number) JsonPath.read(getRatableWords(firstToken, ""), "$.totalElements")).intValue(),
+        // The second user rating one of the first user's words must not change
+        // the first user's pool.
+        Long someWordId = expectedScoredWordIds().iterator().next();
+        rate(secondToken, someWordId, 3);
+        assertEquals(SCORED_WORDS, poolTotal(firstToken, "?size=50"),
                 "another user's rating must not shrink this user's pool");
     }
 
@@ -187,24 +141,22 @@ class RatableWordsHttpTests {
     @Test
     void ratableWordsPaginationClampsLikeRatings() throws Exception {
         String suffix = Long.toString(System.nanoTime());
-        String username = "ratable_page_" + suffix;
-        String token = registerAndGetToken(username);
-        AppUser user = appUserRepository.findByUsername(username).orElseThrow();
-        int difficulty = Math.toIntExact(800_000L + (System.nanoTime() % 1_000_000L));
-        fixtureRound("pg", suffix, difficulty, false);
+        String token = registerAndGetToken("ratable_page_" + suffix);
 
-        GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.TEXT_ONLY, difficulty));
-        playSessionToCompletion(token, session.getSessionUuid());
+        String sessionUuid = startSession(token, ConditionName.CONDITION_1_SOKUON, false);
+        playSessionToCompletion(token, sessionUuid);
 
+        // page/size are honoured; totalPages reflects the full 60-word pool.
         mockMvc.perform(get("/api/game/me/ratable-words?page=0&size=1")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.entries.length()").value(1))
                 .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.totalPages").value(2));
+                .andExpect(jsonPath("$.totalElements").value(SCORED_WORDS))
+                .andExpect(jsonPath("$.totalPages").value(SCORED_WORDS));
 
+        // A negative page clamps to 0 and an oversized size clamps to the 50 cap,
+        // exactly like /me/ratings.
         mockMvc.perform(get("/api/game/me/ratable-words?page=-3&size=999")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
@@ -212,9 +164,85 @@ class RatableWordsHttpTests {
                 .andExpect(jsonPath("$.size").value(50));
     }
 
-    private List<Long> entryIds(String poolJson) {
-        List<Number> raw = JsonPath.read(poolJson, "$.entries[*].ideophoneId");
-        return raw.stream().map(Number::longValue).toList();
+    @Test
+    void crossConditionReplayHealsToOneRowPerWord() throws Exception {
+        // M2 grain-heal (ADR-0): the same 30 scored trials are served in every
+        // script condition. A user who answers them under CONDITION_1_SOKUON and
+        // then again under CONDITION_2_SOKUON has answered each word twice through
+        // two different presentations -- yet, because the pool is keyed by word,
+        // every word still appears EXACTLY ONCE. The pre-M2 grain would have
+        // double-offered them.
+        String suffix = Long.toString(System.nanoTime());
+        String token = registerAndGetToken("ratable_heal_" + suffix);
+
+        String firstSession = startSession(token, ConditionName.CONDITION_1_SOKUON, false);
+        playSessionToCompletion(token, firstSession);
+        assertEquals(SCORED_WORDS, poolTotal(token, "?size=50"));
+
+        String secondSession = startSession(token, ConditionName.CONDITION_2_SOKUON, false);
+        playSessionToCompletion(token, secondSession);
+
+        // Still one row per word after the cross-condition replay.
+        List<Map<String, Object>> entries = collectAllPoolEntries(token);
+        Set<Long> returnedIds = idsOf(entries);
+        assertEquals(SCORED_WORDS, poolTotal(token, "?size=50"),
+                "cross-condition double-offer must be closed by word grain");
+        assertEquals(SCORED_WORDS, returnedIds.size(), "every word appears exactly once");
+        assertEquals(expectedScoredWordIds(), returnedIds);
+        assertTrue(returnedIds.size() <= SCORED_WORDS, "distinct count never grows past the 60 seeded words");
+    }
+
+    // --- helpers -----------------------------------------------------------
+
+    private Set<Long> expectedScoredWordIds() {
+        Set<Long> ids = new LinkedHashSet<>();
+        for (Trial trial : trialRepository.findByPracticeFalseOrderByIdAsc()) {
+            ids.add(trial.getPairing().getWordA().getId());
+            ids.add(trial.getPairing().getWordB().getId());
+        }
+        return ids;
+    }
+
+    private Set<Long> expectedPracticeWordIds() {
+        Set<Long> ids = new LinkedHashSet<>();
+        for (Trial trial : trialRepository.findByPracticeTrueOrderByIdAsc()) {
+            ids.add(trial.getPairing().getWordA().getId());
+            ids.add(trial.getPairing().getWordB().getId());
+        }
+        return ids;
+    }
+
+    private Set<Long> idsOf(List<Map<String, Object>> entries) {
+        return entries.stream()
+                .map(entry -> ((Number) entry.get("ideophoneId")).longValue())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private List<Long> orderedIdsOf(List<Map<String, Object>> entries) {
+        return entries.stream()
+                .map(entry -> ((Number) entry.get("ideophoneId")).longValue())
+                .toList();
+    }
+
+    // Reads the entire pool across pages (the 60-word pool exceeds the size-50
+    // cap), preserving server order.
+    private List<Map<String, Object>> collectAllPoolEntries(String token) throws Exception {
+        List<Map<String, Object>> all = new ArrayList<>();
+        int page = 0;
+        while (true) {
+            String json = getRatableWords(token, "?page=" + page + "&size=50");
+            List<Map<String, Object>> entries = JsonPath.read(json, "$.entries");
+            all.addAll(entries);
+            long total = ((Number) JsonPath.read(json, "$.totalElements")).longValue();
+            if (all.size() >= total || entries.isEmpty()) {
+                return all;
+            }
+            page++;
+        }
+    }
+
+    private int poolTotal(String token, String query) throws Exception {
+        return ((Number) JsonPath.read(getRatableWords(token, query), "$.totalElements")).intValue();
     }
 
     private String getRatableWords(String token, String query) throws Exception {
@@ -226,12 +254,36 @@ class RatableWordsHttpTests {
                 .getContentAsString();
     }
 
-    // Answers whatever the session serves (always the left card; correctness
-    // is irrelevant to pool membership) until the completion sentinel, so
-    // practice ordering rules are respected and player_answers rows are
-    // created through the real flow.
+    private void rate(String token, Long wordId, int rating) throws Exception {
+        mockMvc.perform(post("/api/ratings")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"ideophoneId":%d,"rating":%d,"responseTimeMs":1500}
+                                """.formatted(wordId, rating)))
+                .andExpect(status().isCreated());
+    }
+
+    private String startSession(String token, ConditionName condition, boolean includePractice) throws Exception {
+        String sessionJson = mockMvc.perform(post("/api/game/sessions")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"conditionName":"%s","difficultyLevel":1,"includePractice":%b}
+                                """.formatted(condition.name(), includePractice)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return JsonPath.read(sessionJson, "$.sessionUuid");
+    }
+
+    // Answers whatever the session serves (always the left card; correctness is
+    // irrelevant to pool membership) until the completion sentinel, so practice
+    // ordering is respected and player_answers rows are created through the real
+    // flow. 30 scored + up to 2 practice rounds, so 40 iterations is ample.
     private void playSessionToCompletion(String token, String sessionUuid) throws Exception {
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 40; i++) {
             String roundJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                     .andExpect(status().isOk())
@@ -265,34 +317,5 @@ class RatableWordsHttpTests {
                 .getResponse()
                 .getContentAsString();
         return JsonPath.read(authJson, "$.token");
-    }
-
-    private ArenaRound fixtureRound(String tag, String suffix, int difficulty, boolean practice) {
-        String prompt = tag + " target " + suffix;
-        Ideophone thesisTarget = ideophone(tag + "l", suffix, prompt);
-        Ideophone distractor = ideophone(tag + "r", suffix, tag + " distractor " + suffix);
-        return arenaRoundRepository.save(new ArenaRound(
-                prompt,
-                thesisTarget,
-                distractor,
-                thesisTarget,
-                ConditionName.TEXT_ONLY,
-                difficulty,
-                practice
-        ));
-    }
-
-    private Ideophone ideophone(String tag, String suffix, String gloss) {
-        String kana = tag + suffix.substring(suffix.length() - 6);
-        return ideophoneRepository.save(new Ideophone(
-                kana,
-                kana,
-                kana,
-                tag + "-" + suffix,
-                gloss,
-                tag.toUpperCase() + suffix.substring(suffix.length() - 8),
-                tag + "-" + suffix + ".m4a",
-                Modality.AUDITORY
-        ));
     }
 }
