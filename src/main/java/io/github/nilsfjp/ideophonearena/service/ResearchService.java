@@ -59,20 +59,41 @@ public class ResearchService {
         this.researchMapper = researchMapper;
     }
 
+    // Live divergence: the crowd of real players (Rider A excludes automation and
+    // the thesis_p% cohort). One row per word with at least one guess or rating.
+    @Transactional(readOnly = true)
+    public List<DivergenceResponse> getDivergence() {
+        return mergeDivergence(
+                playerAnswerRepository.aggregateGuessStatsByWord(),
+                ratingRepository.aggregateRatingStatsByWord());
+    }
+
+    // The Observatory thesis layer (NIL-54): the same per-word merge over the
+    // thesis_p% cohort only (inverted Rider A predicate). Each of the 30 target
+    // words was answered by all 36 thesis participants, so the per-word guess
+    // accuracy reproduces pairings.thesis_accuracy and rolls up to the vendored
+    // per-modality figures (68.6/64.2/59.7).
+    @Transactional(readOnly = true)
+    public List<DivergenceResponse> getThesisDivergence() {
+        return mergeDivergence(
+                playerAnswerRepository.aggregateThesisGuessStatsByWord(),
+                ratingRepository.aggregateThesisRatingStatsByWord());
+    }
+
     // Guess accuracy (from player_answers) and mean rating (from ratings) are
     // independent aggregates; a single join across both would form a cartesian
     // product and inflate the correct-answer sum. So each is queried separately
     // and merged on the word id, mirroring AdminStatsService. Both aggregates
     // are word-keyed (ADR-0): one row per word, healing the pre-M2 row split.
-    @Transactional(readOnly = true)
-    public List<DivergenceResponse> getDivergence() {
+    private List<DivergenceResponse> mergeDivergence(List<IdeophoneGuessStatsProjection> guessRows,
+            List<IdeophoneRatingStatsProjection> ratingRows) {
         Map<Long, IdeophoneGuessStatsProjection> guessStats = new LinkedHashMap<>();
-        for (IdeophoneGuessStatsProjection row : playerAnswerRepository.aggregateGuessStatsByWord()) {
+        for (IdeophoneGuessStatsProjection row : guessRows) {
             guessStats.put(row.getIdeophoneId(), row);
         }
 
         Map<Long, IdeophoneRatingStatsProjection> ratingStats = new LinkedHashMap<>();
-        for (IdeophoneRatingStatsProjection row : ratingRepository.aggregateRatingStatsByWord()) {
+        for (IdeophoneRatingStatsProjection row : ratingRows) {
             ratingStats.put(row.getIdeophoneId(), row);
         }
 

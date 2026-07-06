@@ -300,6 +300,42 @@ words (`ideophoneId`, `canonicalForm`, `romaji`, `stimulusFile`, `modality`, `me
 answered scored round appear; practice words never do; rating a word (the `POST` above) removes it from the next
 fetch. Unauthenticated `GET` returns `401`.
 
+## Thesis data — Observatory thesis layer (2026-07-06, NIL-54)
+
+The thesis Gorilla export (36 participants) lives in the seed as `thesis_p##` accounts (`completed_at = NULL`,
+excluded from the live research aggregates by the reserved `thesis_p%` prefix). Regenerate + verify the seed:
+
+```sh
+python3 scripts/generate_seed_sql.py --check    # exit 0: "... 36 thesis users, 1080 answers, 1080 ratings"
+```
+
+Reseed a pristine DB (Windows mysql.exe from WSL, `$PW` = the local root password), then boot and curl. On a fresh
+reseed with no live players, the live layer is empty (proving the exclusion) while the thesis layer reconciles:
+
+```sh
+"/mnt/c/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe" -u root -p"$PW" \
+  --default-character-set=utf8mb4 < src/main/resources/db/init/ideophone_arena.sql
+
+curl -s http://localhost:8081/api/research/divergence            # []  (thesis excluded from the live layer)
+curl -s http://localhost:8081/api/research/rating-distributions  # {"distributions":[],"byModalityN":{}}
+curl -s http://localhost:8081/api/research/thesis/divergence     # 30 rows; guessCount/ratingCount == 36 each
+```
+
+The thesis layer's guess-count-weighted per-modality accuracy reproduces the vendored figures — AUDITORY 68.6%
+(247/360), VISUAL 64.2% (231/360), INTEROCEPTIVE 59.7% (215/360), overall 693/1080 — and each row's `guessAccuracy`
+equals that pairing's `pairings.thesis_accuracy` (e.g. `gosogoso` -> `0.6944`). A direct SQL reconciliation:
+
+```sh
+"/mnt/c/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe" -u root -p"$PW" -t -e "
+USE ideophone_arena;
+SELECT w.modality, COUNT(*) answers,
+       ROUND(100*AVG(pa.is_correct),1) thesis_acc_pct
+FROM player_answers pa JOIN trials t ON t.id=pa.trial_id
+  JOIN game_sessions s ON s.id=pa.session_id JOIN app_users u ON u.id=s.user_id
+  JOIN words w ON w.id=pa.target_word_id
+WHERE u.username LIKE 'thesis\_p%' GROUP BY w.modality;"
+```
+
 ## Deterministic shuffle proofs (2026-06-12)
 
 Each session derives its round order, target identities, sides, and meaning order from `game_sessions.shuffle_seed`

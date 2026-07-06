@@ -16,7 +16,8 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     Page<Rating> findByUserIdOrderByRatedAtDesc(Long userId, Pageable pageable);
 
     // Mean rating per word (divergence rating side), word-keyed (ADR-0). Rider A
-    // excludes browser_loop_* automation accounts -- no response-shape change.
+    // excludes browser_loop_* automation accounts and the thesis_p% ingestion
+    // cohort (NIL-54) -- no response-shape change.
     @Query("""
             select
                 word.id as ideophoneId,
@@ -25,14 +26,31 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             from Rating rating
             join rating.word word
             where rating.user.username not like 'browser!_loop!_%' escape '!'
+              and rating.user.username not like 'thesis!_p%' escape '!'
             group by word.id
             """)
     List<IdeophoneRatingStatsProjection> aggregateRatingStatsByWord();
 
+    // Thesis-cohort counterpart (NIL-54 Observatory thesis layer): predicate
+    // inverted to INCLUDE only the thesis_p% cohort, so the thesis divergence
+    // endpoint carries the thesis mean iconicity rating per word.
+    @Query("""
+            select
+                word.id as ideophoneId,
+                count(rating.id) as ratingCount,
+                avg(rating.rating) as meanRating
+            from Rating rating
+            join rating.word word
+            where rating.user.username like 'thesis!_p%' escape '!'
+            group by word.id
+            """)
+    List<IdeophoneRatingStatsProjection> aggregateThesisRatingStatsByWord();
+
     // Population distribution of the 1-7 rating values per modality (per-value
     // counts, not means), for the Observatory raincloud panels. Null-modality
     // words are excluded -- they cannot belong to a modality panel. Word-keyed
-    // (ADR-0); Rider A excludes browser_loop_* automation accounts.
+    // (ADR-0); Rider A excludes browser_loop_* automation accounts and the
+    // thesis_p% ingestion cohort (NIL-54).
     @Query("""
             select
                 word.modality as modality,
@@ -42,6 +60,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
             join rating.word word
             where word.modality is not null
               and rating.user.username not like 'browser!_loop!_%' escape '!'
+              and rating.user.username not like 'thesis!_p%' escape '!'
             group by word.modality, rating.rating
             """)
     List<ModalityRatingDistributionProjection> aggregateRatingDistribution();

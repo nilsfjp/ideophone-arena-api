@@ -159,8 +159,10 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
     // Guess accuracy per word: grouped by the round's derived target
     // (target_word_id), so this measures how guessable each word's meaning is.
     // Divergence heals to one row per word (ADR-0). Rider A excludes practice
-    // trials (defensive) and browser_loop_* automation accounts (the same rows
-    // scripts/cleanup-test-accounts.sql deletes) -- no response-shape change.
+    // trials (defensive), browser_loop_* automation accounts (the same rows
+    // scripts/cleanup-test-accounts.sql deletes), and the thesis_p% ingestion
+    // cohort (NIL-54: live-facing, so it shows only live-player data; the thesis
+    // figures surface via /api/research/thesis/divergence) -- no shape change.
     @Query("""
             select
                 word.id as ideophoneId,
@@ -170,16 +172,37 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             join answer.targetWord word
             where answer.trial.practice = false
               and answer.session.user.username not like 'browser!_loop!_%' escape '!'
+              and answer.session.user.username not like 'thesis!_p%' escape '!'
             group by word.id
             """)
     List<IdeophoneGuessStatsProjection> aggregateGuessStatsByWord();
+
+    // Thesis-cohort counterpart of aggregateGuessStatsByWord: the Observatory
+    // thesis layer (NIL-54). Predicate inverted to INCLUDE only the thesis_p%
+    // cohort so /api/research/thesis/divergence reconstructs the vendored
+    // per-modality accuracy (68.6/64.2/59.7). Practice trials stay excluded.
+    @Query("""
+            select
+                word.id as ideophoneId,
+                count(answer.id) as guesses,
+                sum(case when answer.correct = true then 1 else 0 end) as correct
+            from PlayerAnswer answer
+            join answer.targetWord word
+            where answer.trial.practice = false
+              and answer.session.user.username like 'thesis!_p%' escape '!'
+            group by word.id
+            """)
+    List<IdeophoneGuessStatsProjection> aggregateThesisGuessStatsByWord();
 
     // Every scored, non-automation answer with the graph the position-bias
     // aggregate needs to replay each session's shuffle: the session (seed), the
     // trial (matched by id against the derived presentation), and the
     // selected/target words (matched by id to a side). The shuffle replay itself
     // (RoundShuffler) is byte-for-byte unchanged; only these joins move to word
-    // grain, and Rider A adds the browser_loop_* exclusion.
+    // grain. Rider A excludes browser_loop_* automation accounts and the thesis_p%
+    // cohort (NIL-54: its shuffle_seed is synthetic -- Gorilla never exported the
+    // real left/right -- so replaying it would fabricate a side; excluding it also
+    // keeps this live aggregate byte-stable).
     @Query("""
             select answer
             from PlayerAnswer answer
@@ -189,6 +212,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             join fetch answer.targetWord
             where answer.trial.practice = false
               and answer.session.user.username not like 'browser!_loop!_%' escape '!'
+              and answer.session.user.username not like 'thesis!_p%' escape '!'
             """)
     List<PlayerAnswer> findScoredForPositionBias();
 }

@@ -1,5 +1,6 @@
 package io.github.nilsfjp.ideophonearena.seed;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -58,15 +60,34 @@ class IdeophoneSeedIntegrityTests {
     private record TrialRow(long id, String roundType, long pairingId, Long correctWordId, boolean practice) {
     }
 
+    private record UserRow(long id, String username, String email, String role) {
+    }
+
+    private record SessionRow(long id, String sessionUuid, long userId, String conditionName, long shuffleSeed) {
+    }
+
+    private record AnswerRow(long id, long sessionId, long trialId, long selectedWordId, long targetWordId,
+            boolean correct, Long responseTimeMs) {
+    }
+
+    private record RatingRow(long id, long userId, long wordId, Long sessionId, int rating, Long responseTimeMs) {
+    }
+
+    private static String seedSql;
     private static List<Word> words;
     private static List<Presentation> presentations;
     private static List<PairingRow> pairings;
     private static List<TrialRow> trials;
+    private static List<UserRow> appUsers;
+    private static List<SessionRow> sessions;
+    private static List<AnswerRow> answers;
+    private static List<RatingRow> ratings;
     private static Map<Long, Word> wordsById;
 
     @BeforeAll
     static void parseSeed() throws IOException {
         String sql = Files.readString(SEED_PATH, StandardCharsets.UTF_8);
+        seedSql = sql;
 
         words = new ArrayList<>();
         for (List<String> f : rows(sql, "words")) {
@@ -85,6 +106,24 @@ class IdeophoneSeedIntegrityTests {
         trials = new ArrayList<>();
         for (List<String> f : rows(sql, "trials")) {
             trials.add(new TrialRow(l(f, 0), s(f, 1), l(f, 2), nullableLong(f, 3), "1".equals(f.get(5))));
+        }
+        appUsers = new ArrayList<>();
+        for (List<String> f : rows(sql, "app_users")) {
+            appUsers.add(new UserRow(l(f, 0), s(f, 1), s(f, 2), s(f, 4)));
+        }
+        sessions = new ArrayList<>();
+        for (List<String> f : rows(sql, "game_sessions")) {
+            sessions.add(new SessionRow(l(f, 0), s(f, 1), l(f, 2), s(f, 3), l(f, 4)));
+        }
+        answers = new ArrayList<>();
+        for (List<String> f : rows(sql, "player_answers")) {
+            answers.add(new AnswerRow(l(f, 0), l(f, 1), l(f, 2), l(f, 3), l(f, 4),
+                    "1".equals(f.get(5)), nullableLong(f, 6)));
+        }
+        ratings = new ArrayList<>();
+        for (List<String> f : rows(sql, "ratings")) {
+            ratings.add(new RatingRow(l(f, 0), l(f, 1), l(f, 2), nullableLong(f, 3),
+                    (int) l(f, 4), nullableLong(f, 5)));
         }
 
         wordsById = new HashMap<>();
@@ -230,7 +269,126 @@ class IdeophoneSeedIntegrityTests {
         }
     }
 
+    // --- NIL-54 thesis tidy-data ingestion -----------------------------------
+
+    @Test
+    void thesisCohortIsThirtySixReservedUsersAlongsideTheAdmin() {
+        assertEquals(37, appUsers.size(), "admin (id 1) plus the 36 thesis participants");
+        assertTrue(appUsers.stream().anyMatch(u -> u.username().equals("arena_admin")), "admin must remain");
+        List<UserRow> thesis = appUsers.stream().filter(u -> u.username().startsWith("thesis_p")).toList();
+        assertEquals(36, thesis.size());
+        Set<String> expected = new HashSet<>();
+        for (int n = 1; n <= 36; n++) {
+            expected.add(String.format("thesis_p%02d", n));
+        }
+        assertEquals(expected, thesis.stream().map(UserRow::username).collect(Collectors.toSet()),
+                "usernames must be exactly thesis_p01..thesis_p36 (the reserved Rider A prefix)");
+        for (UserRow user : thesis) {
+            assertEquals("ROLE_USER", user.role(), user.username() + " must be ROLE_USER");
+            assertEquals(user.username() + "@thesis.invalid", user.email());
+        }
+    }
+
+    @Test
+    void thesisSessionsAreThirtySixIncompleteWithTheConditionSplit() {
+        // completed_at must be absent from the INSERT so it takes the DDL default
+        // NULL: thesis sessions feed divergence but never the leaderboard.
+        assertFalse(insertColumns(seedSql, "game_sessions").contains("completed_at"),
+                "thesis sessions must take the completed_at DDL default (NULL)");
+        assertEquals(36, sessions.size());
+        assertEquals(36, sessions.stream().map(SessionRow::sessionUuid).distinct().count(),
+                "session_uuid must be unique");
+        Map<String, Long> byCondition = new HashMap<>();
+        for (SessionRow session : sessions) {
+            assertTrue(CONDITIONS.contains(session.conditionName()),
+                    "unexpected condition " + session.conditionName());
+            assertTrue(session.userId() >= 2 && session.userId() <= 37,
+                    "thesis session must belong to a thesis user (ids 2..37)");
+            byCondition.merge(session.conditionName(), 1L, Long::sum);
+        }
+        assertEquals(11L, byCondition.get("CONDITION_1_SOKUON"));
+        assertEquals(13L, byCondition.get("CONDITION_2_SOKUON"));
+        assertEquals(12L, byCondition.get("CONDITION_3_SOKUON"));
+    }
+
+    // The load-bearing reconciliation: the emitted answers, judged against each
+    // trial's fixed thesis target (correct_word_id), reproduce the vendored
+    // per-modality Choosing accuracy exactly -- AUDITORY 247/360 = 68.6%,
+    // VISUAL 231/360 = 64.2%, INTEROCEPTIVE 215/360 = 59.7% (overall 693/1080).
+    @Test
+    void thesisAnswersReconstructTheThesisPerModalityAccuracy() {
+        assertEquals(1080, answers.size());
+
+        Set<String> sessionTrialKeys = new HashSet<>();
+        Map<Long, Set<Long>> trialsBySession = new HashMap<>();
+        for (AnswerRow answer : answers) {
+            assertTrue(sessionTrialKeys.add(answer.sessionId() + ":" + answer.trialId()),
+                    "UNIQUE(session_id, trial_id) violated at answer " + answer.id());
+            trialsBySession.computeIfAbsent(answer.sessionId(), key -> new HashSet<>()).add(answer.trialId());
+        }
+        assertEquals(36, trialsBySession.size());
+        trialsBySession.values().forEach(set -> assertEquals(30, set.size(),
+                "each thesis session answers all 30 core trials"));
+
+        Map<Long, TrialRow> trialById = new HashMap<>();
+        for (TrialRow trial : trials) {
+            trialById.put(trial.id(), trial);
+        }
+
+        Map<String, long[]> perModality = new HashMap<>();   // modality -> [total, correct]
+        long totalCorrect = 0;
+        for (AnswerRow answer : answers) {
+            TrialRow trial = trialById.get(answer.trialId());
+            assertNotNull(trial, "answer " + answer.id() + " references unknown trial " + answer.trialId());
+            assertEquals(trial.correctWordId(), Long.valueOf(answer.targetWordId()),
+                    "answer target_word_id must be the trial's fixed thesis target (correct_word_id)");
+            String modality = wordsById.get(answer.targetWordId()).modality();
+            long[] counts = perModality.computeIfAbsent(modality, key -> new long[2]);
+            counts[0]++;
+            if (answer.correct()) {
+                counts[1]++;
+                totalCorrect++;
+            }
+        }
+        assertArrayEquals(new long[] {360, 247}, perModality.get("AUDITORY"), "auditory 247/360 = 68.6%");
+        assertArrayEquals(new long[] {360, 231}, perModality.get("VISUAL"), "visual 231/360 = 64.2%");
+        assertArrayEquals(new long[] {360, 215}, perModality.get("INTEROCEPTIVE"), "interoceptive 215/360 = 59.7%");
+        assertEquals(693, totalCorrect, "overall 693/1080 = 64.17%");
+    }
+
+    @Test
+    void thesisRatingsAreWellFormedAndUniquePerUserWord() {
+        assertEquals(1080, ratings.size());
+        Set<String> userWordKeys = new HashSet<>();
+        Map<Long, Set<Long>> wordsByUser = new HashMap<>();
+        for (RatingRow rating : ratings) {
+            assertTrue(rating.rating() >= 1 && rating.rating() <= 7, "rating must be in 1..7");
+            assertTrue(userWordKeys.add(rating.userId() + ":" + rating.wordId()),
+                    "UNIQUE(user_id, word_id) violated at rating " + rating.id());
+            assertTrue(rating.userId() >= 2 && rating.userId() <= 37,
+                    "thesis rating must belong to a thesis user (ids 2..37)");
+            assertNotNull(rating.sessionId(), "thesis rating keeps its session_id for provenance");
+            wordsByUser.computeIfAbsent(rating.userId(), key -> new HashSet<>()).add(rating.wordId());
+        }
+        assertEquals(36, wordsByUser.size());
+        wordsByUser.values().forEach(set -> assertEquals(30, set.size(),
+                "each participant rated all 30 target words once"));
+    }
+
     // --- SQL parsing helpers -------------------------------------------------
+
+    // The declared column list of an `INSERT INTO <table> (...)` block, so a test
+    // can assert a column is deliberately omitted (taking its DDL default).
+    private static List<String> insertColumns(String sql, String table) {
+        String marker = "INSERT INTO " + table + " (";
+        int start = sql.indexOf(marker) + marker.length();
+        int end = sql.indexOf(")", start);
+        List<String> columns = new ArrayList<>();
+        for (String column : sql.substring(start, end).split(",")) {
+            columns.add(column.trim());
+        }
+        return columns;
+    }
 
     // Extracts the value rows of an `INSERT INTO <table> (...) VALUES ...;`
     // block, each row split into fields (strings unquoted, bare tokens verbatim).

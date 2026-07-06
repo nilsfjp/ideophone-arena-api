@@ -278,6 +278,7 @@ GET  /api/game/me/attempts       authenticated
 GET  /api/game/me/ratable-words  authenticated (own rating pool)
 GET  /api/leaderboard            public (paginated)
 GET  /api/research/divergence    public (read-only aggregate)
+GET  /api/research/thesis/divergence     public (read-only aggregate)
 GET  /api/research/rating-distributions  public (read-only aggregate)
 GET  /api/research/position-bias         public (read-only aggregate)
 GET  /api/admin/stats            ROLE_ADMIN
@@ -329,6 +330,21 @@ ReconstructedFromTheSeed` plays a real round and proves the left/right and targe
 expected before/after deltas — the shuffle replay is correct end-to-end. `PositionBiasCalculatorTests` pins the
 d'/criterion math (log-linear correction, null on an empty stimulus class). No schema change (`ddl-auto=validate`
 still passes). `./mvnw test` -> 88 tests, 0 failures.
+
+2026-07-06 evidence (thesis tidy-data ingestion, NIL-54): the thesis Gorilla export (36 participants) is ingested as
+generator-emitted seed rows via `generate_seed_sql.py` (`--check` clean) — 36 `thesis_p##` users, 36 `game_sessions`
+with `completed_at = NULL`, 1080 `player_answers`, 1080 `ratings` — with **no schema change** and no flag/`data_source`
+column; provenance is the reserved `thesis_p%` username prefix. Rider A now also excludes `thesis_p%` from the live
+`divergence`/`rating-distributions`/`position-bias` aggregates (no shape change; `ThesisCohortExclusionTests` proves
+the algebraic identity `raw == rider + thesis + browser_loop` per word for both guesses and ratings). New public
+read-only `GET /api/research/thesis/divergence` (inverted predicate; `SecurityConfig` permits it next to its
+siblings; reuses `DivergenceResponse`) is the Observatory thesis layer. `IdeophoneSeedIntegrityTests` (now 13) parses
+the emitted SQL and reconstructs the vendored per-modality Choosing accuracy exactly (AUDITORY 247/360, VISUAL
+231/360, INTEROCEPTIVE 215/360; overall 693/1080) plus the cohort shape (36 users, 36 incomplete sessions, 1080
+answers with `UNIQUE(session_id, trial_id)`, 1080 ratings 1-7 with `UNIQUE(user_id, word_id)`). Live proof: fresh
+reseed + validate-boot -> `GET /api/research/divergence` = `[]` and `/api/research/rating-distributions` empty (thesis
+excluded from the live layer) while `GET /api/research/thesis/divergence` = 200 with 30 rows rolling up to
+68.6/64.2/59.7. `./mvnw test` -> 97 tests, 0 failures.
 
 ### CORS
 

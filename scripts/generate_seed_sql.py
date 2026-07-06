@@ -5,6 +5,7 @@ import argparse
 import csv
 import re
 import sys
+import uuid
 from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
@@ -172,6 +173,48 @@ ADMIN_EMAIL = "arena_admin@example.invalid"
 ADMIN_PASSWORD_HASH = "$2a$10$AWmwnu11Xi/MVcBlbRLB8OUYrJ7kmfjW9Qzy6tCAk38/Kw0EUGzaK"
 ADMIN_ROLE = "ROLE_ADMIN"
 
+# --- NIL-54: thesis Gorilla tidy-data ingestion ---------------------------
+# The thesis's own experiment data (36 participants: a 2AFC "choosing" task and
+# a 7-point "rating" task), ingested as generator-emitted seed rows so the
+# Observatory runs on real human data. Reconstruction key: trials.correct_word_id
+# (== the thesis fixed target). Sessions carry completed_at = NULL and the cohort
+# is fenced off from the live research aggregates by a reserved username prefix
+# (thesis_p01..thesis_p36), exactly like browser_loop_% (Rider A precedent).
+TIDY_DIR = REPO_ROOT / "docs" / "research" / "data"
+CHOOSING_CSV = TIDY_DIR / "gorilla-tidy-choosing.csv"
+RATING_CSV = TIDY_DIR / "gorilla-tidy-rating.csv"
+
+THESIS_USER_COUNT = 36
+THESIS_ROW_COUNT = 1080  # 36 participants x 30 trials, per task
+
+CONDITION_BY_SPREADSHEET = {
+    "condition-1": "CONDITION_1_SOKUON",
+    "condition-2": "CONDITION_2_SOKUON",
+    "condition-3": "CONDITION_3_SOKUON",
+}
+
+# The condition CSVs (the word source) and the Gorilla tidy export disagree on
+# the romanisation of four geminate (sokuon) ideophones: the word source uses a
+# Q-truncated token (romaji_to_hiragana folds Q -> small tsu), the tidy export
+# spells the full doubled-consonant + "to" form. Both name the SAME word; the
+# kana differ by one mora, so resolution keys on this alias, not on kana.
+#   tidy-export romaji -> words.romaji
+SOKUON_ROMAJI_ALIASES = {
+    "sakutto": "sakuQ",
+    "kiritto": "kiriQ",
+    "hotto": "hoQ",
+    "katitto": "katiQ",
+}
+
+# thesis_p## accounts never authenticate; a single frozen BCrypt digest of a
+# throwaway password keeps --check reproducible (runtime hashing would salt
+# differently each run). Minted once via jshell + spring-security-crypto, the
+# same way ADMIN_PASSWORD_HASH was, of "thesis-cohort-no-login-nil54".
+THESIS_PASSWORD_HASH = "$2a$10$l2O7BFb4JhRRBxGhHQDmJOFi8XTVpdf6y59IfXOiEyCCabMdOZgba"
+THESIS_ROLE = "ROLE_USER"
+# Fixed namespace so uuid5 session uuids are deterministic (RFC 4122 example NS).
+THESIS_UUID_NAMESPACE = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+
 
 def to_katakana(hiragana: str) -> str:
     return "".join(
@@ -219,6 +262,26 @@ class Pairing:
     correct_audio: str         # thesis fixed target (word-answer column)
     modality: str
     practice: bool
+
+
+@dataclass(frozen=True)
+class ChoosingTrial:
+    participant: str           # Gorilla "Participant Private ID", e.g. "13318377.0"
+    condition_name: str        # CONDITION_{1,2,3}_SOKUON (from Current Spreadsheet)
+    pair_code: str             # a0..i9 (Spreadsheet: pairing) -> pairings.pair_code
+    selected_file: str         # Response .mp4 (always word-a or word-b)
+    answer_file: str           # word-answer .mp4 (the thesis fixed target)
+    correct: bool              # CSV Correct == "1"
+    response_time_ms: int      # round(Reaction Time); stored verbatim (may exceed 600000)
+
+
+@dataclass(frozen=True)
+class RatingRecord:
+    participant: str
+    pair_code: str
+    rated_file: str            # rated-word .mp4 (a pairing member; the target)
+    rating: int                # 1-7
+    response_time_ms: int
 
 
 def romaji_to_hiragana(romaji: str) -> str:
@@ -500,13 +563,192 @@ def insert_block(table: str, columns: list[str], rows: list[tuple[object, ...]])
     return lines
 
 
+def read_choosing(path: Path) -> list[ChoosingTrial]:
+    with path.open("r", encoding="utf-8-sig", newline="") as source:
+        trials = [
+            ChoosingTrial(
+                participant=row["Participant Private ID"],
+                condition_name=CONDITION_BY_SPREADSHEET[row["Current Spreadsheet"]],
+                pair_code=row["Spreadsheet: pairing"],
+                selected_file=row["Response"],
+                answer_file=row["Spreadsheet: word-answer"],
+                correct=row["Correct"] == "1",
+                response_time_ms=round(float(row["Reaction Time"])),
+            )
+            for row in csv.DictReader(source)
+        ]
+    if len(trials) != THESIS_ROW_COUNT:
+        raise ValueError(f"Expected {THESIS_ROW_COUNT} choosing rows in {path.name}, found {len(trials)}")
+    return trials
+
+
+def read_rating(path: Path) -> list[RatingRecord]:
+    with path.open("r", encoding="utf-8-sig", newline="") as source:
+        records = [
+            RatingRecord(
+                participant=row["Participant Private ID"],
+                pair_code=row["Spreadsheet: pairing"],
+                rated_file=row["Spreadsheet: rated-word"],
+                rating=int(row["rating"]),
+                response_time_ms=round(float(row["Reaction Time"])),
+            )
+            for row in csv.DictReader(source)
+        ]
+    if len(records) != THESIS_ROW_COUNT:
+        raise ValueError(f"Expected {THESIS_ROW_COUNT} rating rows in {path.name}, found {len(records)}")
+    return records
+
+
+def participant_order(choosing: list[ChoosingTrial]) -> list[str]:
+    # Distinct participants sorted numerically by their Gorilla private id ->
+    # ordinal n in 1..36: username thesis_p{n:02d}, session id n, user id n + 1.
+    # Deterministic (no randomness/datetime), so --check stays byte-exact.
+    ordered = sorted({trial.participant for trial in choosing}, key=float)
+    if len(ordered) != THESIS_USER_COUNT:
+        raise ValueError(f"Expected {THESIS_USER_COUNT} thesis participants, found {len(ordered)}")
+    return ordered
+
+
+def resolve_word_id(stimulus_file: str, id_by_romaji: dict[str, int]) -> int:
+    # A Gorilla stimulus .mp4 -> the word id it names. The 4 sokuon words carry a
+    # doubled-consonant romaji in the export that the alias folds to words.romaji.
+    _pairing, _script, romaji = parse_stimulus_file(stimulus_file)
+    romaji = SOKUON_ROMAJI_ALIASES.get(romaji, romaji)
+    return id_by_romaji[romaji]
+
+
+def validate_thesis(
+    choosing: list[ChoosingTrial],
+    ratings: list[RatingRecord],
+    words: OrderedDict[str, Word],
+    pairings: OrderedDict[str, Pairing],
+) -> None:
+    # Self-validating ingestion: every choosing row must reconstruct a pairing
+    # member for its selection, the thesis fixed target (== trials.correct_word_id)
+    # for its answer, and a derived correctness that agrees with the CSV Correct
+    # column; every rated word must be a pairing member. Any future data/ordering
+    # drift fails the generator loudly rather than seeding a wrong row.
+    word_ids = word_id_map(words)
+    id_by_romaji = {word.romaji: word_ids[audio_file] for audio_file, word in words.items()}
+    members = {code: {word_ids[p.word_a_audio], word_ids[p.word_b_audio]} for code, p in pairings.items()}
+    correct_word = {code: word_ids[p.correct_audio] for code, p in pairings.items()}
+
+    order = participant_order(choosing)
+    condition_by_participant: dict[str, str] = {}
+    for trial in choosing:
+        seen = condition_by_participant.setdefault(trial.participant, trial.condition_name)
+        if seen != trial.condition_name:
+            raise ValueError(f"Participant {trial.participant} spans multiple conditions")
+
+    for trial in choosing:
+        if trial.pair_code not in members:
+            raise ValueError(f"Choosing pairing {trial.pair_code!r} has no seeded pairing")
+        selected = resolve_word_id(trial.selected_file, id_by_romaji)
+        target = resolve_word_id(trial.answer_file, id_by_romaji)
+        if selected not in members[trial.pair_code]:
+            raise ValueError(f"Selected {trial.selected_file} is not a member of {trial.pair_code}")
+        if target != correct_word[trial.pair_code]:
+            raise ValueError(f"Answer {trial.answer_file} is not the trial target for {trial.pair_code}")
+        if (selected == target) != trial.correct:
+            raise ValueError(f"Derived is_correct disagrees with CSV Correct for {trial.pair_code}")
+
+    rating_participants = {record.participant for record in ratings}
+    if not rating_participants <= set(order):
+        raise ValueError("Rating participants are not a subset of the choosing participants")
+    for record in ratings:
+        if record.pair_code not in members:
+            raise ValueError(f"Rating pairing {record.pair_code!r} has no seeded pairing")
+        word = resolve_word_id(record.rated_file, id_by_romaji)
+        if word not in members[record.pair_code]:
+            raise ValueError(f"Rated {record.rated_file} is not a member of {record.pair_code}")
+        if not (1 <= record.rating <= 7):
+            raise ValueError(f"Rating {record.rating} out of range for {record.rated_file}")
+
+
+def build_thesis_app_user_rows(order: list[str]) -> list[tuple[object, ...]]:
+    return [
+        (
+            ordinal + 1,                                    # user id (admin is 1)
+            f"thesis_p{ordinal:02d}",
+            f"thesis_p{ordinal:02d}@thesis.invalid",
+            THESIS_PASSWORD_HASH,
+            THESIS_ROLE,
+        )
+        for ordinal, _participant in enumerate(order, start=1)
+    ]
+
+
+def build_thesis_session_rows(
+    order: list[str], condition_by_participant: dict[str, str]
+) -> list[tuple[object, ...]]:
+    rows = []
+    for ordinal, participant in enumerate(order, start=1):
+        session_uuid = str(uuid.uuid5(THESIS_UUID_NAMESPACE, f"thesis_p{ordinal:02d}"))
+        # shuffle_seed is required NOT NULL but inert here: only position-bias
+        # replays it, and the thesis cohort is excluded from that aggregate. The
+        # participant's private id gives a stable, unique BIGINT.
+        rows.append((ordinal, session_uuid, ordinal + 1, condition_by_participant[participant], int(float(participant))))
+    return rows
+
+
+def build_thesis_answer_rows(
+    choosing: list[ChoosingTrial],
+    session_by_participant: dict[str, int],
+    pairing_ids: dict[str, int],
+    id_by_romaji: dict[str, int],
+) -> list[tuple[object, ...]]:
+    by_session: dict[int, list[tuple[int, int, int, bool, int]]] = {}
+    for trial in choosing:
+        selected = resolve_word_id(trial.selected_file, id_by_romaji)
+        target = resolve_word_id(trial.answer_file, id_by_romaji)
+        session_id = session_by_participant[trial.participant]
+        trial_id = pairing_ids[trial.pair_code]  # trial id == pairing id (1:1 for core)
+        by_session.setdefault(session_id, []).append(
+            (trial_id, selected, target, trial.correct, trial.response_time_ms)
+        )
+    rows = []
+    answer_id = 1
+    for session_id in sorted(by_session):
+        for trial_id, selected, target, correct, response_time_ms in sorted(by_session[session_id]):
+            rows.append((answer_id, session_id, trial_id, selected, target, correct, response_time_ms))
+            answer_id += 1
+    return rows
+
+
+def build_thesis_rating_rows(
+    ratings: list[RatingRecord],
+    session_by_participant: dict[str, int],
+    id_by_romaji: dict[str, int],
+) -> list[tuple[object, ...]]:
+    by_session: dict[int, list[tuple[int, int, int]]] = {}
+    for record in ratings:
+        word = resolve_word_id(record.rated_file, id_by_romaji)
+        session_id = session_by_participant[record.participant]
+        by_session.setdefault(session_id, []).append((word, record.rating, record.response_time_ms))
+    rows = []
+    rating_id = 1
+    for session_id in sorted(by_session):
+        for word, rating, response_time_ms in sorted(by_session[session_id]):
+            # user id = session id + 1 (admin is user 1); session_id kept for
+            # provenance (nullable, unread by any aggregate).
+            rows.append((rating_id, session_id + 1, word, session_id, rating, response_time_ms))
+            rating_id += 1
+    return rows
+
+
 def render_sql(
     words: OrderedDict[str, Word],
     presentations: list[Presentation],
     pairings: OrderedDict[str, Pairing],
+    choosing: list[ChoosingTrial],
+    ratings: list[RatingRecord],
 ) -> str:
     word_ids = word_id_map(words)
     pairing_ids = {code: index for index, code in enumerate(pairings.keys(), start=1)}
+    id_by_romaji = {word.romaji: word_ids[audio_file] for audio_file, word in words.items()}
+    order = participant_order(choosing)
+    session_by_participant = {participant: ordinal for ordinal, participant in enumerate(order, start=1)}
+    condition_by_participant = {trial.participant: trial.condition_name for trial in choosing}
 
     lines = [
         "CREATE DATABASE IF NOT EXISTS ideophone_arena",
@@ -816,11 +1058,37 @@ def render_sql(
         trial_rows,
     ))
     lines.append("")
-    lines.append('-- Dev-only admin account. Throwaway password; see docs/demo-runbook.md, "Creating an admin".')
+    lines.append('-- Dev-only admin account (id 1). Throwaway password; see docs/demo-runbook.md,')
+    lines.append('-- "Creating an admin". Followed by the NIL-54 thesis cohort (thesis_p01..thesis_p36,')
+    lines.append("-- ids 2-37): accounts that never authenticate (shared frozen digest) and are fenced")
+    lines.append("-- off from the live Rider A research aggregates by the reserved thesis_p% prefix.")
+    app_user_rows = [(1, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD_HASH, ADMIN_ROLE)]
+    app_user_rows.extend(build_thesis_app_user_rows(order))
     lines.extend(insert_block(
         "app_users",
         ["id", "username", "email", "password_hash", "role"],
-        [(1, ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD_HASH, ADMIN_ROLE)],
+        app_user_rows,
+    ))
+    lines.append("")
+    lines.append("-- NIL-54: thesis Gorilla tidy-data (36 participants, 30 trials each). Sessions carry")
+    lines.append("-- completed_at NULL (never completed) so answers feed divergence but never the")
+    lines.append("-- leaderboard; started_at/completed_at/answered_at/rated_at take their DDL defaults.")
+    lines.extend(insert_block(
+        "game_sessions",
+        ["id", "session_uuid", "user_id", "condition_name", "shuffle_seed"],
+        build_thesis_session_rows(order, condition_by_participant),
+    ))
+    lines.append("")
+    lines.extend(insert_block(
+        "player_answers",
+        ["id", "session_id", "trial_id", "selected_word_id", "target_word_id", "is_correct", "response_time_ms"],
+        build_thesis_answer_rows(choosing, session_by_participant, pairing_ids, id_by_romaji),
+    ))
+    lines.append("")
+    lines.extend(insert_block(
+        "ratings",
+        ["id", "user_id", "word_id", "session_id", "rating", "response_time_ms"],
+        build_thesis_rating_rows(ratings, session_by_participant, id_by_romaji),
     ))
     lines.append("")
 
@@ -837,8 +1105,14 @@ def main() -> int:
     args = parser.parse_args()
 
     words, presentations, pairings = collect_data()
-    rendered = render_sql(words, presentations, pairings)
-    summary = f"{len(words)} words, {len(presentations)} presentations, {len(pairings)} pairings/trials"
+    choosing = read_choosing(CHOOSING_CSV)
+    ratings = read_rating(RATING_CSV)
+    validate_thesis(choosing, ratings, words, pairings)
+    rendered = render_sql(words, presentations, pairings, choosing, ratings)
+    summary = (
+        f"{len(words)} words, {len(presentations)} presentations, {len(pairings)} pairings/trials, "
+        f"{THESIS_USER_COUNT} thesis users, {len(choosing)} answers, {len(ratings)} ratings"
+    )
 
     if args.check:
         current = OUTPUT_PATH.read_text(encoding="utf-8") if OUTPUT_PATH.exists() else ""

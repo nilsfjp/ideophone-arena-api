@@ -913,3 +913,70 @@ repo's own Vite dev server on :5174 was reused (not restarted) and never edited.
 Next single task:
 NIL-54 thesis ingestion (`trials.correct_word_id` is its reconstruction key; ingest with `completed_at = NULL`,
 no flag column -- mechanism decided in chat first).
+
+## 2026-07-06 ("NIL-54: thesis tidy-data ingestion + Observatory thesis layer")
+
+Session goal:
+Ingest the thesis Gorilla tidy data (2AFC choosing + 7-point rating, 36 participants) into the M2 schema as
+generator-emitted seed rows, reconstructed against `trials.correct_word_id`, so divergence/rating stats run on real
+data. Decided mechanism (Nils, in chat): `completed_at = NULL`, no flag/`data_source` column, provenance = reserved
+`thesis_p%` username prefix excluded from the live Rider A aggregates. Two calls confirmed this session: **exclude
+from live + ship a new `/api/research/thesis/divergence`** (inverted predicate) as the Observatory thesis layer, and
+**store the one out-of-bound RT (1121099 ms) as-is** (faithful; the 0-600000 bound is live-submission validation only).
+
+Changed:
+- `scripts/generate_seed_sql.py`: reads `docs/research/data/gorilla-tidy-{choosing,rating}.csv`; deterministic
+  (`uuid.uuid5` for session uuids, sorted participant ordering, no random/datetime). New dataclasses/readers,
+  `participant_order`, `resolve_word_id` (a 4-entry sokuon alias map `sakutto->sakuQ`/`kiritto->kiriQ`/`hotto->hoQ`/
+  `katitto->katiQ` -- the tidy export's doubled-consonant form vs the seed's Q-truncated romaji), a self-validating
+  `validate_thesis` (selection/target are pairing members, target == trial `correct_word_id`, derived is_correct ==
+  CSV Correct, rated word is a member), and row builders. Emits 36 `thesis_p01..thesis_p36` app_users (frozen shared
+  BCrypt digest, never authenticate), 36 `game_sessions` (`completed_at`/`started_at` omitted -> DDL defaults;
+  `shuffle_seed` inert), 1080 `player_answers`, 1080 `ratings`. `ideophone_arena.sql` regenerated (+2249 lines);
+  `--check` clean.
+- Rider A: added `and <user>.username not like 'thesis!_p%' escape '!'` to the 4 live aggregate queries
+  (`aggregateGuessStatsByWord`, `findScoredForPositionBias`, `aggregateRatingStatsByWord`, `aggregateRatingDistribution`);
+  added two inverted-predicate methods (`aggregateThesisGuessStatsByWord`, `aggregateThesisRatingStatsByWord`).
+  Leaderboard (structural `completed_at is not null`) and admin-stats (intentionally all-cohort) untouched.
+- New endpoint `GET /api/research/thesis/divergence`: `ResearchService.getThesisDivergence()` (getDivergence refactored
+  to a shared `mergeDivergence`), `ResearchController` mapping, `SecurityConfig` permit. Reuses `DivergenceResponse` --
+  no new DTO, no frozen shape changed.
+- Tests: `IdeophoneSeedIntegrityTests` (+4, now 13) parses the emitted SQL and reconstructs per-modality accuracy +
+  cohort shape; new `ThesisDivergenceHttpTests` (endpoint rollup) and `ThesisCohortExclusionTests` (repo-level
+  `raw == rider + thesis + browser_loop` identity).
+- Docs: `backend-contract.md` (new endpoint section + changelog), `ARCHITECTURE.md` §7/§12 (recorded the reversal of
+  the ADR-5 "in-band" lean), `backend-grading-checklist.md`, this log.
+
+Proof:
+- `python3 scripts/generate_seed_sql.py --check` -> clean ("68 words, 204 presentations, 34 pairings/trials, 36 thesis
+  users, 1080 answers, 1080 ratings"); emitted-SQL parse confirms 693/1080 correct, 247/231/215 per modality,
+  UNIQUE(session_id,trial_id) and UNIQUE(user_id,word_id) hold, RT outlier 1121099 preserved.
+- Fresh dev re-init from the regenerated SQL; app boots under `ddl-auto=validate` (no drift). `./mvnw test` -> **97
+  tests, 0 failures**.
+- Live curl on a pristine reseed: `GET /api/research/divergence` = `[]` and `/api/research/rating-distributions` empty
+  (thesis excluded from the live layer despite 1080 seeded thesis ratings); `GET /api/research/thesis/divergence` =
+  200 with 30 rows (guessCount/ratingCount 36 each) rolling up to 68.6/64.2/59.7; row 1 `gosogoso` guessAccuracy
+  0.6944 == `pairings.thesis_accuracy` for `a0`. DB cross-check confirmed thesis 360 answers/modality at
+  68.6/64.2/59.7, `live_ans` = 0.
+
+Result:
+Thesis data is in the DB and reconciles to the vendored figures. The live Observatory stays live-player-only and
+byte-stable; the thesis baseline is a separable inverted-predicate layer. No schema change (`ddl-auto=validate`),
+no flag column, response shapes frozen (the new endpoint is additive). Clean, reviewable tree (commits are Nils's).
+
+Commit:
+Not committed. Proposed message:
+"NIL-54: ingest thesis tidy data as generator-emitted seed + Observatory thesis layer" -- body: 36 thesis_p## users /
+36 sessions (completed_at NULL) / 1080 answers / 1080 ratings via generate_seed_sql.py (--check clean; 4-entry sokuon
+alias; self-validating reconstruction against trials.correct_word_id); Rider A extended to exclude thesis_p% from the
+live divergence/rating-distributions/position-bias aggregates; new public GET /api/research/thesis/divergence
+(inverted predicate, reuses DivergenceResponse) reconciles to 68.6/64.2/59.7; reverses ADR-5 "in-band" (ARCHITECTURE
+§7/§12 amended); no schema change; 97 tests green.
+
+Blocker:
+None. Process note: the local dev DB was reseeded from the regenerated `ideophone_arena.sql` (drops all tables incl.
+any prior test accounts); the validate-boot jar (`java -jar target/...jar`) launched for the live curl proof was
+stopped. `scripts/__pycache__/` is untracked build noise (not staged).
+
+Next single task:
+View-design adjudication artifact.

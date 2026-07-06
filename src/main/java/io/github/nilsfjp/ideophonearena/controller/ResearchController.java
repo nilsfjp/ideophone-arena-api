@@ -29,6 +29,12 @@ public class ResearchController {
         return ResponseEntity.ok(researchService.getDivergence());
     }
 
+    @GetMapping("/thesis/divergence")
+    @Operation(summary = "Thesis-cohort divergence (NIL-54): the vendored per-pair experiment, in-DB")
+    public ResponseEntity<List<DivergenceResponse>> getThesisDivergence() {
+        return ResponseEntity.ok(researchService.getThesisDivergence());
+    }
+
     @GetMapping("/rating-distributions")
     @Operation(summary = "Per-modality distribution of the 1-7 iconicity rating values")
     public ResponseEntity<RatingDistributionsResponse> getRatingDistributions() {

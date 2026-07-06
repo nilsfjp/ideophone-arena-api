@@ -479,6 +479,31 @@ least one guess **or** one rating (words with neither are omitted), ordered by `
 - `displayForm` (added 2026-07-06) is the word's kana label, **verbatim** from `ideophones.display_form` (invariant 1:
   rendered as stored, never derived/converted); the Observatory renders kana labels. Additive — clients that ignore it
   are unaffected.
+- Rider A (research aggregates only) excludes practice trials, `browser_loop_%` automation accounts, and — since
+  NIL-54 (2026-07-06) — the reserved `thesis_p%` ingestion cohort, so this live layer shows only live-player data and
+  stays byte-stable across the thesis ingestion. The thesis cohort's own aggregate is served separately (below).
+
+## Thesis divergence — Observatory thesis layer (2026-07-06, NIL-54)
+
+The thesis's own experiment (36 participants) ingested into the live tables and exposed as the inverted-Rider-A
+counterpart of `/api/research/divergence`: the same shape, computed over the reserved `thesis_p%` cohort **only**.
+
+```text
+GET /api/research/thesis/divergence
+```
+
+Public (no authentication). Identical `DivergenceResponse[]` shape as `/api/research/divergence`; one row per thesis
+target word (30), ordered by `ideophoneId`. Because each target word was answered and rated by all 36 participants,
+every row carries `guessCount == 36` and `ratingCount == 36`, each `guessAccuracy` equals that pairing's
+`pairings.thesis_accuracy`, and the guess-count-weighted per-modality rollup reproduces the vendored thesis figures
+(AUDITORY 68.6%, VISUAL 64.2%, INTEROCEPTIVE 59.7%; overall 693/1080).
+
+- No schema change and no new DTO: reuses `DivergenceResponse` and the divergence merge, with the Rider A predicate
+  inverted (`username like 'thesis!_p%' escape '!'`) in two dedicated repository methods.
+- The rows are generator-emitted seed (`generate_seed_sql.py`, verified by `--check`): 36 `app_users`
+  (`thesis_p01`..`thesis_p36`), 36 `game_sessions` with **`completed_at = NULL`** (so they feed divergence but never
+  the leaderboard), 1080 `player_answers`, 1080 `ratings`. No flag/`data_source` column — provenance is the username
+  prefix, fenced from the live aggregates exactly like `browser_loop_%`.
 
 ## Rating distributions per modality (2026-07-06)
 
@@ -608,6 +633,19 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
   the localStorage pool is discarded without migration (only pre-deploy test data existed).
 
 ## Changelog
+
+- 2026-07-06: **Thesis tidy-data ingestion (NIL-54)** — the thesis Gorilla export (36 participants: 2AFC choosing +
+  7-point rating) ingested as generator-emitted seed rows (`generate_seed_sql.py`, `--check` clean): 36 `thesis_p##`
+  users, 36 `game_sessions` (`completed_at = NULL`), 1080 `player_answers`, 1080 `ratings`. **No schema change, no
+  flag/`data_source` column** — provenance is the reserved `thesis_p%` username prefix. **Rider A extended**: the live
+  `divergence` / `rating-distributions` / `position-bias` aggregates now also exclude `thesis_p%` (no shape change;
+  live output byte-stable across the ingestion — this **reverses** the earlier ADR-5 "in-band" lean, recorded in
+  ARCHITECTURE.md §12). New public read-only endpoint **`GET /api/research/thesis/divergence`** (additive, reuses
+  `DivergenceResponse`) is the Observatory thesis layer: the inverted-predicate view whose per-modality rollup
+  reproduces the vendored 68.6/64.2/59.7. **Side effect** — `GET /api/admin/stats` (which intentionally counts all
+  cohorts) gains +36 users / +36 sessions / +1080 answers, and `byCondition` the thesis cohort (11/13/12 across
+  `CONDITION_{1,2,3}_SOKUON`); `completedSessions` stays live-only. `ddl-auto=validate` unchanged. `./mvnw test` -> 97
+  tests, 0 failures.
 
 - 2026-07-06: **M2 "The Re-key" (NIL-68)** — internal schema normalized to word grain with **every public response
   shape frozen** (verified by byte-level curl-diff). `ideophones` split into `words` + `presentations`;
