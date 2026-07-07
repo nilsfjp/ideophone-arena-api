@@ -4,6 +4,11 @@ scripts/__pycache__
 docs/research/INDEX.md
 docs/research/data/full-experimental-data/*
 docs/research/data/ideophone-dataset/*
+# Participant-level thesis response data (Gorilla "Participant Private ID" rows) - kept on
+# disk for the seed generator, never tracked (privacy gate, NIL-44). Aggregate files such as
+# docs/research/data/thesis-per-pair-stats.csv stay tracked.
+docs/research/data/gorilla-tidy-choosing.csv
+docs/research/data/gorilla-tidy-rating.csv
 docs/research/design-archive/Onomatopedia-images.zip
 docs/research/papers/*
 

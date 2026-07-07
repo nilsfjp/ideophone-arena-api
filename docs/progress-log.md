@@ -980,3 +980,57 @@ stopped. `scripts/__pycache__/` is untracked build noise (not staged).
 
 Next single task:
 View-design adjudication artifact.
+
+## 2026-07-07 ("NIL-44: portfolio README narrative + architecture story + privacy rider")
+
+Session goal:
+Rewrite README.md as a portfolio-grade artifact (research story, iconicity hook, architecture story,
+honest current state, one-command run) with the three Observatory portfolio figures placed one per
+narrative beat; clear the api half of the gorilla-tidy participant-data privacy gate. Docs-only;
+commits are Nils's.
+
+Changed:
+- README.md rewritten (was a how-to-run doc). Narrative arc (MA thesis -> gamified 2AFC instrument ->
+  live research surface); the dumbbell/scatter/radar figures at "the claim" / "the two measures" /
+  "the fingerprint"; adopted mode slate (Meaning Match, Rating Lab, Perception Ladder, Word Mint,
+  Word Anatomy, Polyglot Challenge -- Script Lab framed as a feature within Meaning Match); the
+  word-grain schema story (M2), deterministic shuffle, three planes, hard layering rules, hand-rolled
+  JWT; current-state LIVE vs ROADMAP; deploy = designed/costed, not live; full endpoint surface incl.
+  the four /api/research Observatory endpoints; Paulsson (2025) full-title citation + McLean 2023 /
+  Iida & Akita 2023 (CC BY). Six interpretive sections carry NIL-84 essence-review HTML-comment flags.
+- Figures copied web -> api docs/images/ (observatory-{dumbbell,scatter,radar}.png).
+- Privacy rider: git rm --cached docs/research/data/gorilla-tidy-{choosing,rating}.csv (both carry a
+  "Participant Private ID" column); .gitignore entries added; files kept on disk for the seed
+  generator; aggregate thesis-per-pair-stats.csv stays tracked.
+
+Proof:
+- Docs-only tree (git diff --cached --name-only): README.md, .gitignore, docs/images/*.png (added),
+  gorilla-tidy-*.csv (deleted). No .java/src/main/src/test/pom.xml changes, so the 97-test suite is
+  untouched (last green: 97 tests, NIL-54).
+- Rider: `git ls-files | grep gorilla-tidy` -> empty; both CSVs still on disk; grep confirmed no other
+  tracked file carries participant IDs (generate_seed_sql.py matches "Private ID" only as a CSV
+  column-name reference; signoff.xlsx sharedStrings clean; design-archive/gorilla-*.png are UI-design
+  screenshots, two spot-checked, out of the rider's scope).
+- README verified: no "orthogonal"/"unrelated" in prose; <em> tags balanced (no nesting); no repo-
+  escaping links; all three image paths resolve; anchors match headings. Two adversarial review
+  workflows (gather + 5-critic review): 0 blockers, honest-state clean, framing compliant.
+
+Result:
+README reads as a portfolio piece and traces every number to thesis-facts.md or a committed endpoint;
+the api half of the privacy gate is closed. Reviewable, docs-only tree; commits are Nils's.
+
+Commit:
+Not committed. Proposed (two commits, or squashed to one):
+1. "NIL-44: portfolio-grade README (research story + architecture + Observatory figures)"
+2. "NIL-44 rider: untrack gorilla-tidy participant CSVs before public (privacy gate, api half)"
+Squashed: "NIL-44: portfolio README + untrack participant-data CSVs (privacy gate, api half)".
+
+Blocker:
+None for the api half. The WEB half of the privacy gate is still open (NIL-80's raincloud reads a
+gorilla-tidy CSV in place -> vendored-aggregate replacement) and rides the first post-NIL-80-commit
+web session. The demo GIF (NIL-45) is a placeholder comment, not recorded. Planning docs
+(summer-2026-plan.md / execution-plan / SPEC-hosting) read from the /mnt/c planning folder, not the
+api repo.
+
+Next single task:
+NIL-84 (essence review, Fable, morning).
