@@ -127,7 +127,7 @@ One scripted pass (Python, alongside `generate_seed_sql.py`): extract features f
 1. Feature parity: Python extractor output for all 68 romaji == Java `PhonologyServiceTests` golden file (same booleans, same mora counts).
 2. `python3 scripts/generate_seed_sql.py --check` clean; `ddl-auto=validate` boots; `./mvnw test` green (round serving, answer judging, axis filter validation, 409/400 semantics).
 3. Live curl: session with `gameMode: TEMPLATE_READING` → rounds cycle axes; answers judged against adjudicated `correct_ideophone_id`; `GET /api/research/templates` aggregates.
-4. `npm run build` + `vitest`; browser: full 12-round session; highlight renders on a っ word and a -り word; no highlight crash on a word where the literal isn't found.
+4. `pnpm build` + `pnpm vitest run`; browser: full 12-round session; highlight renders on a っ word and a -り word; no highlight crash on a word where the literal isn't found.
 5. Sign-off workbook archived to `research/` with decisions recorded.
 
 ## 11. Build cost
@@ -137,4 +137,10 @@ Pipeline + sign-off pass (script + Nils's review — cheap in session time, but 
 ## 12. Risks
 
 - **Ground-truth softness** — a signed-off pair can still be argued; mitigation: hedged copy + reject liberally at sign-off + live accuracy flags pathological pairs (self-norming catches what adjudication missed).
-- **Teaching-to-the-test** — template training may raise Choosing accuracy and drift the core measure. Reframed as the *transfer finding* (a feature, measurable 
+- **Teaching-to-the-test** — template training may raise Choosing accuracy and drift the core measure. Reframed as the *transfer finding* (a feature, measurable via timestamps + `game_mode` separation); note it in research copy rather than pretending isolation.
+- **Axis starvation pre-expansion** — N deferred already; RI/Q pools shrink further under same-modality + single-axis constraints. The §9 pipeline reports exact counts before any build commitment; the expansion batch (rich in -ri and -Q words: chirari, pikari, hiyari, uttori, kippari, gyuq, tsururi) relieves this.
+- **Python/Java extractor drift** — golden-file parity test in CI (proof step 1) makes drift loud.
+
+## 13. Deferred to NIL-57
+
+Mode dispatch D1 · unified trials D2 · shared item-stats D4 · `word_features` table vs columns · extractor single-sourcing strategy · seed-stream registry (`shuffleSeed + 3` claimed here) · whether `/api/research/templates` folds into a general research-stats namespace.

@@ -128,6 +128,8 @@ Files: `controller/ProductionController.java`, `service/ProductionService.java` 
 
 ## 9. Frozen-copy needs
 
+> **SUPERSEDED (2026-07-06, NIL-83):** strings below are drafts of record only. The frozen slate — including the language-neutral rewording of the prompt and parse helper — is **SPEC-view-designs.md §8**. Build from §8, not this list.
+
 New strings in `experimentText.ts` (drafts; **Nils adjudicates before build** — production is a new instrument, its prompt wording is part of the measure):
 
 - Prompt: "Invent a Japanese-sounding word for the meaning below. Type it in roman letters."
@@ -141,7 +143,7 @@ New strings in `experimentText.ts` (drafts; **Nils adjudicates before build** �
 1. `./mvnw test` green, including `PhonologyServiceTests` golden cases: `gosogoso`↔`gosogoso` = 100; `paq` normalizes to `pa-Q` (final-sokuon pitfall); `shittori`→`sittori` folding; `zyaazyaa` = 4 morae; `ngrk` → parse failure; plus a full-inventory smoke test asserting every seeded `romaji` normalizes without error.
 2. `python3 scripts/generate_seed_sql.py --check` clean; `ddl-auto=validate` boots.
 3. Live curl: `GET next` → prompt; `POST` valid → 201 with features; repeat → 409; garbage input → 400 `validationErrors`; `GET /api/research/triangulation` → row with `productionCount: 1`.
-4. Frontend: `npm run build` + `vitest`; browser: full loop prompt → type → reveal → next; parse error shows helper without consuming the attempt.
+4. Frontend: `pnpm build` + `pnpm vitest run`; browser: full loop prompt → type → reveal → next; parse error shows helper without consuming the attempt.
 5. Contract + checklist docs updated; Swagger lists all four endpoints.
 
 ## 11. Build cost
@@ -151,4 +153,10 @@ New strings in `experimentText.ts` (drafts; **Nils adjudicates before build** �
 ## 12. Risks
 
 - **Score face-validity** — a player types something reasonable and gets a low score → the feature chips exist precisely to make the score legible; copy frames it as distance, not grade. Weights are v1; `scorer_version` makes tuning safe.
-- **Anglophone orthography** (`shiny`, `splash`) → parser rejects politely; helper copy trains romaji fast. Watch early live data for rejection-rate spikes (log parse failures server-side at INFO with the failing input — it's [a-
+- **Anglophone orthography** (`shiny`, `splash`) → parser rejects politely; helper copy trains romaji fast. Watch early live data for rejection-rate spikes (log parse failures server-side at INFO with the failing input — it's [a-z]-constrained, safe to log).
+- **Gloss leakage** — some glosses hint at the form ("munching, crunching" → anything crunchy scores well). Fine: that *is* iconicity working. No mitigation needed, just note it in research copy.
+- **Prompt-order determinism vs boredom** — fixed selection rule means all users produce the same early words; acceptable for data density (fast per-word convergence stats), revisit post-launch.
+
+## 13. Deferred to NIL-57
+
+`PhonologyService` placement as shared engine (production / NIL-58 foil-distance / phoneme-shape features) · per-language phonology profiles · producibility joining the shared item-stats source · whether `/api/research/triangulation` eventually supersedes `/api/research/divergence` (keep both until the landing page picks).

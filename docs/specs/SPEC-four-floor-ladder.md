@@ -87,4 +87,10 @@ Smallest code delta of the four candidates: **≤ 1 backend session (seed + map 
 ## 12. Risks
 
 - Recording gate stalls indefinitely → the floor is cleanly deferrable (nothing else depends on it; the other three floors ship in W28 regardless).
-- Speaker mismatch introduces a confound → G1 constraint is non-negot
+- Speaker mismatch introduces a confound → G1 constraint is non-negotiable; if the original speaker is unavailable, record **all** floor-4 words with one new speaker and document the break (never mix speakers within a floor).
+- Re-classification surprises in historical stats → §4 decision is recorded; mention in the contract changelog so the dashboard/landing numbers don't look haunted.
+- gyuq's word-final sokuon: keep the F1 romaji pitfall in mind end-to-end (`gyuQ` in thesis-style romaji; audio filename `h5h-gyuq.m4a` lowercase; norms-join preserves final `q`).
+
+## 13. Deferred to NIL-57
+
+Shared item-stats source for self-norming (D4) · whether floor membership becomes schema (`floors` table) once floors multiply beyond four · pairing-pipeline data model for the remaining 17 approved pairs (A/I/V floors — same batch, separate concern from this floor extension).

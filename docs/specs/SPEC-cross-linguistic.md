@@ -155,4 +155,16 @@ New strings for `experimentText.ts` (drafts; **Nils adjudicates before build**, 
 
 ## 12. Deferred to NIL-57 (explicit ledger)
 
-D1 mode dispatch (`game_mode` column vs per-mode session models) · D2 uni
+D1 mode dispatch (`game_mode` column vs per-mode session models) · D2 unified trials table vs per-mode round tables · D3 cross-source word identity (lexeme) · D4 shared per-item live-stats source for self-norming · seed-stream registry for `shuffleSeed + k` · placement of `stimulus_sources` (per-stimulus vs per-ideophone) · whether `semantic_category` and `modality` unify under one typed taxonomy table.
+
+**D4 granularity (escalated 2026-07-02, not resolved here):** mclean2023 tested two forms under two concepts each and got wildly different guessability (iraira .70 vs .39; nebaneba .38 vs .20) — guessability is a property of the form–meaning **pairing**, not the word. D4's "per-item" stats source should therefore key on **round/pairing**, with word-level stats as a derived aggregate, not the primitive. Evidence in `research/f1-dataset-profile.md` §2 (2026-07-02 section).
+
+## 13. Attribution (CC BY 4.0 obligations — ship with the mode AND on the landing page)
+
+All three sources below are Creative Commons Attribution 4.0 International. Hosting, redistribution, and adaptation are permitted with attribution. Frozen credit lines (F3 may restyle, semantics fixed):
+
+- Punselie, S., McLean, B., & Dingemanse, M. (2024). The Structure of Sound Symbolism in Japanese, Korean, Ewe, Semai and Siwu Ideophones. *Open Mind*. Data & audio: `triangulating_iconicity` (CC BY 4.0).
+- Dingemanse, M., Schuerman, W., Reinisch, E., Tufvesson, S., & Mitterer, H. (2016). What sound symbolism can and cannot do: testing the iconicity of ideophones from five languages. *Language*, 92(2), e117–e133. Stimuli (CC BY 4.0).
+- Lockwood, G., Dingemanse, M., & Hagoort, P. (2016). How iconicity helps people learn new words: neural correlates and individual differences in sound-symbolic bootstrapping. *Collabra*, 2(1). Stimuli & data (CC BY 4.0).
+
+Landing-page note: a compact credits block linking the three papers + the OSF/GitHub repositories; the per-trial feedback card does **not** need per-item attribution (dataset-level credit satisfies CC BY 4.0), keeping trial chrome clean.

@@ -62,10 +62,11 @@ Live counts derived client-side from the divergence response (Σ guessCount, Σ 
 - **Idiom:** dumbbell per modality row: thesis mean (ink dot, from vendored `thesis-per-pair-stats.csv` aggregated per modality) vs live arena mean (vermillion dot, client-side weighted aggregate over divergence rows, which carry `modality`). Chance line at 50% as a hairline with a specimen label `CHANCE · 50%`.
 - **Copy hook:** "Sound carries furthest" — the aud > vis > int ordering stated plainly, with live numbers testing it out-of-sample as play accumulates.
 - **Low-n honesty:** live dots render hollow until a per-modality n threshold (n ≥ 30 guesses), with `N = …` in the row label. No error bars in v1.0; Wilson CIs arrive with the v1.1 polish if wanted.
+- **As-built caveat (NIL-78, disclosed in figcaption):** live means currently include practice traffic and `browser_loop_*` accounts — the research aggregates carry no exclusion (grep-verified 2026-07-06). Server-side fix = rider on NIL-68's sweep (exclude practice trials + loop accounts, leaderboard-consistent); until it lands, the figcaption disclosure is the honest state.
 
 ### 3.3 The two measures — divergence scatter (v1.0)
 
-- **Idiom (adopted, brief):** x = guess accuracy, y = mean rating, one mark per word; marginal densities on both axes (hand-rolled Epanechnikov KDE, ~15 lines, no dep).
+- **Idiom (adopted, brief; y-axis revised as-built):** x = guess accuracy, y = **rating z-score within study** (adjudicated during NIL-78: thesis 1–7 raw means and McLean z-scores aren't scale-commensurable; z-within-study is), one mark per word; marginal densities on both axes (hand-rolled Epanechnikov KDE, no dep). Arena layer suppressed until a word has ≥3 ratings.
 - **Three layers:**
   1. **McLean 2023 backdrop** (304 items, vendored): the stratum story — ideophone vs prosaic in soft fills + distinct marker shapes. This is where "ratings separate ideophones from prosaic words (δ = +.50); guessing doesn't (δ ≈ −.01)" is *visible*.
   2. **Thesis layer** (30 pairs, vendored): ink marks — the study this app replicates.
@@ -76,7 +77,7 @@ Live counts derived client-side from the divergence response (Σ guessCount, Σ 
 
 ### 3.4 The fingerprint — modality profiles (radar v1.0; rainclouds v1.1)
 
-- **Radar (v1.0):** per-word 6-axis profile (Auditory/Visual/Haptic/Gustatory/Olfactory/Interoceptive) from vendored Iida & Akita norms (510×17), for every pool word that joins the norms. Signature panel — a genuinely new axis the thesis never visualized. Word picker = searchable list (romaji + gloss); two-word compare overlay (e.g. kirakira vs dokidoki) as the default demo state, seeded to a strong contrast pair.
+- **Radar (v1.0, as built):** per-word 6-axis profile (Auditory/Visual/Haptic/Gustatory/Olfactory/Interoceptive) from vendored Iida & Akita norms (510×17), joined to arena words by **strict romaji equality**. As-built intersection: **17 words** (Kunrei-shiki API romaji vs the norms' Hepburn-leaning spellings blocks the rest; transliteration is forbidden by design, so 17 is the honest v1 number — the durable fix is a curated norms-key/alias in M4 `word_features`, see §4.5). Pipeline canonicalizes three thesis sokuon spellings (sakutto/kiritto/hotto) to pool forms and validates thesis ⊆ pool. Word picker = searchable list; two-word compare overlay; default pair **kirakira / sukkiri** (max-L1 contrast in the actual intersection — the spec's illustrative kirakira/dokidoki ranked 2nd). Axis display order re-slotted so the longest labels sit top/bottom (320px legibility, §4.3 direct-label rule).
 - **Rainclouds (v1.1, arbitrated):** per-modality 1–7 rating distributions — half-violin (KDE) + quartile box + seeded-jitter raw dots. **Raincloud over ridgeline** because the register of this app is honesty about thin data: raw dots *show* sample size while ratings are sparse, and the density earns its place as data accrues; a ridgeline would smooth 12 ratings into fake confidence. Compactness (ridgeline's one win) doesn't matter on an editorial page. n in the specimen label per tier. Thesis `gorilla-tidy-rating.csv` distributions render as a reference layer behind the live one.
 - **Data gate:** rainclouds need per-value counts, not means → new endpoint (§4.2). Radar needs nothing from the server.
 
@@ -92,13 +93,13 @@ Live counts derived client-side from the divergence response (Σ guessCount, Σ 
 
 `GET /api/research/divergence` → per-ideophone `{ideophoneId, romaji, gloss, modality, guessAccuracy, guessCount, meanRating, ratingCount}`, public, read-only, merged independent aggregates. Feeds: header counts, modality dumbbell (client-side weighted aggregation), scatter arena layer. This is the whole v1.0 API surface.
 
-### 4.2 Live (new, v1.1 — one backend session, all additive, read-only, ResearchController siblings)
+### 4.2 Live (new, v1.1 — SHIPPED by NIL-79, api commit `c059d1d` = origin/dev)
 
-- `GET /api/research/rating-distributions` — modality × rating-value (1–7) counts → rainclouds.
-- `GET /api/research/position-bias` — §3.5.
-- Optional: `displayForm` added to `DivergenceResponse` (kana labels, invariant-1-verbatim).
+- `GET /api/research/rating-distributions` — dense zero-filled modality × rating-value (1–7) grid + `byModalityN` → rainclouds.
+- `GET /api/research/position-bias` — seed-replay reconstruction (no schema change); left/right pick rate + SDT `dPrime`/`criterion` (log-linear correction, `@JsonProperty`-pinned casing) + **accuracy-by-target-position** (Nils's pick for the vertical axis) with additive `targetTopCorrect`/`targetBottomCorrect`.
+- `displayForm` on `DivergenceResponse` — verbatim kana (invariant 1).
 
-No schema changes required for any of these (position-bias has a flagged optional-column variant, gated separately). All stay within the three-layer + DTO + mapper conventions; grading checklist untouched areas stay untouched.
+**Shapes are frozen in the api repo's `docs/backend-contract.md` (NIL-79's update) — that document, not this section, is the contract of record for NIL-80.** All three-layer + DTO + mapper conventions held; 88 tests green; grading checklist evidence updated.
 
 ### 4.3 Vendored static layers (baked at build, no runtime fetch of research files)
 
@@ -123,7 +124,7 @@ Not a v1 blocker. Post-NIL-54: scatter cloud widens (more words, live-normed pai
 
 Three concrete things the vendored datasets teach the ARCHITECTURE.md M-plan; recorded so the inspiration lands in the right sessions:
 
-1. **Iida & Akita's shape is the `word_features` (M4) design.** Their 17 columns reduce to *per-word × per-dimension scalars plus derived values* — exactly what a long-format `word_features(word_id, feature, value, source_id)` handles uniformly for the 6-vector, `Modality_exclusivity`, their bonus `Iconicity` column, corpus frequency, `kata_share`, and difficulty priors (the top-600 and sign-off sheets carry the same shape). Post-M4 the radar swaps vendored JSON → API with zero panel changes (§4.4's volume-not-structure promise made concrete). Provenance stamps via M5 `stimulus_sources`.
+1. **Iida & Akita's shape is the `word_features` (M4) design.** Their 17 columns reduce to *per-word × per-dimension scalars plus derived values* — exactly what a long-format `word_features(word_id, feature, value, source_id)` handles uniformly for the 6-vector, `Modality_exclusivity`, their bonus `Iconicity` column, corpus frequency, `kata_share`, and difficulty priors (the top-600 and sign-off sheets carry the same shape). Post-M4 the radar swaps vendored JSON → API with zero panel changes (§4.4's volume-not-structure promise made concrete). Provenance stamps via M5 `stimulus_sources`. **As-built addendum (NIL-78):** the norms join runs on romaji-string coincidence and yields only 17/60 (Kunrei vs Hepburn) — M4 should carry a **curated `norms_key`/romaji-alias feature per word** so external-norm joins stop depending on romanization luck. Curation is data work, not derivation; it belongs in the pipeline/DB, never the frontend.
 2. **External anchors attach to form–meaning pairings, not words.** McLean 2023's long format (`identifier, ideophone/stratum, method, z_score, score`) — with nebaneba scoring differently under two concepts — is the standing reminder (already noted in SPEC-four-floor-ladder §2) that guessability anchors for NIL-54 priors may need to key on *pairing/meaning*, not word alone. Carry into the M4 keying decision.
 3. **The graph needs no graph store, and the arena already generates its own edges.** McLean's 2-CSV nodes/edges model maps to one relational `word_relations(word_a, word_b, relation_type, weight, source_id)` table in the ADR-3 world — and the richest edge types are *ours for free*: pairing-history edges from `pairings`, confusion edges from aggregating unified `trials` (which wrong word got picked). The Great Language Game's record shape (`target, sample, choices, guess`) independently confirms ADR-3's unified `trials` is already the right long format for confusion aggregation. Nothing to add server-side now; this is validation, plus one future table.
 
@@ -178,13 +179,13 @@ Not invoked during ordinary panel construction — SVG-in-React chart work is no
 
 _Original plan said buffer-tier W31+; superseded same-day — Nils wants v1 fully finished within Fable week (ends Wed 2026-07-08). "Fully finished" = NIL-78 + 79 + 80 + 81; NIL-82 stays data-gated on NIL-54 by design and ships as its honest coming-soon slot._
 
-| Order | Issue | Scope | Due | Blocked by | Backend? |
+| Order | Issue | Scope | Status | Blocked by | Backend? |
 |---|---|---|---|---|---|
-| 1 | **NIL-78** | Observatory v1.0: deps (gate settled) + vendored data + shell + dumbbell + scatter + radar | 07-06 | — | **None** |
-| 2 | **NIL-79** | rating-distributions + position-bias + `displayForm` | 07-07 | — (parallel-delegable with NIL-78) | Yes — additive, read-only |
-| 3 | **NIL-80** | Observatory v1.1: rainclouds + integrity strip + kana labels | 07-08 | NIL-78, NIL-79 | None |
-| 4 | **NIL-81** | E1 figure-export pass (canvas-design) | 07-08 | NIL-78 | None |
-| 5 | **NIL-82** | N2 network panel (algorithmic-art) + confusion sibling | W32 buffer | NIL-54 | Graph endpoint TBD in its own plan |
+| 1 | **NIL-78** | Observatory v1.0: deps + vendored data + shell + dumbbell + scatter + radar | **DONE, web `ab04469`** (153 vitest, was 84; S1 rider skipped — valid) | — | **None** |
+| 2 | **NIL-79** | rating-distributions + position-bias + `displayForm` | **DONE, api `c059d1d` = origin/dev** (88 tests; shapes → backend-contract.md) | — | Additive, read-only |
+| 3 | **NIL-80** | Observatory v1.1: rainclouds + integrity strip + kana labels | Todo, due 07-08 — unblocked; briefing comment on the issue (incl. api `git pull --ff-only` pre-step) | NIL-78 ✅, NIL-79 ✅ | None |
+| 4 | **NIL-81** | E1 figure-export pass (canvas-design) | Todo, due 07-08 — unblocked | NIL-78 ✅ | None |
+| 5 | **NIL-82** | N2 network panel (algorithmic-art) + confusion sibling | Backlog, **W31** (Nils moved it up from W32, 2026-07-05) | NIL-54 | Graph endpoint TBD in its own plan |
 
 All four Fable-week issues sit in the W28 "Second mode + build-out" milestone (whose charter is exactly this kind of pulled-forward work). **Known compression:** W28 also carries 28A/28B ladder + NIL-62 + NIL-76 + NIL-43 + NIL-58, plus NIL-63 finishing and NIL-73 due 07-08 — the Observatory slate consumes roughly four of the remaining Fable-window sessions; deadlines govern sequencing, Nils arbitrates what slips past Wednesday. Landing (NIL-43) consumes the Observatory as CTA destination whenever it lands relative to these.
 
