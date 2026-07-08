@@ -214,10 +214,10 @@ class LeaderboardPaginationHttpTests {
     }
 
     // Reference the seeded scored trials rather than creating fixtures: every
-    // session serves the same 30 scored trials, so a fixture trial would be
+    // session serves the same 47 scored trials, so a fixture trial would be
     // served to unrelated sessions and NPE. The UNIQUE(session_id, trial_id)
     // constraint is respected because each session answers distinct trials and
-    // answered <= 30.
+    // answered <= 47.
     private List<Trial> createIsolatedRounds(String suffix, int count) {
         return trialRepository.findByPracticeFalseOrderByIdAsc().subList(0, count);
     }

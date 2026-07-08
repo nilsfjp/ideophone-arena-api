@@ -198,7 +198,7 @@ Practice answers:
   already-passed practice round returns `409`, and practice answers against a session started without the flag
   return `400`.
 
-Practice rounds do not consume round numbers: "Round 1/30" still means the first scored round. Sessions started
+Practice rounds do not consume round numbers: "Round 1/47" still means the first scored round. Sessions started
 without the flag behave exactly as before; existing clients are unaffected.
 
 ## Deterministic per-session shuffle (2026-06-12)
@@ -207,7 +207,7 @@ Every session stores a server-generated `shuffle_seed` (`SecureRandom`, never ex
 The seed deterministically derives the session's entire presentation, recomputed from scratch on every request —
 nothing but the seed is persisted, so a session replays identically across server restarts:
 
-1. the order of the 30 scored rounds,
+1. the order of the 47 scored rounds (30 thesis + 17 A/V/I expansion, since NIL-60),
 2. which word of each pair is the **target** (identity randomization — a deliberate extension beyond the thesis,
    which fixed targets by pairing parity; decision recorded 2026-06-12),
 3. the target's left/right position,
@@ -225,6 +225,12 @@ nothing but the seed is persisted, so a session replays identically across serve
    id** (defined on the pair's ideophone ids, never on the stored left/right columns).
 4. Practice rounds keep their fixed order (p0 then p1), but take the same three per-round draws from a separate
    stream, `new Random(shuffleSeed + 1)`, so the scored derivation is unaffected by practice on/off.
+
+The **algorithm** above is frozen. The **base list it shuffles** grew from 30 to 47 scored rounds when NIL-60
+brought the 17 A/V/I expansion pairs live (2026-07-08); a given seed therefore derives a different order than it
+did pre-NIL-60. This is compatible because no persisted in-progress live session exists (dev/demo DB is reloaded),
+and the thesis cohort's answers are keyed by `trial_id` — not by shuffle order — so they are untouched. Any future
+change to the base list once real sessions exist would break replay and is forbidden.
 
 ### Consequences
 
@@ -634,6 +640,15 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
 
 ## Changelog
 
+- 2026-07-08: **A/V/I expansion go-live (NIL-60)** — the 17 A/V/I expansion pairs seeded dark by NIL-86 now emit
+  trials and serve in the live pool: **scored rounds per session 30 -> 47** (30 thesis + 17 A/V/I expansion),
+  total trials 34 -> 51, and the ratable-word pool a completed session yields grows 60 -> 86 (the 26 new A/V/I
+  words). The 4 HAPTIC expansion pairs **stay dark** (HAPTIC serves in no mode until the Touch floor, NIL-41/42).
+  Expansion trials carry `correct_word_id = NULL` (no thesis fixed target; the served target is shuffle-derived,
+  and that column is unread for CHOOSING). **Every public DTO/endpoint shape is unchanged (zero API/frontend
+  changes); only counts grow.** The 34 TTS clips (`ja-JP-Wavenet-B`) were audited (ffprobe: aac/mono/24 kHz,
+  nonzero duration) and serve via `/stimuli/audio/<file>`. See the shuffle derivation-spec note on the base-list
+  growth.
 - 2026-07-08: **Stimulus-expansion dark inventory (NIL-86)** — 21 signed-off expansion pairs seeded via
   `generate_seed_sql.py` into `words`/`presentations`/`pairings` (68->102 words, 204->306 presentations, 34->55
   pairings) with **no trials**, so they serve in zero live pools (round generation, ratable pool, leaderboard, admin

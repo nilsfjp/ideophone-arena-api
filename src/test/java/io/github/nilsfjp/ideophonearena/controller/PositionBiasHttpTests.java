@@ -58,7 +58,7 @@ class PositionBiasHttpTests {
 
         Map<String, Object> before = snapshot();
 
-        // A condition-free seeded session: every session serves the same 30
+        // A condition-free seeded session: every session serves the same 47
         // scored trials, each with presentations, so the first served round is a
         // real scored round we can answer.
         String sessionJson = mockMvc.perform(post("/api/game/sessions")

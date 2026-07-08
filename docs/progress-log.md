@@ -1097,3 +1097,64 @@ launcher said "~180 existing audio files" but the repo has 68 per-word .m4a — 
 
 Next single task:
 Nils runs the TTS batch (scripts/generate_tts_audio.py --run) with his GCP credentials.
+
+## 2026-07-08 ("NIL-60: A/V/I expansion go-live — audit 34 TTS clips + seed trials for 17 pairs")
+
+Session goal:
+Verify the 34 expansion TTS clips synthesized 2026-07-08 (ja-JP-Wavenet-B) sound and are correctly named, then
+bring the A(auditory)/V(visual)/I(interoceptive) expansion pairs live (trials in the seed, served in Meaning Match)
+while the HAPTIC pairs stay dark (no served mode until the Touch floor, NIL-41/42).
+
+Changed:
+- scripts/generate_seed_sql.py: flip the trial-emission filter so the 17 A/V/I expansion pairs emit CHOOSING trials
+  (`source != EXPANSION or modality != HAPTIC`); expansion trials carry `correct_word_id = NULL` (no thesis fixed
+  target; the served target is shuffle-derived and that column is unread for CHOOSING). Added `HAPTIC_MODALITY`
+  constant; updated the render/validate/summary comments and the `main()` summary (now reports A/V/I live vs HAPTIC
+  dark). `--check` byte-stable (thesis/practice rows 1-34 untouched; only 17 new trial rows + a header comment).
+- src/main/resources/db/init/ideophone_arena.sql: regenerated. trials 34 -> 51 (30 thesis + 17 A/V/I expansion + 4
+  practice). New expansion trial ids 35-40 (A1-A6), 45-49 (I1-I5), 50-55 (V1-V6); ids 41-44 (H1/H4/H5/H6) skipped.
+- src/test/.../seed/IdeophoneSeedIntegrityTests.java: `expansionPairingsAreDarkWithNoTrials` reworked into
+  `hapticExpansionStaysDarkWhileAviExpansionServes` (asserts the served pool contains all 17 A/V/I expansion
+  pairings and zero HAPTIC, 8 HAPTIC words stay dark); `trialsCollapseToThirtyFourWithFourPractice` ->
+  `trialsAreFortySevenScoredPlusFourPractice` (51/47/4); `everyTrialMapsToAPairing...` branches on source
+  (expansion trials assert `correct_word_id` NULL, thesis assert a member); class doc updated.
+- src/test/.../controller/: GameLoopHttpTests (30L->47L scored assertion, completion loop cap 40->60);
+  PracticeRoundHttpTests (hardcoded 30 -> scored.size()); RatableWordsHttpTests (dropped the SCORED_WORDS=60 literal
+  for the dynamic `expectedScoredWordIds().size()`, loop cap 40->60); stale "30 scored" comments in PositionBias /
+  Leaderboard updated.
+- docs/backend-contract.md (shuffle spec 30->47 + base-list-growth compatibility note + changelog entry),
+  docs/demo-runbook.md (scored 30 -> 47).
+- ideophone-arena-web/dist/stimuli/audio/: copied the 34 new .m4a from source stimuli/audio/ into the backend-served
+  dist (the documented manual media step until the next vite build); 68 -> 102 clips served.
+
+Proof:
+- Audit: ffprobe on all 34 clips -> exist, named `<3char>-<romaji>.m4a` (invariant 2), aac / mono / 24 kHz,
+  duration 0.57-0.94 s (shortest = the punctual h6h-gyuQ). No silent/failed synth.
+- `python3 scripts/generate_seed_sql.py --check` -> exit 0 ("102 words, 306 presentations, 55 pairings [17 A/V/I
+  expansion live, 4 HAPTIC expansion dark, 8 mixed], 51 trials, 36 thesis users, 1080 answers, 1080 ratings").
+- DB reloaded; `SELECT`: trials_scored=47, trials_total=51, expansion_trials=17, haptic_trials=0,
+  expansion_null_correct=17.
+- `./mvnw test` -> 98 tests, 0 failures, 0 errors.
+- Live (booted on 8081): register 201 -> start session 201 -> walked 47 scored rounds to `completed:true`;
+  expansion word `urouro` (id 98, VISUAL, round 53) served live; `GET /stimuli/audio/v13h-urouro.m4a` -> 200
+  audio/mp4 9984 bytes, ffprobe aac/mono/24 kHz/0.808 s (auditory a10k-batabata + interoceptive i13h-guruguru also
+  200 audio/mp4); `GET /api/game/me/ratable-words` totalElements=86 with expansion words present; `GET
+  /api/leaderboard` 200, thesis_p excluded, our session bestSessionAnswered=47.
+
+Result:
+The 17 A/V/I expansion pairs serve live in Meaning Match (30 -> 47 scored rounds; ratable pool 60 -> 86); the 4
+HAPTIC pairs remain dark with a test asserting exactly that; audio plays via the API path. Zero DTO/endpoint shape
+changes. Clean api tree except the generated seed + tests + docs; commits are Nils's.
+
+Commit:
+Not committed (Nils's). Proposed single commit (api):
+"NIL-60: bring A/V/I expansion pairs live (17 trials, 30->47 scored rounds); keep HAPTIC dark".
+(web dist/stimuli/audio is gitignored; the 34-clip copy is a runtime media step, not a commit.)
+
+Blocker:
+None. Riders: (a) HAPTIC-floor go-live (H1/H4/H5/H6 + the reused-VISUAL H2/H3) rides NIL-41/42's Touch floor;
+(b) NIL-85 sampling design consumes the enlarged pool (next session); (c) the dist copy is interim until the next
+vite build regenerates dist/stimuli from source.
+
+Next single task:
+NIL-85: sampling design over the enlarged 47-round pool.

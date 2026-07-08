@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /**
  * The Rating Lab pool endpoint, played entirely through the real HTTP flow
  * against the seeded, condition-free trials (M2 word grain, ADR-0). Every
- * session serves the same 30 scored trials; answering a scored round makes both
+ * session serves the same 47 scored trials; answering a scored round makes both
  * members of its pair ratable, practice words never persist an answer, rated
  * words drop out, and the pool is scoped per user. The M2 grain-heal regression
  * (Test E) proves that answering the same words again under a different script
@@ -41,9 +41,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class RatableWordsHttpTests {
 
-    // The seed has 30 scored trials covering words 1-60, both members of every
-    // pair distinct, so a completed session makes exactly 60 words ratable.
-    private static final int SCORED_WORDS = 60;
+    // The seed has 47 scored trials (30 thesis + 17 A/V/I expansion), covering 86
+    // distinct words, so a completed session makes exactly that many words ratable.
+    // Derived from the live scored trials (expectedScoredWordIds) so it tracks the
+    // seed rather than a frozen literal.
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,10 +69,10 @@ class RatableWordsHttpTests {
         // The whole pool (paged past the size-50 cap): both members of every
         // answered scored pair, each word exactly once, practice never present.
         List<Map<String, Object>> entries = collectAllPoolEntries(token);
-        assertEquals(SCORED_WORDS, poolTotal(token, "?size=50"),
+        assertEquals(expectedScoredIds.size(), poolTotal(token, "?size=50"),
                 "both members of every answered scored round, deduplicated to word grain");
         Set<Long> returnedIds = idsOf(entries);
-        assertEquals(SCORED_WORDS, returnedIds.size(), "no word appears twice");
+        assertEquals(expectedScoredIds.size(), returnedIds.size(), "no word appears twice");
         assertEquals(expectedScoredIds, returnedIds);
         for (Long practiceId : practiceIds) {
             assertFalse(returnedIds.contains(practiceId),
@@ -97,11 +98,11 @@ class RatableWordsHttpTests {
         List<Long> secondOrder = orderedIdsOf(collectAllPoolEntries(token));
         assertEquals(firstOrder, secondOrder);
 
-        // Rating one word removes it from the pool and leaves the rest (60 -> 59).
+        // Rating one word removes it from the pool and leaves the rest (n -> n-1).
         Long ratedId = firstOrder.get(0);
         rate(token, ratedId, 6);
 
-        assertEquals(SCORED_WORDS - 1, poolTotal(token, "?size=50"));
+        assertEquals(expectedScoredIds.size() - 1, poolTotal(token, "?size=50"));
         assertFalse(idsOf(collectAllPoolEntries(token)).contains(ratedId),
                 "a rated word must drop out of the pool");
     }
@@ -111,9 +112,10 @@ class RatableWordsHttpTests {
         String suffix = Long.toString(System.nanoTime());
         String firstToken = registerAndGetToken("ratable_owner_" + suffix);
 
+        int scoredWords = expectedScoredWordIds().size();
         String sessionUuid = startSession(firstToken, ConditionName.CONDITION_1_SOKUON, false);
         playSessionToCompletion(firstToken, sessionUuid);
-        assertEquals(SCORED_WORDS, poolTotal(firstToken, "?size=50"));
+        assertEquals(scoredWords, poolTotal(firstToken, "?size=50"));
 
         // A second user who has answered nothing sees an empty pool -- never the
         // first user's words.
@@ -128,7 +130,7 @@ class RatableWordsHttpTests {
         // the first user's pool.
         Long someWordId = expectedScoredWordIds().iterator().next();
         rate(secondToken, someWordId, 3);
-        assertEquals(SCORED_WORDS, poolTotal(firstToken, "?size=50"),
+        assertEquals(scoredWords, poolTotal(firstToken, "?size=50"),
                 "another user's rating must not shrink this user's pool");
     }
 
@@ -146,14 +148,16 @@ class RatableWordsHttpTests {
         String sessionUuid = startSession(token, ConditionName.CONDITION_1_SOKUON, false);
         playSessionToCompletion(token, sessionUuid);
 
-        // page/size are honoured; totalPages reflects the full 60-word pool.
+        // page/size are honoured; with size=1, totalPages == totalElements == the
+        // full scored-word pool.
+        int scoredWords = expectedScoredWordIds().size();
         mockMvc.perform(get("/api/game/me/ratable-words?page=0&size=1")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.entries.length()").value(1))
                 .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.totalElements").value(SCORED_WORDS))
-                .andExpect(jsonPath("$.totalPages").value(SCORED_WORDS));
+                .andExpect(jsonPath("$.totalElements").value(scoredWords))
+                .andExpect(jsonPath("$.totalPages").value(scoredWords));
 
         // A negative page clamps to 0 and an oversized size clamps to the 50 cap,
         // exactly like /me/ratings.
@@ -166,7 +170,7 @@ class RatableWordsHttpTests {
 
     @Test
     void crossConditionReplayHealsToOneRowPerWord() throws Exception {
-        // M2 grain-heal (ADR-0): the same 30 scored trials are served in every
+        // M2 grain-heal (ADR-0): the same 47 scored trials are served in every
         // script condition. A user who answers them under CONDITION_1_SOKUON and
         // then again under CONDITION_2_SOKUON has answered each word twice through
         // two different presentations -- yet, because the pool is keyed by word,
@@ -175,9 +179,10 @@ class RatableWordsHttpTests {
         String suffix = Long.toString(System.nanoTime());
         String token = registerAndGetToken("ratable_heal_" + suffix);
 
+        int scoredWords = expectedScoredWordIds().size();
         String firstSession = startSession(token, ConditionName.CONDITION_1_SOKUON, false);
         playSessionToCompletion(token, firstSession);
-        assertEquals(SCORED_WORDS, poolTotal(token, "?size=50"));
+        assertEquals(scoredWords, poolTotal(token, "?size=50"));
 
         String secondSession = startSession(token, ConditionName.CONDITION_2_SOKUON, false);
         playSessionToCompletion(token, secondSession);
@@ -185,11 +190,11 @@ class RatableWordsHttpTests {
         // Still one row per word after the cross-condition replay.
         List<Map<String, Object>> entries = collectAllPoolEntries(token);
         Set<Long> returnedIds = idsOf(entries);
-        assertEquals(SCORED_WORDS, poolTotal(token, "?size=50"),
+        assertEquals(scoredWords, poolTotal(token, "?size=50"),
                 "cross-condition double-offer must be closed by word grain");
-        assertEquals(SCORED_WORDS, returnedIds.size(), "every word appears exactly once");
+        assertEquals(scoredWords, returnedIds.size(), "every word appears exactly once");
         assertEquals(expectedScoredWordIds(), returnedIds);
-        assertTrue(returnedIds.size() <= SCORED_WORDS, "distinct count never grows past the 60 seeded words");
+        assertTrue(returnedIds.size() <= scoredWords, "distinct count never grows past the seeded scored words");
     }
 
     // --- helpers -----------------------------------------------------------
@@ -224,7 +229,7 @@ class RatableWordsHttpTests {
                 .toList();
     }
 
-    // Reads the entire pool across pages (the 60-word pool exceeds the size-50
+    // Reads the entire pool across pages (the scored-word pool exceeds the size-50
     // cap), preserving server order.
     private List<Map<String, Object>> collectAllPoolEntries(String token) throws Exception {
         List<Map<String, Object>> all = new ArrayList<>();
@@ -281,9 +286,9 @@ class RatableWordsHttpTests {
     // Answers whatever the session serves (always the left card; correctness is
     // irrelevant to pool membership) until the completion sentinel, so practice
     // ordering is respected and player_answers rows are created through the real
-    // flow. 30 scored + up to 2 practice rounds, so 40 iterations is ample.
+    // flow. 47 scored + up to 2 practice rounds, so 60 iterations is ample.
     private void playSessionToCompletion(String token, String sessionUuid) throws Exception {
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 60; i++) {
             String roundJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                     .andExpect(status().isOk())

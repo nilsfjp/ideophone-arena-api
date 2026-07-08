@@ -33,9 +33,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * Practice-round flow against the regenerated WORD-grain seed. The game is
- * condition-free, so every session serves the same 30 scored trials (ids 1-30)
- * and, with the practice flag, the first two seeded practice trials
- * (31=p0 auditory, 32=p1 visual) first. Sessions are created through the
+ * condition-free, so every session serves the same 47 scored trials (30 thesis +
+ * 17 A/V/I expansion) and, with the practice flag, the first two seeded practice
+ * trials (31=p0 auditory, 32=p1 visual) first. Sessions are created through the
  * repository with a known seed so the derived order is deterministic; no Trial
  * or Word fixtures are ever created (every trial is served by every session and
  * needs its seeded presentations).
@@ -102,7 +102,7 @@ class PracticeRoundHttpTests {
                     "practice answers must not complete the session");
         }
 
-        // All 30 scored rounds follow; answering them counts and the session
+        // All scored rounds follow; answering them counts and the session
         // completes on the final scored answer even though practice ran first.
         Map<Long, Long> targetByTrialId = new HashMap<>();
         for (DerivedRound derived : derivedScored) {
@@ -115,10 +115,10 @@ class PracticeRoundHttpTests {
             submitAnswer(token, sessionUuid, roundId, targetByTrialId.get(roundId));
         }
 
-        assertEquals(30L, playerAnswerRepository.countBySessionId(session.getId()),
-                "exactly the 30 scored answers must be persisted");
+        assertEquals((long) scored.size(), playerAnswerRepository.countBySessionId(session.getId()),
+                "exactly the scored answers must be persisted");
         assertNotNull(gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getCompletedAt(),
-                "the 30 scored answers must complete the session regardless of practice rounds");
+                "the scored answers must complete the session regardless of practice rounds");
     }
 
     @Test

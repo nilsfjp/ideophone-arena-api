@@ -216,10 +216,10 @@ CREATE TABLE ratings (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Reference data + trial content generated from src/main/resources/condition-*-choosing-sokuon.csv.
--- NIL-86: 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv) seeded as dark
--- inventory -- words/presentations/pairings but no trials, so they serve in zero live pools
--- until their TTS audio lands. Every jpn stimulus is ja-JP-Wavenet-B TTS; per-stimulus
--- provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).
+-- NIL-86 seeded 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv). NIL-60 flips the
+-- 17 A/V/I pairs live (trials seeded, NULL correct_word_id -- no thesis target); the 4 HAPTIC pairs
+-- stay dark (no served mode until the Touch floor, NIL-41/42). Every jpn stimulus is ja-JP-Wavenet-B
+-- TTS; per-stimulus provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).
 INSERT INTO languages (id, iso_code, name, family, player_note)
 VALUES
 (1, 'jpn', 'Japanese', 'Japonic', NULL);
@@ -731,7 +731,24 @@ VALUES
 (31, 'CHOOSING', 31, 61, NULL, 1),
 (32, 'CHOOSING', 32, 64, NULL, 1),
 (33, 'CHOOSING', 33, 66, NULL, 1),
-(34, 'CHOOSING', 34, 67, NULL, 1);
+(34, 'CHOOSING', 34, 67, NULL, 1),
+(35, 'CHOOSING', 35, NULL, NULL, 0),
+(36, 'CHOOSING', 36, NULL, NULL, 0),
+(37, 'CHOOSING', 37, NULL, NULL, 0),
+(38, 'CHOOSING', 38, NULL, NULL, 0),
+(39, 'CHOOSING', 39, NULL, NULL, 0),
+(40, 'CHOOSING', 40, NULL, NULL, 0),
+(45, 'CHOOSING', 45, NULL, NULL, 0),
+(46, 'CHOOSING', 46, NULL, NULL, 0),
+(47, 'CHOOSING', 47, NULL, NULL, 0),
+(48, 'CHOOSING', 48, NULL, NULL, 0),
+(49, 'CHOOSING', 49, NULL, NULL, 0),
+(50, 'CHOOSING', 50, NULL, NULL, 0),
+(51, 'CHOOSING', 51, NULL, NULL, 0),
+(52, 'CHOOSING', 52, NULL, NULL, 0),
+(53, 'CHOOSING', 53, NULL, NULL, 0),
+(54, 'CHOOSING', 54, NULL, NULL, 0),
+(55, 'CHOOSING', 55, NULL, NULL, 0);
 
 -- Dev-only admin account (id 1). Throwaway password; see docs/demo-runbook.md,
 -- "Creating an admin". Followed by the NIL-54 thesis cohort (thesis_p01..thesis_p36,

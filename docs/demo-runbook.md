@@ -259,7 +259,8 @@ curl -i -X POST http://localhost:8081/api/game/sessions \
 
 The first two next-round responses carry `practice: true` and p-prefix stimuli
 (for example `/stimuli/audio/p0h-sotto.m4a`). Practice answers return feedback with `practice: true` but keep
-`totalAnswered`/`totalCorrect` at 0 and create no `player_answers` rows; the scored 30 rounds follow unchanged.
+`totalAnswered`/`totalCorrect` at 0 and create no `player_answers` rows; the scored 47 rounds (30 thesis + 17
+A/V/I expansion, NIL-60) follow unchanged.
 
 Practice audio proof:
 

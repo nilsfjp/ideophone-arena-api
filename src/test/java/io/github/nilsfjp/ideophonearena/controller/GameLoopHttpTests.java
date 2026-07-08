@@ -227,9 +227,10 @@ class GameLoopHttpTests {
     }
 
     @Test
-    void seedDataContainsThirtyScoredConditionFreeTrials() {
-        assertEquals(30L, trialRepository.countByPracticeFalse(),
-                "seed must expose exactly 30 scored (condition-free) trials served to every session");
+    void seedDataContainsFortySevenScoredConditionFreeTrials() {
+        assertEquals(47L, trialRepository.countByPracticeFalse(),
+                "seed must expose exactly 47 scored (condition-free) trials served to every session "
+                        + "(30 thesis + 17 A/V/I expansion; the 4 HAPTIC expansion pairs stay dark)");
     }
 
     @Test
@@ -302,13 +303,13 @@ class GameLoopHttpTests {
                 .getContentAsString();
         String sessionUuid = JsonPath.read(sessionJson, "$.sessionUuid");
 
-        // Play the whole condition-free session (30 scored rounds) to completion,
+        // Play the whole condition-free session (47 scored rounds) to completion,
         // answering each round with its own left choice. Remember the first
         // answered round so we can prove a replay is rejected after completion.
         Long firstRoundId = null;
         Long firstSelectedId = null;
         String completionJson = null;
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 60; i++) {
             String roundJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                     .andExpect(status().isOk())

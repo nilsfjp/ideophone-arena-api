@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -26,10 +27,11 @@ import org.junit.jupiter.api.Test;
  * Guards the experiment invariants of the M2 word-grain seed: word identity is
  * an entity (68 thesis/practice + 34 expansion = 102 words) with its script
  * manipulations split into presentations (306), the condition dimension collapses
- * into 34 thesis trials, and the thesis backfill and per-word audio (invariant 2)
- * are correct. NIL-86 adds 21 expansion pairings as dark inventory (55 pairings,
- * still 34 trials -- expansion pairs carry no trial). Parses the generated SQL
- * directly so the schema owner (generate_seed_sql.py) stays the source of truth.
+ * into the scored+practice trials, and the thesis backfill and per-word audio
+ * (invariant 2) are correct. NIL-86 added 21 expansion pairings as dark inventory
+ * (55 pairings); NIL-60 flips the 17 A/V/I pairs live (51 trials = 30 thesis + 17
+ * A/V/I expansion + 4 practice) while the 4 HAPTIC pairs stay dark. Parses the
+ * generated SQL directly so the schema owner (generate_seed_sql.py) stays the truth.
  */
 class IdeophoneSeedIntegrityTests {
 
@@ -245,59 +247,68 @@ class IdeophoneSeedIntegrityTests {
         }
     }
 
-    // The dark mechanism (ADR-3): the 21 expansion pairings are inventory with NO
-    // trial, so trial-driven round generation never reaches them, and none of the 34
-    // new expansion words is ever a trial target. (Reused thesis words in mixed pairs
-    // stay served by their own thesis pairings -- that is expected, not a leak.)
+    // NIL-60 go-live: the 17 A/V/I expansion pairings now emit trials and serve in the
+    // live pool; only the 4 HAPTIC expansion pairings stay dark (ADR-3: a pairing without
+    // a trial is unserved -- HAPTIC has no served mode until the Touch floor, NIL-41/42).
+    // The served pool must therefore contain every A/V/I expansion pairing and zero HAPTIC.
     @Test
-    void expansionPairingsAreDarkWithNoTrials() {
-        Set<Long> expansionPairingIds = pairings.stream()
-                .filter(p -> "EXPANSION".equals(p.source()))
-                .map(PairingRow::id).collect(Collectors.toSet());
-        assertEquals(21, expansionPairingIds.size());
-        for (TrialRow trial : trials) {
-            assertFalse(expansionPairingIds.contains(trial.pairingId()),
-                    "trial " + trial.id() + " must not reference a dark expansion pairing");
+    void hapticExpansionStaysDarkWhileAviExpansionServes() {
+        Map<Long, PairingRow> pairingsById = new HashMap<>();
+        for (PairingRow pairing : pairings) {
+            pairingsById.put(pairing.id(), pairing);
+        }
+        Set<Long> trialPairingIds = trials.stream().map(TrialRow::pairingId).collect(Collectors.toSet());
+
+        List<PairingRow> expansion = pairings.stream()
+                .filter(p -> "EXPANSION".equals(p.source())).toList();
+        List<PairingRow> avi = expansion.stream()
+                .filter(p -> !"HAPTIC".equals(p.modality())).toList();
+        List<PairingRow> haptic = expansion.stream()
+                .filter(p -> "HAPTIC".equals(p.modality())).toList();
+        assertEquals(17, avi.size(), "6 AUDITORY + 6 VISUAL + 5 INTEROCEPTIVE expansion pairs go live");
+        assertEquals(4, haptic.size(), "4 HAPTIC expansion pairs stay dark");
+
+        for (PairingRow pairing : avi) {
+            assertTrue(trialPairingIds.contains(pairing.id()),
+                    "A/V/I expansion pairing " + pairing.pairCode() + " must serve a trial");
+        }
+        for (PairingRow pairing : haptic) {
+            assertFalse(trialPairingIds.contains(pairing.id()),
+                    "HAPTIC expansion pairing " + pairing.pairCode() + " must stay dark (no trial)");
         }
 
-        Set<Long> thesisWordIds = new HashSet<>();
-        for (PairingRow pairing : pairings) {
-            if ("THESIS".equals(pairing.source())) {
-                thesisWordIds.add(pairing.wordAId());
-                thesisWordIds.add(pairing.wordBId());
-            }
+        // No trial serves a HAPTIC pairing or one of the 8 dark HAPTIC words.
+        Set<Long> hapticWordIds = new HashSet<>();
+        for (PairingRow pairing : haptic) {
+            hapticWordIds.add(pairing.wordAId());
+            hapticWordIds.add(pairing.wordBId());
         }
-        Set<Long> darkWordIds = new HashSet<>();
-        for (PairingRow pairing : pairings) {
-            if ("EXPANSION".equals(pairing.source())) {
-                if (!thesisWordIds.contains(pairing.wordAId())) {
-                    darkWordIds.add(pairing.wordAId());
-                }
-                if (!thesisWordIds.contains(pairing.wordBId())) {
-                    darkWordIds.add(pairing.wordBId());
-                }
-            }
-        }
-        assertEquals(34, darkWordIds.size(), "34 newly minted expansion words are dark");
+        assertEquals(8, hapticWordIds.size(), "8 HAPTIC expansion words stay dark");
         for (TrialRow trial : trials) {
-            assertFalse(darkWordIds.contains(trial.correctWordId()),
-                    "trial " + trial.id() + " must not serve a dark expansion word");
+            PairingRow pairing = pairingsById.get(trial.pairingId());
+            assertFalse("HAPTIC".equals(pairing.modality()),
+                    "trial " + trial.id() + " must not serve a HAPTIC pairing");
+            assertFalse(hapticWordIds.contains(pairing.wordAId()) || hapticWordIds.contains(pairing.wordBId()),
+                    "trial " + trial.id() + " must not serve a dark HAPTIC word");
         }
     }
 
     @Test
-    void trialsCollapseToThirtyFourWithFourPractice() {
-        assertEquals(34, trials.size());
-        assertEquals(30, trials.stream().filter(t -> !t.practice()).count());
+    void trialsAreFortySevenScoredPlusFourPractice() {
+        assertEquals(51, trials.size());
+        assertEquals(47, trials.stream().filter(t -> !t.practice()).count(),
+                "30 thesis + 17 A/V/I expansion scored trials");
         assertEquals(4, trials.stream().filter(TrialRow::practice).count());
         for (TrialRow trial : trials) {
             assertEquals("CHOOSING", trial.roundType(), "M2 seeds CHOOSING trials only");
         }
     }
 
-    // M2 invariant: every trial maps to a pairing whose two real word members
-    // include the trial's correct word, and word_a id < word_b id (the
-    // shuffle-order invariant that "pair second = higher word id" = word_b).
+    // M2 invariant: every trial maps to a pairing whose two real word members are
+    // same-modality contrastive, and word_a id < word_b id (the shuffle-order
+    // invariant that "pair second = higher word id" = word_b). Thesis/practice trials
+    // document their fixed thesis target in correct_word_id (a pairing member); NIL-60
+    // expansion trials have no thesis target, so correct_word_id is NULL (shuffle-derived).
     @Test
     void everyTrialMapsToAPairingWhoseMembersIncludeItsCorrectWord() {
         Map<Long, PairingRow> pairingsById = new HashMap<>();
@@ -311,9 +322,14 @@ class IdeophoneSeedIntegrityTests {
             assertNotNull(wordsById.get(pairing.wordBId()), "pairing " + pairing.pairCode() + " word_b missing");
             assertTrue(pairing.wordAId() < pairing.wordBId(),
                     "pairing " + pairing.pairCode() + " word_a id must be < word_b id (shuffle-order invariant)");
-            assertNotNull(trial.correctWordId(), "trial " + trial.id() + " must have a correct word");
-            assertTrue(trial.correctWordId() == pairing.wordAId() || trial.correctWordId() == pairing.wordBId(),
-                    "trial " + trial.id() + " correct word must be a member of its pairing");
+            if ("EXPANSION".equals(pairing.source())) {
+                assertNull(trial.correctWordId(),
+                        "expansion trial " + trial.id() + " has no thesis target (target is shuffle-derived)");
+            } else {
+                assertNotNull(trial.correctWordId(), "trial " + trial.id() + " must have a correct word");
+                assertTrue(trial.correctWordId() == pairing.wordAId() || trial.correctWordId() == pairing.wordBId(),
+                        "trial " + trial.id() + " correct word must be a member of its pairing");
+            }
             // Same-modality contrastive members (invariant 4).
             assertEquals(wordsById.get(pairing.wordAId()).modality(), wordsById.get(pairing.wordBId()).modality(),
                     "pairing " + pairing.pairCode() + " members must share modality");
