@@ -418,10 +418,10 @@ Register rules:
 |---|---|---|
 | `choosing` (incl. Script Lab) | **Meaning Match** | `MEASURE · GUESSING` |
 | `rating` | **Rating Lab** | `MEASURE · REFLECTION` |
-| `ladder` | **Perception Ladder** (floors: Sound → Sight → Inner States → Touch) | `JOURNEY · PERCEPTION` |
+| `ladder` | **Perception Ladder** (floors: Sound → Sight → Touch → Inner states — hierarchy order per SPEC-view-designs V1; doc-fixed 2026-07-07, NIL-84) | `JOURNEY · PERCEPTION` |
 | `production` (free-form) | **Word Mint** | `MEASURE · PRODUCTION` |
 | `template` (phoneme-shape) | **Word Anatomy** | `STRUCTURE · PATTERNS` |
-| `xl` (cross-linguistic) | **Lingua Quest / Polyglot Challenge** — ⚠ *unresolved pair; final pick deferred to XL build kickoff* | `TRANSFER · 5 LANGUAGES` |
+| `xl` (cross-linguistic) | **Polyglot Challenge** (adopted, Nils 2026-07-07; doc-fixed at NIL-84) | `TRANSFER · 5 LANGUAGES` |
 
 **Rename sweep (chrome literals only — rides NIL-65):** `modes.ts` titles/descriptions; `Instructions.tsx` h1 "Choosing Task Instructions" → "Meaning Match Instructions"; `RatingLab.tsx` empty/done-state literals "…play the Choosing Task…" → "…play Meaning Match…". Verified: the term does not occur in `experimentText.ts`; the sweep touches zero frozen strings. Thesis-register docs keep "Choosing Task" as the measure's name — player name ≠ measure name, and the chip bridges them.
 
@@ -576,7 +576,7 @@ NIL-65 landed with as-built deviations (recorded verbatim in the web repo's `doc
 
 **Going-forward rule (the point of the pass):** the utility surface uses only vanilla Tailwind/shadcn names — anything project-specific lives in tokens.css values and `@layer app`. No custom classifier config, no bridge omissions, no preflight opt-outs.
 
-Doc note: token names throughout this spec were updated to the H2 map on 2026-07-04; the §4.4 candidate table, §13 ledger, and §14 log are decision/measurement records whose original `--accent-*` names are preserved in git history and the progress log. For the record (not deviations): the three unimported `@fontsource` packages (kaisei-decol, klee-one, rocknroll-one) remain installed; removal stays pre-approved and may ride NIL-69. `Toaster` and `Dialog` are themed and staged but untriggered.
+Doc note: token names throughout this spec were updated to the H2 map on 2026-07-04; the §4.4 candidate table, §13 ledger, and §14 log are decision/measurement records whose original `--accent-*` names are preserved in git history and the progress log. For the record (not deviations): the three unimported `@fontsource` packages (kaisei-decol, klee-one, rocknroll-one) **have been removed** (verified absent from package.json 2026-07-07, NIL-84 — the earlier "remain installed" note was stale). `Toaster` and `Dialog` are themed and staged but untriggered; NIL-84 rulings: Dialog's first consumer is 28B's floor intro (V9), sonner keeps its stage with a hard deadline — wire toasts at W30 deploy polish or cut the dep (SPEC-essence-review D3).
 
 
 

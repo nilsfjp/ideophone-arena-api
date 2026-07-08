@@ -237,7 +237,7 @@ This section + `landing-composition.html` + the NIL-64 `landing-hero.html` recor
 |---|---|---|---|
 | D1 | Observatory public exposure (public deep-link vs auth-with-return) | Nils | NIL-43 build session plan |
 | D2 | ~~Word Mint §9 frozen strings + chip wordings / score-band one-liners / button label~~ **RESOLVED 2026-07-06 as NIL-83 — frozen strings in §8** | Nils | done |
-| D3 | XL mode name (Lingua Quest / Polyglot Challenge) | Nils | XL kickoff (standing deferral, untouched here) |
+| D3 | ~~XL mode name (Lingua Quest / Polyglot Challenge)~~ **RESOLVED 2026-07-07: Polyglot Challenge** (Nils; ledger row closed at NIL-84 doc-fix pass) | Nils | done |
 | D4 | Thesis PDF linked from the landing provenance line | Nils | NIL-43 build session plan |
 | D5 | Which E1 export (dumbbell vs scatter) fills strip 6, and its crop | NIL-81 session output; Nils's eye | when NIL-81 lands |
 | D6 | Floor replayability after clear (assumed yes) | 28A session (mechanics) | 28A plan |
