@@ -58,3 +58,39 @@ Pool B adds: Visual 21 · Auditory 12 · Interoceptive 10 · Haptic 6.
 ### Next
 
 Nils's sign-off pass over the workbook → pairing-pipeline data model (input to F4's architecture review) → SketchEngine/jpTenTen script-frequency lookup for the pool-B shortlist → the audio-recording decision (its own gate, as committed).
+
+## 2026-07-02 — OSF-archive mining (NIL-53/56 extension, Fable 5)
+
+_Five archives extracted and mined (see INDEX.md for provenance/shape); puneslie2024.zip md5-verified as a byte-identical mirror of `triangulating_iconicity/` and skipped. **17 statistical tests run this session** (Spearman / Wilcoxon / Mann-Whitney), exploratory and uncorrected — treat p in [.01, .05] as suggestive, and every n ≤ 30 result as descriptive._
+
+### 1. The divergence framing survives at scale — but the copy needs a correction
+
+mclean2023 (304 items = 101 ideophones + 203 prosaic controls, guessing with constructed max-distance foils + iconicity ratings):
+
+- guess ~ rating: **rho = +.435 all items** (p = 1.9e-15, n = 304); **+.651 within ideophones** (n = 101); +.397 within controls (n = 203). The two measures are correlated, not orthogonal.
+- The real dissociation is *what they detect*: guessing does *not* separate ideophones from prosaic words (medians .567 vs .576, p = .94, Cliff's δ = −.01) while ratings separate them massively (.433 vs .298, p = 1.3e-12, **δ = +.50**).
+
+**Consequence:** the thesis-internal rho = +.16 (n = 30, pair-level) fed landing copy like "nearly orthogonal" — retire that phrasing (small-n estimate, contradicted at scale and at a different unit of analysis). The stronger, scale-backed line: **"ratings know an ideophone when they hear one; guessing doesn't — the two measures see different things."** Rating Lab's license is upgraded, not weakened.
+
+### 2. Guessability is a property of the form–meaning *pairing*, not the word
+
+mclean2023 tested two forms under two concepts each: iraira .70 vs .39 guessability; nebaneba .38 vs .20. Same word, different meaning prompt, wildly different guessability. This is direct external validation of our per-pair (`arena_rounds`-level) difficulty model — and an argument that NIL-57's D4 "shared per-item live-stats source" should be keyed on **pairing/round, not word** (escalated to the ledger).
+
+### 3. New external anchors (mclean2023 guess/rating, canonical romaji join, final sokuon = `q`)
+
+9 thesis words: zokuzoku .77/.55 · dokidoki .74/.86 · bonyari .70/.44 · iraira .70/.42 + .39/.49 · shitoshito .57/.32 · hokkori .57/.24 · zuruzuru .57/.29 · nikoniko .50/.40 · sukkiri .40/.31. Approved-batch words: **fuwafuwa .70/.62, nebaneba .38/.33 + .20/.30** (feeds the H-floor priors as *weak* secondary anchors — constructed-foil regime, English online raters; not our task).
+
+### 4. Foil distance does not predict difficulty for real contrastive pairs (the NIL-58 result)
+
+- Applied the SPEC-free-form-entry §5 feature-distance formula between the two words of each thesis pair: **distance ~ accuracy rho = −.155, p = .41, n = 30** — null, trending the *wrong* direction. Mora-Levenshtein is degenerate on invariant-4 content: **28/30 pairs sit at maximum distance** (real same-modality contrastive pairs are nearly always fully segmentally distinct). The most form-similar pair in the set (doshidoshi/gishigishi) was among the *easiest* (83.3%).
+- Where form distance demonstrably *does* move accuracy is the constructed/degraded regime: dingemanse2016 (203 items, 82 listeners, within-category meaning foils, 4 audio versions) — original ≈ full resynthesis ≈ **57%** (55% excl. Sound), phones-only **51.8%** / prosody-only **52.2%** (each n.s. vs chance for cross-modal items); Sound-domain items survive degradation (phones-only β = .46, p < .001; prosody-only β = .29, p = .04); category effect Sound ≫ rest (β = .31); no category × version interaction. Segments and prosody are *jointly* necessary — a caution for any purely segmental distance metric.
+- mclean2023 ships the enabling artifact: `substitutions.csv`, **105 phoneme-pair featural distances** (incl. palatalized + geminate units) used to build maximal-distance foils — this is IcoTools `foiler`'s logic as data.
+
+**Consequence for NIL-58:** the foil-distance engine's dial governs **constructed-foil content (deferred Foil Arena) and degraded-stimulus designs, not core invariant-4 pairs**. Keep computing and recording pair distance (cheap, from the shared `PhonologyService`) as a *validation covariate*; do not use it as an ordering/difficulty principle for real pairs. The four-floor spec's framing (H-floor as a clean prediction test) is exactly right; the phoneme-shape spec's within-tier ordering claim was not, and has been revised. Note the scope: this validates nothing about the *production scorer* (scoring a player's invention against a target is a different use than predicting 2AFC difficulty between two real words).
+
+### 5. Learnability (lockwood 2016) — real effect, weak per-item measure, no fifth mode
+
+- Condition effect replicated exactly from raw data: real-meaning pairs remembered **86.7%** vs opposite-meaning **71.3%** (Wilcoxon p = 4e-5, **Cohen's dz = 1.07**, n = 29 participants). Iconicity aids learning; clash actively hurts. Post-test 2AFC 73.0%.
+- **Provenance find:** Punselie's Collabra guessability *is* the lockwood post-test, per item (max abs diff 0.0000 over 38 items) — same 29 participants. The 38 Collabra anchors and any lockwood-derived learnability numbers are not independent measurements.
+- Per-item signal is thin: each item lived in one condition arm (n = 19 per arm); learn-acc ~ guessability rho = +.30 (real arm) / −.25 (opposite arm), both n.s.; learn-acc ~ rating +.43 (p = .067) / +.01. Directionally coherent with iconic bootstrapping, nowhere near load-bearing.
+- **Fifth-mode verdict: no.** The clean paradigm requires teaching players *false* meanings (opposite arm) — unacceptable for a public research-honest app — and a real-only variant loses the contrast that makes the measure informative (ceiling at .87). Not a free-form-entry mechanic either (that would measure the generation effect, not iconicity). Filed as a designed-but-deferred mode in `game-mode-roadmap.md`; explicitly **not** a build-one candidate. Salvage: the clash-is-costly finding (incl. its P3/LPC ERP signature) is citable research-flavor copy for feedback/landing ("your brain fights a word whose sound points the wrong way"), and the 37-row opposite-gloss sheet is a vetted antonymic-contrast reference for pairing work.
