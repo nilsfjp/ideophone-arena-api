@@ -26,6 +26,7 @@ import io.github.nilsfjp.ideophonearena.model.Presentation;
 import io.github.nilsfjp.ideophonearena.model.Trial;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
+import io.github.nilsfjp.ideophonearena.model.enums.GameMode;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
@@ -82,11 +83,13 @@ class GameServiceTests {
                 presentationRepository,
                 playerAnswerRepository,
                 new GameMapper(),
-                roundShuffler
+                roundShuffler,
+                new LadderFloors(),
+                roundSources()
         );
         user = new AppUser(USERNAME, "player@example.test", "hash");
         setId(user, 10L);
-        session = new GameSession(user, ConditionName.CONDITION_1_SOKUON, 1);
+        session = new GameSession(user, ConditionName.CONDITION_1_SOKUON, false, 0L);
         setId(session, 20L);
         session.setSessionUuid(SESSION_UUID);
 
@@ -94,45 +97,71 @@ class GameServiceTests {
         when(appUserRepository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
     }
 
-    @Test
-    void startSessionRejectsUnsupportedDifficulty() {
-        StartSessionRequest request = new StartSessionRequest();
-        request.setConditionName(ConditionName.CONDITION_1_SOKUON);
-        request.setDifficultyLevel(2);
-
-        BadRequestException exception = assertThrows(
-                BadRequestException.class,
-                () -> gameService.startSession(userDetails, request)
+    private List<RoundSource> roundSources() {
+        return List.of(
+                new ChoosingRoundSource(trialRepository, roundShuffler),
+                new LadderRoundSource(trialRepository, roundShuffler, new LadderFloors())
         );
-
-        assertEquals("Only difficulty level 1 is supported for the current demo", exception.getMessage());
-        verify(gameSessionRepository, never()).save(org.mockito.ArgumentMatchers.any(GameSession.class));
     }
 
     @Test
     void startSessionRejectsUnsupportedCondition() {
+        // All ConditionName values are supported after the TEXT_ONLY cut (A1), so a
+        // service-level "unsupported condition" is only reachable if the allowlist and the
+        // enum ever diverge; the unknown-string case is an HTTP deserialization concern
+        // (see GameLoopHttpTests). Here we assert the ladder-mode guardrails instead.
         StartSessionRequest request = new StartSessionRequest();
-        request.setConditionName(ConditionName.TEXT_ONLY);
-        request.setDifficultyLevel(1);
+        request.setConditionName(ConditionName.CONDITION_1_SOKUON);
+        request.setGameMode(GameMode.LADDER);
 
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> gameService.startSession(userDetails, request)
         );
 
-        assertEquals(
-                "Unsupported conditionName: TEXT_ONLY. Supported values are CONDITION_1_SOKUON, CONDITION_2_SOKUON, CONDITION_3_SOKUON",
-                exception.getMessage()
+        assertEquals("A ladder session requires a floor", exception.getMessage());
+        verify(gameSessionRepository, never()).save(any(GameSession.class));
+    }
+
+    @Test
+    void startSessionRejectsFloorForChoosingMode() {
+        StartSessionRequest request = new StartSessionRequest();
+        request.setConditionName(ConditionName.CONDITION_1_SOKUON);
+        request.setFloor(Modality.AUDITORY);
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> gameService.startSession(userDetails, request)
         );
-        verify(gameSessionRepository, never()).save(org.mockito.ArgumentMatchers.any(GameSession.class));
+
+        assertEquals("A floor is only valid for a ladder session", exception.getMessage());
+        verify(gameSessionRepository, never()).save(any(GameSession.class));
+    }
+
+    @Test
+    void startSessionRejectsLadderWithPractice() {
+        StartSessionRequest request = new StartSessionRequest();
+        request.setConditionName(ConditionName.CONDITION_1_SOKUON);
+        request.setGameMode(GameMode.LADDER);
+        request.setFloor(Modality.AUDITORY);
+        request.setIncludePractice(true);
+        when(trialRepository.findScoredTrialsByPairCodes(any())).thenReturn(List.of(
+                trial(1L, word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> gameService.startSession(userDetails, request)
+        );
+
+        assertEquals("Ladder sessions do not include practice rounds", exception.getMessage());
+        verify(gameSessionRepository, never()).save(any(GameSession.class));
     }
 
     @Test
     void startSessionCreatesSupportedConditionWithoutDefaulting() {
         StartSessionRequest request = new StartSessionRequest();
         request.setConditionName(ConditionName.CONDITION_2_SOKUON);
-        request.setDifficultyLevel(1);
-        when(gameSessionRepository.save(org.mockito.ArgumentMatchers.any(GameSession.class)))
+        when(gameSessionRepository.save(any(GameSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         gameService.startSession(userDetails, request);
@@ -141,7 +170,30 @@ class GameServiceTests {
         verify(gameSessionRepository).save(sessionCaptor.capture());
         GameSession savedSession = sessionCaptor.getValue();
         assertEquals(ConditionName.CONDITION_2_SOKUON, savedSession.getConditionName());
+        assertEquals(GameMode.CHOOSING, savedSession.getGameMode());
+        assertNull(savedSession.getLadderFloor());
+        // difficulty is the locked invariant (A3): never client-supplied, always 1.
         assertEquals(1, savedSession.getDifficultyLevel());
+    }
+
+    @Test
+    void startSessionCreatesLadderSessionForServedFloor() {
+        StartSessionRequest request = new StartSessionRequest();
+        request.setConditionName(ConditionName.CONDITION_1_SOKUON);
+        request.setGameMode(GameMode.LADDER);
+        request.setFloor(Modality.AUDITORY);
+        when(trialRepository.findScoredTrialsByPairCodes(any())).thenReturn(List.of(
+                trial(1L, word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
+        when(gameSessionRepository.save(any(GameSession.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        gameService.startSession(userDetails, request);
+
+        ArgumentCaptor<GameSession> sessionCaptor = ArgumentCaptor.forClass(GameSession.class);
+        verify(gameSessionRepository).save(sessionCaptor.capture());
+        GameSession savedSession = sessionCaptor.getValue();
+        assertEquals(GameMode.LADDER, savedSession.getGameMode());
+        assertEquals(Modality.AUDITORY, savedSession.getLadderFloor());
     }
 
     @Test
@@ -157,7 +209,7 @@ class GameServiceTests {
                 word(4L, "ばちゃばちゃ", "batyabatya", "splashing", "audio/a1k-batyabatya.m4a")
         );
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
-        when(trialRepository.findByPracticeFalseOrderByIdAsc()).thenReturn(List.of(answeredTrial, nextTrial));
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(List.of(answeredTrial, nextTrial));
         when(playerAnswerRepository.findAnsweredTrialIdsBySessionId(20L)).thenReturn(List.of(100L));
         stubPresentations(nextTrial);
 
@@ -200,7 +252,7 @@ class GameServiceTests {
                 derivedOrder.get(1).getTrial().getId()
         );
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
-        when(trialRepository.findByPracticeFalseOrderByIdAsc()).thenReturn(trials);
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(trials);
         when(playerAnswerRepository.findAnsweredTrialIdsBySessionId(20L)).thenReturn(answeredFirstTwo);
         stubPresentations(firstTrial, secondTrial, thirdTrial);
 
@@ -213,7 +265,9 @@ class GameServiceTests {
                 presentationRepository,
                 playerAnswerRepository,
                 new GameMapper(),
-                new RoundShuffler()
+                new RoundShuffler(),
+                new LadderFloors(),
+                roundSources()
         );
 
         RoundResponse response = restartedService.getNextRound(userDetails, SESSION_UUID);
@@ -233,7 +287,7 @@ class GameServiceTests {
                 word(2L, "かたかた", "katakata", "clattering, rattling", "audio/a0k-katakata.m4a")
         );
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
-        when(trialRepository.findByPracticeFalseOrderByIdAsc()).thenReturn(List.of(answeredTrial));
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(List.of(answeredTrial));
         when(playerAnswerRepository.findAnsweredTrialIdsBySessionId(20L)).thenReturn(List.of(100L));
 
         RoundResponse response = gameService.getNextRound(userDetails, SESSION_UUID);
@@ -242,7 +296,6 @@ class GameServiceTests {
         assertEquals("Game session is complete", response.getMessage());
         assertEquals(SESSION_UUID, response.getSessionUuid());
         assertEquals(ConditionName.CONDITION_1_SOKUON, response.getConditionName());
-        assertEquals(1, response.getDifficultyLevel());
         assertNull(session.getCompletedAt());
     }
 
@@ -251,7 +304,13 @@ class GameServiceTests {
         Word left = word(1L, "ごそごそ", "gosogoso", "with a rustling sound", "audio/a0h-gosogoso.m4a");
         Word right = word(2L, "かたかた", "katakata", "clattering, rattling", "audio/a0k-katakata.m4a");
         Trial trial = trial(100L, left, right);
-        DerivedRound derived = derivedScoredRound(List.of(trial), 100L);
+        // A second scored trial keeps the session incomplete after one answer (completion
+        // is now the mode's scored-round count, not a separate counter).
+        Trial filler = trial(101L,
+                word(3L, "しとしと", "sitosito", "drizzling", "audio/a1h-sitosito.m4a"),
+                word(4L, "ばちゃばちゃ", "batyabatya", "splashing", "audio/a1k-batyabatya.m4a"));
+        List<Trial> scored = List.of(trial, filler);
+        DerivedRound derived = derivedScoredRound(scored, 100L);
         SubmitAnswerRequest request = new SubmitAnswerRequest();
         request.setRoundId(100L);
         request.setSelectedIdeophoneId(derived.getTarget().getId());
@@ -259,10 +318,9 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(trialRepository.findByIdWithPairingWords(100L)).thenReturn(Optional.of(trial));
         when(playerAnswerRepository.existsBySessionIdAndTrialId(20L, 100L)).thenReturn(false);
-        stubScoredTrials(List.of(trial));
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(scored);
         when(playerAnswerRepository.countBySessionId(20L)).thenReturn(1L);
         when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(1L);
-        when(trialRepository.countByPracticeFalse()).thenReturn(60L);
 
         AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
 
@@ -300,10 +358,9 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(trialRepository.findByIdWithPairingWords(100L)).thenReturn(Optional.of(trial));
         when(playerAnswerRepository.existsBySessionIdAndTrialId(20L, 100L)).thenReturn(false);
-        stubScoredTrials(List.of(trial));
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(List.of(trial));
         when(playerAnswerRepository.countBySessionId(20L)).thenReturn(1L);
         when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(0L);
-        when(trialRepository.countByPracticeFalse()).thenReturn(60L);
 
         AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
 
@@ -329,15 +386,15 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(trialRepository.findByIdWithPairingWords(100L)).thenReturn(Optional.of(trial));
         when(playerAnswerRepository.existsBySessionIdAndTrialId(20L, 100L)).thenReturn(false);
-        stubScoredTrials(List.of(trial));
-        when(playerAnswerRepository.countBySessionId(20L)).thenReturn(60L);
-        when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(45L);
-        when(trialRepository.countByPracticeFalse()).thenReturn(60L);
+        // One scored trial, one answer -> the session completes.
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(List.of(trial));
+        when(playerAnswerRepository.countBySessionId(20L)).thenReturn(1L);
+        when(playerAnswerRepository.countBySessionIdAndCorrectTrue(20L)).thenReturn(1L);
 
         AnswerResultResponse response = gameService.submitAnswer(userDetails, SESSION_UUID, request);
 
-        assertEquals(60L, response.getTotalAnswered());
-        assertEquals(45L, response.getTotalCorrect());
+        assertEquals(1L, response.getTotalAnswered());
+        assertEquals(1L, response.getTotalCorrect());
         assertTrue(session.getCompletedAt() != null);
     }
 
@@ -353,8 +410,8 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(trialRepository.findByIdWithPairingWords(100L)).thenReturn(Optional.of(trial));
         when(playerAnswerRepository.existsBySessionIdAndTrialId(20L, 100L)).thenReturn(false);
-        stubScoredTrials(List.of(trial));
-        when(playerAnswerRepository.saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class)))
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(List.of(trial));
+        when(playerAnswerRepository.saveAndFlush(any(PlayerAnswer.class)))
                 .thenThrow(new DataIntegrityViolationException("duplicate key"));
 
         assertThrows(ConflictException.class, () -> gameService.submitAnswer(userDetails, SESSION_UUID, request));
@@ -375,10 +432,10 @@ class GameServiceTests {
         when(gameSessionRepository.findBySessionUuid(SESSION_UUID)).thenReturn(Optional.of(session));
         when(trialRepository.findByIdWithPairingWords(100L)).thenReturn(Optional.of(trial));
         when(playerAnswerRepository.existsBySessionIdAndTrialId(20L, 100L)).thenReturn(false);
-        stubScoredTrials(List.of(trial));
+        when(trialRepository.findScoredChoosingTrials()).thenReturn(List.of(trial));
 
         assertThrows(BadRequestException.class, () -> gameService.submitAnswer(userDetails, SESSION_UUID, request));
-        verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
+        verify(playerAnswerRepository, never()).saveAndFlush(any(PlayerAnswer.class));
     }
 
     @Test
@@ -402,7 +459,7 @@ class GameServiceTests {
 
         assertEquals(900L, response.getRoundId());
         assertTrue(response.isPractice());
-        verify(trialRepository, never()).findByPracticeFalseOrderByIdAsc();
+        verify(trialRepository, never()).findScoredChoosingTrials();
     }
 
     @Test
@@ -432,7 +489,7 @@ class GameServiceTests {
         assertEquals(0L, response.getTotalCorrect());
         assertEquals(1, session.getPracticeAnswered());
         assertNull(session.getCompletedAt());
-        verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
+        verify(playerAnswerRepository, never()).saveAndFlush(any(PlayerAnswer.class));
     }
 
     @Test
@@ -466,11 +523,7 @@ class GameServiceTests {
         repeated.setResponseTimeMs(500);
         assertThrows(ConflictException.class,
                 () -> gameService.submitAnswer(userDetails, SESSION_UUID, repeated));
-        verify(playerAnswerRepository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any(PlayerAnswer.class));
-    }
-
-    private void stubScoredTrials(List<Trial> trials) {
-        when(trialRepository.findByPracticeFalseOrderByIdAsc()).thenReturn(trials);
+        verify(playerAnswerRepository, never()).saveAndFlush(any(PlayerAnswer.class));
     }
 
     // The served round needs a presentation per word for the mapper; the map is

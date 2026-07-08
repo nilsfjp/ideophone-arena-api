@@ -38,13 +38,29 @@ class ThesisCohortExclusionTests {
     void liveGuessAggregateExcludesExactlyTheThesisAndBrowserLoopCohorts() {
         Map<Long, Long> rider = guessMap(playerAnswerRepository.aggregateGuessStatsByWord());
         Map<Long, Long> thesis = guessMap(playerAnswerRepository.aggregateThesisGuessStatsByWord());
+        // raw stays the full non-practice universe so LADDER-target words (e.g. the HAPTIC
+        // floor, which has no CHOOSING answers at all) remain in raw.keySet() and under
+        // scrutiny -- narrowing raw to CHOOSING would drop them and blind this check to a
+        // research aggregate that ever starts leaking LADDER answers for a ladder-only word.
+        // The research aggregates (rider, thesis) are CHOOSING-only by design (NIL-41);
+        // LADDER answers are a deliberately-excluded category, so the partition carries an
+        // explicit ladder (non-CHOOSING) term. browserLoop is scoped to CHOOSING so every
+        // cell is disjoint (a browser_loop LADDER answer belongs to ladder, not browserLoop):
+        //   raw = rider (CHOOSING non-cohort) + thesis (CHOOSING thesis)
+        //       + browserLoop (CHOOSING browser_loop) + ladder (all non-CHOOSING).
         Map<Long, Long> raw = countByWord(
                 "select word.id, count(answer.id) from PlayerAnswer answer join answer.targetWord word "
                         + "where answer.trial.practice = false group by word.id");
         Map<Long, Long> browserLoop = countByWord(
                 "select word.id, count(answer.id) from PlayerAnswer answer join answer.targetWord word "
                         + "where answer.trial.practice = false "
+                        + "and answer.session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING "
                         + "and answer.session.user.username like 'browser!_loop!_%' escape '!' group by word.id");
+        Map<Long, Long> ladder = countByWord(
+                "select word.id, count(answer.id) from PlayerAnswer answer join answer.targetWord word "
+                        + "where answer.trial.practice = false "
+                        + "and answer.session.gameMode <> io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING "
+                        + "group by word.id");
 
         // The thesis cohort must actually be present (guards against the seed not
         // being loaded, which would make the identity vacuously true).
@@ -54,9 +70,11 @@ class ThesisCohortExclusionTests {
         for (Long wordId : raw.keySet()) {
             long expected = rider.getOrDefault(wordId, 0L)
                     + thesis.getOrDefault(wordId, 0L)
-                    + browserLoop.getOrDefault(wordId, 0L);
+                    + browserLoop.getOrDefault(wordId, 0L)
+                    + ladder.getOrDefault(wordId, 0L);
             assertEquals(raw.get(wordId), expected,
-                    "Rider A guess count for word " + wordId + " must exclude exactly thesis + browser_loop");
+                    "guess count for word " + wordId + " must partition into CHOOSING rider + thesis "
+                            + "+ browser_loop plus a deliberately-excluded non-CHOOSING ladder term");
         }
         // And the live aggregate never carries a thesis-only word.
         for (Long wordId : thesis.keySet()) {

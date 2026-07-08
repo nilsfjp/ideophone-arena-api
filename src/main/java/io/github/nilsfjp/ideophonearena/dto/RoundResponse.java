@@ -10,7 +10,6 @@ public class RoundResponse {
     private Long roundId;
     private String targetTranslation;
     private ConditionName conditionName;
-    private int difficultyLevel;
     private boolean practice;
     private boolean targetMeaningListedFirst;
     private TranslationResponse translations;
@@ -19,15 +18,15 @@ public class RoundResponse {
     private TimingResponse timing;
 
     public RoundResponse(String sessionUuid, Long roundId, String targetTranslation, ConditionName conditionName,
-            int difficultyLevel, boolean practice, boolean targetMeaningListedFirst,
+            boolean practice, boolean targetMeaningListedFirst,
             TranslationResponse translations, IdeophoneChoiceResponse left,
             IdeophoneChoiceResponse right, TimingResponse timing) {
-        this(false, null, sessionUuid, roundId, targetTranslation, conditionName, difficultyLevel, practice,
+        this(false, null, sessionUuid, roundId, targetTranslation, conditionName, practice,
                 targetMeaningListedFirst, translations, left, right, timing);
     }
 
     public RoundResponse(boolean completed, String message, String sessionUuid, Long roundId, String targetTranslation,
-            ConditionName conditionName, int difficultyLevel, boolean practice, boolean targetMeaningListedFirst,
+            ConditionName conditionName, boolean practice, boolean targetMeaningListedFirst,
             TranslationResponse translations, IdeophoneChoiceResponse left, IdeophoneChoiceResponse right,
             TimingResponse timing) {
         this.completed = completed;
@@ -36,7 +35,6 @@ public class RoundResponse {
         this.roundId = roundId;
         this.targetTranslation = targetTranslation;
         this.conditionName = conditionName;
-        this.difficultyLevel = difficultyLevel;
         this.practice = practice;
         this.targetMeaningListedFirst = targetMeaningListedFirst;
         this.translations = translations;
@@ -71,10 +69,6 @@ public class RoundResponse {
 
     public ConditionName getConditionName() {
         return conditionName;
-    }
-
-    public int getDifficultyLevel() {
-        return difficultyLevel;
     }
 
     public boolean isPractice() {

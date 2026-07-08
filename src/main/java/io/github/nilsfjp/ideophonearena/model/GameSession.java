@@ -1,6 +1,8 @@
 package io.github.nilsfjp.ideophonearena.model;
 
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
+import io.github.nilsfjp.ideophonearena.model.enums.GameMode;
+import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,12 +33,25 @@ public class GameSession {
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
 
+    // Locked experiment invariant: difficulty is fixed at 1 (no longer client-supplied,
+    // A3). The column stays so the frozen schema and thesis seed are untouched.
     @Column(name = "difficulty_level", nullable = false)
     private int difficultyLevel = 1;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "condition_name", nullable = false, length = 50)
-    private ConditionName conditionName = ConditionName.TEXT_ONLY;
+    private ConditionName conditionName;
+
+    // M1 (ADR-2): the session's play mode. Defaults to CHOOSING so legacy/core sessions
+    // are unchanged; LADDER sessions also carry a ladderFloor (the served Perception
+    // Ladder floor, a Modality). ladderFloor is null for every non-LADDER mode.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "game_mode", nullable = false, length = 30)
+    private GameMode gameMode = GameMode.CHOOSING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ladder_floor", length = 30)
+    private Modality ladderFloor;
 
     @Column(name = "include_practice", nullable = false)
     private boolean includePractice;
@@ -60,19 +75,17 @@ public class GameSession {
     protected GameSession() {
     }
 
-    public GameSession(AppUser user, ConditionName conditionName, int difficultyLevel) {
-        this(user, conditionName, difficultyLevel, false);
+    // CHOOSING (Meaning Match) session -- the common case.
+    public GameSession(AppUser user, ConditionName conditionName, boolean includePractice, long shuffleSeed) {
+        this(user, conditionName, GameMode.CHOOSING, null, includePractice, shuffleSeed);
     }
 
-    public GameSession(AppUser user, ConditionName conditionName, int difficultyLevel, boolean includePractice) {
-        this(user, conditionName, difficultyLevel, includePractice, 0L);
-    }
-
-    public GameSession(AppUser user, ConditionName conditionName, int difficultyLevel, boolean includePractice,
-            long shuffleSeed) {
+    public GameSession(AppUser user, ConditionName conditionName, GameMode gameMode, Modality ladderFloor,
+            boolean includePractice, long shuffleSeed) {
         this.user = user;
         this.conditionName = conditionName;
-        this.difficultyLevel = difficultyLevel;
+        this.gameMode = gameMode;
+        this.ladderFloor = ladderFloor;
         this.includePractice = includePractice;
         this.shuffleSeed = shuffleSeed;
     }
@@ -119,6 +132,22 @@ public class GameSession {
 
     public void setConditionName(ConditionName conditionName) {
         this.conditionName = conditionName;
+    }
+
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+
+    public void setGameMode(GameMode gameMode) {
+        this.gameMode = gameMode;
+    }
+
+    public Modality getLadderFloor() {
+        return ladderFloor;
+    }
+
+    public void setLadderFloor(Modality ladderFloor) {
+        this.ladderFloor = ladderFloor;
     }
 
     public boolean isIncludePractice() {

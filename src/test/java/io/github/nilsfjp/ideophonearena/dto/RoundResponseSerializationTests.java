@@ -25,8 +25,7 @@ class RoundResponseSerializationTests {
                 "left-romaji",
                 "audio/left.m4a",
                 "/stimuli/audio/left.m4a",
-                Modality.AUDITORY,
-                "HU"
+                Modality.AUDITORY
         );
         IdeophoneChoiceResponse right = new IdeophoneChoiceResponse(
                 2L,
@@ -36,15 +35,13 @@ class RoundResponseSerializationTests {
                 "right-romaji",
                 "audio/right.m4a",
                 "/stimuli/audio/right.m4a",
-                Modality.AUDITORY,
-                "KD"
+                Modality.AUDITORY
         );
         RoundResponse response = new RoundResponse(
                 "session-uuid",
                 10L,
                 "target meaning",
                 ConditionName.CONDITION_1_SOKUON,
-                1,
                 false,
                 true,
                 new TranslationResponse("target meaning", "distractor meaning"),
@@ -71,6 +68,10 @@ class RoundResponseSerializationTests {
         assertTrue(choiceProperties.contains("stimulusUrl"));
         assertTrue(choiceProperties.contains("displayForm"));
         assertTrue(choiceProperties.contains("canonicalForm"));
+        // A7: the script_code exposure (canonicalScript) is dropped from the choice DTO.
+        assertFalse(choiceProperties.contains("canonicalScript"));
+        // A3: difficultyLevel is dropped from the round DTO.
+        assertFalse(roundProperties.contains("difficultyLevel"));
         assertEquals("left-display", left.getDisplayForm());
         assertEquals("left-canonical", left.getCanonicalForm());
     }

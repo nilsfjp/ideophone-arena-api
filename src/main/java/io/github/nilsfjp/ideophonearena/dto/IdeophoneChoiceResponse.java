@@ -12,10 +12,9 @@ public class IdeophoneChoiceResponse {
     private String stimulusFile;
     private String stimulusUrl;
     private Modality modality;
-    private String canonicalScript;
 
     public IdeophoneChoiceResponse(Long ideophoneId, String kana, String displayForm, String canonicalForm,
-            String romaji, String stimulusFile, String stimulusUrl, Modality modality, String canonicalScript) {
+            String romaji, String stimulusFile, String stimulusUrl, Modality modality) {
         this.ideophoneId = ideophoneId;
         this.kana = kana;
         this.displayForm = displayForm;
@@ -24,7 +23,6 @@ public class IdeophoneChoiceResponse {
         this.stimulusFile = stimulusFile;
         this.stimulusUrl = stimulusUrl;
         this.modality = modality;
-        this.canonicalScript = canonicalScript;
     }
 
     public Long getIdeophoneId() {
@@ -57,9 +55,5 @@ public class IdeophoneChoiceResponse {
 
     public Modality getModality() {
         return modality;
-    }
-
-    public String getCanonicalScript() {
-        return canonicalScript;
     }
 }

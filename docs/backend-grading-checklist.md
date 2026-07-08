@@ -398,13 +398,10 @@ rg -n "@RestControllerAdvice|@ExceptionHandler|extends RuntimeException" src/mai
 - [x] Session start requires authenticated user.
 - [x] Session start accepts a request DTO.
 - [x] Session start requires `conditionName`.
-- [x] Session start requires `difficultyLevel`.
-- [x] Session start rejects unsupported difficulty values.
-- [x] Session start rejects unsupported condition names.
-- [x] Session start rejects `TEXT_ONLY` as an externally requested condition.
-- [x] For the current demo, `difficultyLevel: 1` is supported.
-- [x] For the current demo and Phase 2 Script Lab preparation, `CONDITION_1_SOKUON`, `CONDITION_2_SOKUON`, and `CONDITION_3_SOKUON` are supported at difficulty `1`.
-- [x] Seed data contains difficulty-1 rounds for all three externally supported sokuon conditions.
+- [x] Session start rejects unsupported condition names (unknown enum string -> `400`).
+- [x] `gameMode` is optional (default `CHOOSING`); `LADDER` requires a valid `floor` and forbids `includePractice`.
+- [x] For the current demo and Phase 2 Script Lab preparation, `CONDITION_1_SOKUON`, `CONDITION_2_SOKUON`, and `CONDITION_3_SOKUON` are supported.
+- [x] `difficultyLevel` is no longer a request/response field (A3); it is the locked invariant (column stays, always `1`).
 - [x] Session ownership is stored and enforced.
 
 Proof:
@@ -413,10 +410,18 @@ Proof:
 curl -i -X POST http://localhost:8081/api/game/sessions \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{"conditionName":"CONDITION_1_SOKUON","difficultyLevel":1}'
+  -d '{"conditionName":"CONDITION_1_SOKUON"}'
 ```
 
-2026-06-07 evidence: `GameController.startSession` is authenticated and accepts `@Valid StartSessionRequest`; `StartSessionRequest` requires `conditionName` and positive `difficultyLevel`; `GameService.startSession` stores the owner, requires difficulty `1`, and allowlists only `CONDITION_1_SOKUON`, `CONDITION_2_SOKUON`, and `CONDITION_3_SOKUON` for external session start. `GameLoopHttpTests` verifies missing `conditionName` returns `400`, missing `difficultyLevel` returns `400`, unsupported difficulty returns `400`, `TEXT_ONLY` returns `400`, all three supported sokuon conditions create sessions at difficulty `1`, all three can fetch a renderable first round, and seeded difficulty-1 rounds exist for all three supported sokuon conditions.
+2026-07-08 evidence (NIL-41, supersedes the 2026-06-07 note below): `StartSessionRequest` requires `conditionName`
+and carries optional `gameMode`/`floor` (no `difficultyLevel`). `GameService.startSession` stores the owner,
+allowlists only the three sokuon conditions, and branches per mode (LADDER requires a served floor, forbids
+practice; CHOOSING rejects a stray floor). `GameLoopHttpTests` verifies missing `conditionName` -> `400`, an unknown
+condition string -> `400`, and all three sokuon conditions create sessions and fetch a renderable first round (with
+no `difficultyLevel`/`canonicalScript` in the payload). `LadderHttpTests`/`GameServiceTests` cover the LADDER
+validation and floor-scoped serving.
+
+2026-06-07 evidence (superseded by A3/A1): `GameController.startSession` is authenticated and accepts `@Valid StartSessionRequest`; `StartSessionRequest` required `conditionName` and positive `difficultyLevel`; `GameService.startSession` stored the owner, required difficulty `1`, and allowlisted only `CONDITION_1_SOKUON`, `CONDITION_2_SOKUON`, and `CONDITION_3_SOKUON`. `GameLoopHttpTests` verified missing `conditionName` returned `400`, missing `difficultyLevel` returned `400`, unsupported difficulty returned `400`, `TEXT_ONLY` returned `400`, all three supported sokuon conditions created sessions at difficulty `1`, all three fetched a renderable first round, and seeded difficulty-1 rounds existed for those conditions.
 
 ### Round retrieval
 

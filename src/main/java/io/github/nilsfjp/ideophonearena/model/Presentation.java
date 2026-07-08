@@ -16,7 +16,8 @@ import jakarta.persistence.UniqueConstraint;
 
 // The script manipulation, and nothing else (ADR-0): one row per word x scripted
 // condition. display_form is the exact kana string the player sees (invariant 1);
-// script_code is the legacy 2-letter provenance code exposed as canonicalScript.
+// script_code is the legacy 2-letter provenance code (no longer exposed to the
+// frontend as of A7/NIL-41; the column stays).
 @Entity
 @Table(
         name = "presentations",

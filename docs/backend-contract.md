@@ -17,15 +17,17 @@ http://localhost:8081
 
 ## Supported session-start settings
 
-`conditionName` and `difficultyLevel` are required in `POST /api/game/sessions`. `includePractice` is optional
-(default `false`); when `true`, the session serves 2 practice rounds before round 1 (see "Practice rounds").
+`conditionName` is required in `POST /api/game/sessions`. `includePractice` is optional (default `false`); when
+`true`, a CHOOSING session serves 2 practice rounds before round 1 (see "Practice rounds"). `gameMode` is optional
+(default `CHOOSING`); `LADDER` additionally requires a `floor` and forbids `includePractice` (see "Perception Ladder").
+`difficultyLevel` is no longer a request or response field (A3): it is the locked experiment invariant, always `1`,
+and the column stays server-side only.
 
-The stable demo path uses:
+The stable Meaning Match demo path uses:
 
 ```json
 {
-  "conditionName": "CONDITION_1_SOKUON",
-  "difficultyLevel": 1
+  "conditionName": "CONDITION_1_SOKUON"
 }
 ```
 
@@ -37,10 +39,8 @@ CONDITION_2_SOKUON
 CONDITION_3_SOKUON
 ```
 
-Do not expose arbitrary difficulty selection. Difficulty values above `1` are not seeded and must not be selectable in the frontend.
-The backend rejects missing or unsupported `difficultyLevel` values with `400 Bad Request`; only `1` is supported.
-The backend rejects missing or unsupported `conditionName` values with `400 Bad Request`. `TEXT_ONLY` is an internal enum
-value used by tests and legacy data paths, not an externally supported session-start condition.
+The backend rejects a missing or unsupported `conditionName` with `400 Bad Request` (an unknown enum string is a `400`
+on request-body parsing). `TEXT_ONLY` was removed from the enum (A1) and is no longer accepted.
 
 ## Script Lab frontend assumptions
 
@@ -59,13 +59,11 @@ For Script Lab, keep sending:
 
 ```json
 {
-  "conditionName": "CONDITION_1_SOKUON",
-  "difficultyLevel": 1
+  "conditionName": "CONDITION_1_SOKUON"
 }
 ```
 
-with `conditionName` swapped to one of the three supported values. Do not send `TEXT_ONLY`. Do not expose difficulty
-selection; `difficultyLevel` remains locked to `1`.
+with `conditionName` swapped to one of the three supported values.
 
 Round responses for all three supported conditions expose the rendering fields the frontend currently needs:
 
@@ -77,7 +75,6 @@ roundId
 targetTranslation
 prompt
 conditionName
-difficultyLevel
 practice
 translations.target
 translations.other
@@ -89,7 +86,6 @@ left.romaji
 left.stimulusFile
 left.stimulusUrl
 left.modality
-left.canonicalScript
 right.ideophoneId
 right.kana
 right.displayForm
@@ -98,7 +94,6 @@ right.romaji
 right.stimulusFile
 right.stimulusUrl
 right.modality
-right.canonicalScript
 timing.fixationMs
 timing.preChoiceDelayMs
 ```
@@ -106,7 +101,7 @@ timing.preChoiceDelayMs
 Script display is data, not code (2026-06-10):
 
 - `displayForm` is the exact kana string the player sees before answering. The frontend must render it verbatim and
-  must not derive the display script from `canonicalScript` or any other field.
+  must not derive the display script at runtime.
 - `canonicalForm` is the word in its canonical script, intended for the feedback reveal.
 - `stimulusUrl` now points at one shared per-word audio file, `/stimuli/audio/<modality><pairing><h|k>-<romaji>.m4a`
   (for example `/stimuli/audio/a0h-gosogoso.m4a`). All three condition rows of a word reference the same audio file;
@@ -115,10 +110,11 @@ Script display is data, not code (2026-06-10):
 - `kana` keeps the dictionary lemma spelling. For the two long-vowel words (`zyaazyaa`, `kyaakyaa`) the stimuli render
   the chouonpu forms, so `displayForm`/`canonicalForm` use the long-vowel mark while `kana` does not. Render
   `displayForm`, not `kana`.
-- `canonicalScript` remains the raw two-letter filename code (pos3+pos4, e.g. `HK`) for this session; the frontend
-  migrates off it next session.
+- `canonicalScript` was dropped from the round choice DTO (A7, NIL-41). The `presentations.script_code` column stays,
+  but it is no longer exposed to the frontend.
 
-No new backend `GameMode` or `PresentationMode` field exists yet.
+The session carries a `gameMode` (M1): `CHOOSING` (default, Meaning Match) or `LADDER` (Perception Ladder). The session
+response echoes `gameMode` and, for a ladder session, `floor`.
 
 ## Authentication
 
@@ -147,12 +143,12 @@ Request body (`includePractice` optional, default `false`):
 ```json
 {
   "conditionName": "CONDITION_1_SOKUON",
-  "difficultyLevel": 1,
   "includePractice": false
 }
 ```
 
-The session response echoes `includePractice`.
+The session response echoes `conditionName`, `gameMode`, `floor` (null for CHOOSING), `includePractice`, and
+`startedAt`.
 
 Get next round:
 
@@ -264,7 +260,6 @@ Response body:
   "message": "Game session is complete",
   "sessionUuid": "8e3c93f3-9ea4-4257-abd4-a9fded012ea6",
   "conditionName": "CONDITION_1_SOKUON",
-  "difficultyLevel": 1,
   "roundId": null,
   "targetTranslation": null,
   "prompt": null,
@@ -277,6 +272,66 @@ Response body:
 
 Normal round responses from the same endpoint include `completed: false` and the usual round fields. This makes
 completion easy to distinguish from a real `404 Not Found`, such as an invalid session UUID.
+
+## Perception Ladder (2026-07-08, NIL-41)
+
+The Perception Ladder is a difficulty-tiered climb (mode `LADDER`) through the modality floors. Its trials are
+ordinary Choosing rounds — same round DTO and same answer flow as Meaning Match — served floor-scoped in a fixed
+easy→hard order.
+
+Floors overview (authenticated):
+
+```text
+GET /api/game/ladder/floors
+```
+
+Returns `floors[]` in climb/hierarchy order — Sound → Sight → Touch → Inner states. Array position is the floor
+ordinal (the client derives `FLOOR n` from it; ordinals are never persisted). Each floor:
+
+```json
+{
+  "modality": "HAPTIC",
+  "pairCount": 4,
+  "finalRungPairCode": "exp-h6",
+  "cleared": true,
+  "bestCorrect": 3,
+  "bestAnswered": 4,
+  "pairs": [
+    { "pairCode": "exp-h1", "finalRung": false },
+    { "pairCode": "exp-h5", "finalRung": false },
+    { "pairCode": "exp-h4", "finalRung": false },
+    { "pairCode": "exp-h6", "finalRung": true }
+  ]
+}
+```
+
+- `pairs` is the floor's easy→hard order (thesis-facts §8 for A/V/I, four-floor spec §4 for Touch). No per-pair
+  difficulty number is exposed pre-answer — the position is the difficulty signal. The last rung is `finalRung: true`
+  (`a5` / `v4` / `exp-h6` / `i2`, the at-or-below-chance pairs).
+- Floor presence is data-driven: a floor appears only once its pairs have served trials. Today the ladder has four
+  floors (Sound 10, Sight 10, Touch 4, Inner states 10).
+- `cleared` / `bestCorrect` / `bestAnswered` are the caller's own: `cleared` is true iff the caller has a completed
+  LADDER session for that floor, with the best session's score (`bestCorrect`/`bestAnswered` are null when uncleared).
+  Sequential unlock is not enforced server-side (the client states `AFTER FLOOR n` in words); replaying a cleared floor
+  is allowed (best score stands).
+
+Floor-scoped session start reuses `POST /api/game/sessions` (no new endpoint):
+
+```json
+{
+  "conditionName": "CONDITION_1_SOKUON",
+  "gameMode": "LADDER",
+  "floor": "AUDITORY"
+}
+```
+
+`floor` is a modality (`AUDITORY` / `VISUAL` / `HAPTIC` / `INTEROCEPTIVE`), required for `LADDER` and rejected for
+`CHOOSING`. A ladder session forbids `includePractice`. The session then serves only that floor's pairs in map order;
+completion is the floor's pair count. LADDER sessions never enter the Meaning Match leaderboard, live divergence, or
+position bias; they do appear in admin `byModality` (a `HAPTIC` row surfaces organically).
+
+The Touch floor's Haptic pairs are served **only** through the ladder — Meaning Match (`CHOOSING`) still serves exactly
+the 47 A/V/I trials, so its frozen shuffle is unchanged.
 
 ## Progress display
 
@@ -640,6 +695,23 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
 
 ## Changelog
 
+- 2026-07-08: **Perception Ladder backend + M1 game_mode + essence-review riders (NIL-41)** — new game mode `LADDER`
+  and the floors API. `game_sessions` gains `game_mode` (NOT NULL DEFAULT `CHOOSING`) and `ladder_floor` (nullable
+  modality). `GET /api/game/ladder/floors` returns the floors in hierarchy order (Sound → Sight → Touch → Inner
+  states) with each floor's easy→hard pairs, final-rung marker, and the caller's cleared/best-score progress; a
+  floor-scoped session starts via `POST /api/game/sessions` with `gameMode:"LADDER"` + `floor`. Round serving now
+  dispatches per mode through a `RoundSource` seam (ADR-2); the ladder derives side/identity from the reserved
+  `shuffleSeed + 4` stream over map-ordered floor trials (the `+0`/`+1` streams are byte-identical). **Touch floor is
+  live** as a 4-pair floor (`exp-h1/h5/h4/h6`, final rung `exp-h6`): the 4 HAPTIC trials are seeded but served **only**
+  through the ladder, so Meaning Match (`CHOOSING`) still serves exactly the frozen 47 A/V/I trials (55 non-practice
+  trials total, 47 non-HAPTIC). LADDER answers are kept out of the frozen CHOOSING aggregates (leaderboard, live
+  divergence, position bias) via a `gameMode = 'CHOOSING'` guard; admin `byModality` gains a `HAPTIC` row organically.
+  **Breaking (rides NIL-42 on the web side):** `difficultyLevel` is removed from `POST /api/game/sessions` request and
+  from the session/round responses (A3; the column + locked invariant stay); `canonicalScript` is removed from the
+  round choice DTO (A7; the `script_code` column stays); `TEXT_ONLY` is removed from `ConditionName` (A1) and the dead
+  `ScriptType` enum is deleted (A2). New guard (A10): registration rejects reserved username prefixes `thesis_p*` /
+  `browser_loop_*` with `400` and a contract-style `validationErrors.username` (case-insensitive to match the read-side
+  LIKE fences). Suite 98 -> 113 (0 failures); floors/ladder walk/leaderboard-exclusion proven live.
 - 2026-07-08: **A/V/I expansion go-live (NIL-60)** — the 17 A/V/I expansion pairs seeded dark by NIL-86 now emit
   trials and serve in the live pool: **scored rounds per session 30 -> 47** (30 thesis + 17 A/V/I expansion),
   total trials 34 -> 51, and the ratable-word pool a completed session yields grows 60 -> 86 (the 26 new A/V/I

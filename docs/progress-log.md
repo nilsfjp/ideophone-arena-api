@@ -1158,3 +1158,74 @@ vite build regenerates dist/stimuli from source.
 
 Next single task:
 NIL-85: sampling design over the enlarged 47-round pool.
+
+## 2026-07-08 ("NIL-41: Perception Ladder backend — M1 game_mode + floors API + Touch go-live + essence riders")
+
+Session goal:
+Build the Perception Ladder floor model and serving (mode LADDER): a floors endpoint in hierarchy order (Sound ->
+Sight -> Touch -> Inner states) with each floor's easy->hard pairs, and floor-scoped session start. Land M1
+(game_sessions.game_mode) which this build rides. Ship the Touch floor live as a 4-pair floor (user decision at
+plan time). Fold in essence-review riders A1/A2/A3/A7/A10.
+
+Changed:
+- scripts/generate_seed_sql.py: dropped the dark-filter so all 21 expansion pairs emit trials (4 HAPTIC now live,
+  ids 41-44, `correct_word_id = NULL`); added `game_mode VARCHAR(30) NOT NULL DEFAULT 'CHOOSING'` + `ladder_floor
+  VARCHAR(30) NULL` to the game_sessions DDL and dropped the `condition_name DEFAULT 'TEXT_ONLY'` (A1). Regenerated
+  the seed; `--check` byte-stable except the DDL + 4 trial rows + a comment.
+- Enums: added `GameMode {CHOOSING,LADDER,TEMPLATE_READING,CROSS_LINGUISTIC}` (M1); deleted dead `ScriptType` (A2);
+  removed `ConditionName.TEXT_ONLY` (A1).
+- `GameSession`: `+gameMode` (default CHOOSING) `+ladderFloor` (Modality); dropped the TEXT_ONLY field default; ctors
+  no longer take `difficultyLevel` (field stays =1, the locked invariant).
+- DTOs: `StartSessionRequest` `+gameMode +floor -difficultyLevel` (A3); `GameSessionResponse`/`RoundResponse`
+  `-difficultyLevel` (A3), session response `+gameMode +floor`; `IdeophoneChoiceResponse` `-canonicalScript` (A7);
+  new `LadderFloorsResponse`/`LadderFloorResponse`/`LadderPairResponse`.
+- Serving seam (ADR-2): `RoundSource` + `ChoosingRoundSource` + `LadderRoundSource` dispatched by
+  `Map<GameMode,RoundSource>`; `RoundShuffler.deriveLadderRounds` on the reserved `+4` stream (no shuffle);
+  `LadderFloors` holds the code map (thesis-facts §8 for A/V/I, four-floor §4 for Touch). `GameService` routes
+  getNextRound/submitAnswer/completion through the seam; per-mode validation (LADDER needs a served floor, forbids
+  practice). `LadderService` + `GET /api/game/ladder/floors` (per-caller cleared/best-score).
+- Shuffle-contract guard: `TrialRepository.findScoredChoosingTrials()` excludes HAPTIC, so Meaning Match stays the
+  frozen 47-pool (both `GameService` and `ResearchService` position-bias consume it). New
+  `findScoredTrialsByPairCodes` for floor serving; `PlayerAnswerRepository.findCompletedLadderSessionScores` for
+  progress; `gameMode = 'CHOOSING'` guards added to `findLeaderboard` (x3), `findScoredForPositionBias`, and live
+  `aggregateGuessStatsByWord` so ladder answers stay out of the frozen aggregates (byModality left open -> HAPTIC
+  organic).
+- A10: `@NotReservedUsername` validator on `RegisterRequest.username` (trim + lowercase, rejects `thesis_p` /
+  `browser_loop_` -> 400 `validationErrors.username`).
+- Tests: refit the seed-integrity (invert HAPTIC-dark -> all-expansion-serve; 55 trials/51 scored), Game loop,
+  GameService (RoundSource seam ctor), RoundResponse serialization tests; added LadderFloors/LadderService/
+  RoundShuffler(+4)/LadderHttp/RegistrationHttp tests. Docs: backend-contract (new Perception Ladder section +
+  changelog; session-start/round-field lists trimmed).
+
+Proof:
+- `python3 scripts/generate_seed_sql.py --check` -> exit 0 ("... 55 pairings [17 A/V/I + 4 HAPTIC expansion, all
+  live] ... 55 trials ..."). DB re-init; `SELECT` trials_total=55, scored_choosing(non-HAPTIC)=47, haptic=4;
+  game_mode + ladder_floor columns present.
+- `./mvnw test` -> 113 tests, 0 failures, 0 errors.
+- Live (booted on 8081, pristine seed): `GET /api/game/ladder/floors` -> 4 floors in hierarchy order, within-floor
+  order = §8 (a9->a5 / v2->v4 / i3->i2), Touch pairCount=4 (exp-h1,exp-h5,exp-h4,exp-h6; finalRung exp-h6), no
+  difficulty numbers. Start LADDER+HAPTIC -> served the 4 Touch pairs in map order; `/stimuli/audio/h6h-gyuQ.m4a`
+  -> 200 audio/mp4; after completion HAPTIC cleared=true bestCorrect=3 bestAnswered=4. Meaning Match (CHOOSING)
+  still walked exactly 47 scored rounds to completion. Registration of `thesis_p37` -> 400.
+
+Result:
+Perception Ladder ships as a 4-floor climb (Sound 10 / Sight 10 / Touch 4 / Inner states 10) with a data-driven
+floors API and floor-scoped serving; M1 game_mode landed. Touch is live but served only through the ladder, so
+Meaning Match and its frozen shuffle are untouched. Five essence riders (A1/A2/A3/A7/A10) folded in. Clean api tree
+except the generated seed + code + tests + docs; commits are Nils's.
+
+Commit:
+Not committed (Nils's). Proposed single commit (api):
+"NIL-41: Perception Ladder backend (M1 game_mode + floors API + Touch floor live) + essence riders A1/A2/A3/A7/A10".
+(web dist/stimuli/audio already carries the 8 HAPTIC clips from NIL-86; no media step this session.)
+
+Blocker:
+None. Handoff to 28B/NIL-42 (frontend): floors-from-data verified; DTO shapes are floor {modality, pairs[],
+finalRungPairCode, pairCount, cleared, bestCorrect, bestAnswered} and session-start {gameMode:"LADDER", floor:MODALITY};
+replay allowed; sequential unlock is advisory (render AFTER FLOOR n, no server block); FINAL RUNG grammar must handle
+a 4-pair Touch floor; and the web sweep of the removed `difficultyLevel`/`canonicalScript` fields + the six README
+flags rides NIL-42.
+
+Next single task:
+28B/NIL-42: Perception Ladder frontend (floor chrome from the floors API) + the web `difficultyLevel`/`canonicalScript`
+sweep.

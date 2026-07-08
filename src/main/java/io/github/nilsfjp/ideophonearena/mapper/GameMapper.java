@@ -31,18 +31,18 @@ public class GameMapper {
     public GameSessionResponse toSessionResponse(GameSession session) {
         return new GameSessionResponse(
                 session.getSessionUuid(),
-                session.getDifficultyLevel(),
                 session.getConditionName(),
+                session.getGameMode(),
+                session.getLadderFloor(),
                 session.isIncludePractice(),
                 session.getStartedAt()
         );
     }
 
     // The served prompt, translations, and sides all come from the session's
-    // seed-derived presentation. Condition/difficulty are session facts (they
-    // left the trial in the ADR-3 collapse). Each card's display_form and the
-    // frozen 2-letter canonicalScript come from presentation(word, condition);
-    // everything else is a word-level fact.
+    // seed-derived presentation. Condition is a session fact (it left the trial in
+    // the ADR-3 collapse). Each card's display_form comes from
+    // presentation(word, condition); everything else is a word-level fact.
     public RoundResponse toRoundResponse(GameSession session, DerivedRound derivedRound,
             Map<Long, Presentation> presentationsByWordId) {
         Trial trial = derivedRound.getTrial();
@@ -51,7 +51,6 @@ public class GameMapper {
                 trial.getId(),
                 derivedRound.getTarget().getGloss(),
                 session.getConditionName(),
-                session.getDifficultyLevel(),
                 trial.isPractice(),
                 derivedRound.isTargetMeaningListedFirst(),
                 new TranslationResponse(derivedRound.getTarget().getGloss(), derivedRound.getOther().getGloss()),
@@ -63,7 +62,7 @@ public class GameMapper {
 
     public RoundResponse toCompletedRoundResponse(GameSession session, String message) {
         return new RoundResponse(true, message, session.getSessionUuid(), null, null,
-                session.getConditionName(), session.getDifficultyLevel(), false, false, null, null, null, null);
+                session.getConditionName(), false, false, null, null, null, null);
     }
 
     public AnswerResultResponse toAnswerResultResponse(DerivedRound derivedRound, Word selectedWord,
@@ -137,8 +136,8 @@ public class GameMapper {
 
     // The card renders word-level facts (kana, canonical form, romaji, audio,
     // modality) plus this session-condition's script manipulation: display_form
-    // (invariant 1, verbatim) and the frozen 2-letter script_code exposed as
-    // canonicalScript. The id keeps its frozen name ideophoneId (= the word id).
+    // (invariant 1, verbatim, from presentation(word, condition)). The id keeps its
+    // frozen name ideophoneId (= the word id).
     private IdeophoneChoiceResponse toIdeophoneResponse(Word word, Map<Long, Presentation> presentationsByWordId) {
         Presentation presentation = presentationsByWordId.get(word.getId());
         return new IdeophoneChoiceResponse(
@@ -149,8 +148,7 @@ public class GameMapper {
                 word.getRomaji(),
                 word.getStimulusFile(),
                 STIMULUS_URL_PREFIX + word.getStimulusFile(),
-                word.getModality(),
-                presentation.getScriptCode()
+                word.getModality()
         );
     }
 }

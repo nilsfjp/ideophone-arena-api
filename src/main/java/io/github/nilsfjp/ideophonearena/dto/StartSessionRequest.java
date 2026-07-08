@@ -1,27 +1,24 @@
 package io.github.nilsfjp.ideophonearena.dto;
 
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
+import io.github.nilsfjp.ideophonearena.model.enums.GameMode;
+import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 public class StartSessionRequest {
-
-    @NotNull
-    @Positive
-    private Integer difficultyLevel;
 
     @NotNull
     private ConditionName conditionName;
 
     private boolean includePractice;
 
-    public Integer getDifficultyLevel() {
-        return difficultyLevel;
-    }
+    // M1: optional play mode; absent means CHOOSING (the core Meaning Match loop).
+    private GameMode gameMode;
 
-    public void setDifficultyLevel(Integer difficultyLevel) {
-        this.difficultyLevel = difficultyLevel;
-    }
+    // Perception Ladder floor to serve (a Modality). Required iff gameMode == LADDER and
+    // forbidden otherwise -- validated in GameService. The ladder never overloads
+    // difficultyLevel (A3): floor selection is this explicit parameter.
+    private Modality floor;
 
     public ConditionName getConditionName() {
         return conditionName;
@@ -37,5 +34,21 @@ public class StartSessionRequest {
 
     public void setIncludePractice(boolean includePractice) {
         this.includePractice = includePractice;
+    }
+
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+
+    public void setGameMode(GameMode gameMode) {
+        this.gameMode = gameMode;
+    }
+
+    public Modality getFloor() {
+        return floor;
+    }
+
+    public void setFloor(Modality floor) {
+        this.floor = floor;
     }
 }

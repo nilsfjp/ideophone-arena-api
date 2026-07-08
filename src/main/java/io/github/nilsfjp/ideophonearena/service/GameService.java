@@ -18,12 +18,15 @@ import io.github.nilsfjp.ideophonearena.model.Presentation;
 import io.github.nilsfjp.ideophonearena.model.Trial;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
+import io.github.nilsfjp.ideophonearena.model.enums.GameMode;
+import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import io.github.nilsfjp.ideophonearena.repository.PresentationRepository;
 import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import java.security.SecureRandom;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class GameService {
 
-    private static final int SUPPORTED_DIFFICULTY_LEVEL = 1;
     private static final int PRACTICE_ROUNDS_PER_SESSION = 2;
     private static final Set<ConditionName> SUPPORTED_CONDITION_NAMES = EnumSet.of(
             ConditionName.CONDITION_1_SOKUON,
@@ -54,11 +56,14 @@ public class GameService {
     private final PlayerAnswerRepository playerAnswerRepository;
     private final GameMapper gameMapper;
     private final RoundShuffler roundShuffler;
+    private final LadderFloors ladderFloors;
+    private final Map<GameMode, RoundSource> roundSources;
     private final SecureRandom shuffleSeedSource = new SecureRandom();
 
     public GameService(AppUserRepository appUserRepository, GameSessionRepository gameSessionRepository,
             TrialRepository trialRepository, PresentationRepository presentationRepository,
-            PlayerAnswerRepository playerAnswerRepository, GameMapper gameMapper, RoundShuffler roundShuffler) {
+            PlayerAnswerRepository playerAnswerRepository, GameMapper gameMapper, RoundShuffler roundShuffler,
+            LadderFloors ladderFloors, List<RoundSource> roundSources) {
         this.appUserRepository = appUserRepository;
         this.gameSessionRepository = gameSessionRepository;
         this.trialRepository = trialRepository;
@@ -66,17 +71,24 @@ public class GameService {
         this.playerAnswerRepository = playerAnswerRepository;
         this.gameMapper = gameMapper;
         this.roundShuffler = roundShuffler;
+        this.ladderFloors = ladderFloors;
+        this.roundSources = new EnumMap<>(GameMode.class);
+        for (RoundSource roundSource : roundSources) {
+            this.roundSources.put(roundSource.mode(), roundSource);
+        }
     }
 
     @Transactional
     public GameSessionResponse startSession(UserDetails userDetails, StartSessionRequest request) {
         AppUser user = getCurrentUser(userDetails);
-        Integer difficultyLevel = request.getDifficultyLevel();
+        GameMode gameMode = request.getGameMode() == null ? GameMode.CHOOSING : request.getGameMode();
         ConditionName conditionName = request.getConditionName();
+        Modality floor = request.getFloor();
+        boolean includePractice = request.isIncludePractice();
 
-        validateSupportedStartRequest(conditionName, difficultyLevel);
+        validateSupportedStartRequest(gameMode, conditionName, floor, includePractice);
 
-        GameSession session = new GameSession(user, conditionName, difficultyLevel, request.isIncludePractice(),
+        GameSession session = new GameSession(user, conditionName, gameMode, floor, includePractice,
                 shuffleSeedSource.nextLong());
         return gameMapper.toSessionResponse(gameSessionRepository.save(session));
     }
@@ -94,7 +106,7 @@ public class GameService {
             }
         }
 
-        List<DerivedRound> rounds = derivedScoredRoundsForSession(session);
+        List<DerivedRound> rounds = scoredRoundsForSession(session);
         if (rounds.isEmpty()) {
             throw new ResourceNotFoundException("No rounds found for this session");
         }
@@ -126,7 +138,8 @@ public class GameService {
             throw new ConflictException("This round has already been answered in this session");
         }
 
-        DerivedRound derivedRound = derivedScoredRound(session, trial);
+        List<DerivedRound> scoredRounds = scoredRoundsForSession(session);
+        DerivedRound derivedRound = findDerivedRound(scoredRounds, trial);
         Word selectedWord = getSelectedWord(trial, request.getSelectedIdeophoneId());
         boolean correct = isCorrectChoice(derivedRound, selectedWord);
         PlayerAnswer answer = new PlayerAnswer(session, trial, selectedWord, derivedRound.getTarget(),
@@ -142,7 +155,9 @@ public class GameService {
         long totalAnswered = playerAnswerRepository.countBySessionId(session.getId());
         long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
 
-        long totalRounds = trialRepository.countByPracticeFalse();
+        // Completion is per-mode: the mode's own scored-round count, not a global trial
+        // count (LADDER = the floor's size, CHOOSING = 47).
+        long totalRounds = scoredRounds.size();
         if (session.getCompletedAt() == null && totalAnswered == totalRounds) {
             session.complete();
         }
@@ -198,13 +213,19 @@ public class GameService {
         return roundShuffler.derivePracticeRounds(session.getShuffleSeed(), served);
     }
 
-    private List<DerivedRound> derivedScoredRoundsForSession(GameSession session) {
-        List<Trial> trials = trialRepository.findByPracticeFalseOrderByIdAsc();
-        return roundShuffler.deriveScoredRounds(session.getShuffleSeed(), trials);
+    // The session's scored rounds, dispatched by mode through the RoundSource seam (ADR-2):
+    // CHOOSING serves the 47 A/V/I trials shuffled on the +0 stream; LADDER serves its
+    // floor's trials in fixed order on the +4 stream.
+    private List<DerivedRound> scoredRoundsForSession(GameSession session) {
+        RoundSource roundSource = roundSources.get(session.getGameMode());
+        if (roundSource == null) {
+            throw new BadRequestException("Unsupported game mode: " + session.getGameMode());
+        }
+        return roundSource.scoredRounds(session);
     }
 
-    private DerivedRound derivedScoredRound(GameSession session, Trial trial) {
-        for (DerivedRound derived : derivedScoredRoundsForSession(session)) {
+    private DerivedRound findDerivedRound(List<DerivedRound> scoredRounds, Trial trial) {
+        for (DerivedRound derived : scoredRounds) {
             if (derived.getTrial().getId().equals(trial.getId())) {
                 return derived;
             }
@@ -229,15 +250,38 @@ public class GameService {
                 .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
     }
 
-    private void validateSupportedStartRequest(ConditionName conditionName, Integer difficultyLevel) {
-        if (difficultyLevel != SUPPORTED_DIFFICULTY_LEVEL) {
-            throw new BadRequestException("Only difficulty level 1 is supported for the current demo");
-        }
+    private void validateSupportedStartRequest(GameMode gameMode, ConditionName conditionName, Modality floor,
+            boolean includePractice) {
         if (!SUPPORTED_CONDITION_NAMES.contains(conditionName)) {
             throw new BadRequestException(
                     "Unsupported conditionName: " + conditionName
                             + ". Supported values are CONDITION_1_SOKUON, CONDITION_2_SOKUON, CONDITION_3_SOKUON"
             );
+        }
+        switch (gameMode) {
+            case CHOOSING -> {
+                if (floor != null) {
+                    throw new BadRequestException("A floor is only valid for a ladder session");
+                }
+            }
+            case LADDER -> validateLadderStart(floor, includePractice);
+            default -> throw new BadRequestException("Unsupported gameMode: " + gameMode);
+        }
+    }
+
+    // A ladder session must name a floor that has served trials (data-driven: a floor whose
+    // trials are not yet seeded is rejected rather than serving an empty session), and never
+    // carries practice rounds (those are the CHOOSING warmup).
+    private void validateLadderStart(Modality floor, boolean includePractice) {
+        if (floor == null) {
+            throw new BadRequestException("A ladder session requires a floor");
+        }
+        List<String> pairCodes = ladderFloors.pairCodesInOrder(floor);
+        if (pairCodes.isEmpty() || trialRepository.findScoredTrialsByPairCodes(pairCodes).isEmpty()) {
+            throw new BadRequestException("Unsupported ladder floor: " + floor);
+        }
+        if (includePractice) {
+            throw new BadRequestException("Ladder sessions do not include practice rounds");
         }
     }
 

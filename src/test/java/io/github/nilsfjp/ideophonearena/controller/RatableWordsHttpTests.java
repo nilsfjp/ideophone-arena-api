@@ -201,7 +201,7 @@ class RatableWordsHttpTests {
 
     private Set<Long> expectedScoredWordIds() {
         Set<Long> ids = new LinkedHashSet<>();
-        for (Trial trial : trialRepository.findByPracticeFalseOrderByIdAsc()) {
+        for (Trial trial : trialRepository.findScoredChoosingTrials()) {
             ids.add(trial.getPairing().getWordA().getId());
             ids.add(trial.getPairing().getWordB().getId());
         }

@@ -40,6 +40,14 @@ public class RoundShuffler {
         return drawPresentation(practiceTrialsInOrder, new Random(shuffleSeed + 1));
     }
 
+    // Perception Ladder (NIL-41): a floor's trials keep their fixed easy->hard map order
+    // (no shuffle -- the order IS the difficulty signal), and the same three per-trial
+    // draws come from a reserved stream, new Random(shuffleSeed + 4), so ladder serving is
+    // independent of the scored (+0) and practice (+1) streams and never perturbs them.
+    public List<DerivedRound> deriveLadderRounds(long shuffleSeed, List<Trial> floorTrialsInOrder) {
+        return drawPresentation(floorTrialsInOrder, new Random(shuffleSeed + 4));
+    }
+
     private List<DerivedRound> drawPresentation(List<Trial> trials, Random random) {
         List<DerivedRound> derived = new ArrayList<>(trials.size());
         for (Trial trial : trials) {

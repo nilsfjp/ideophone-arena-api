@@ -2,10 +2,12 @@ package io.github.nilsfjp.ideophonearena.controller;
 
 import io.github.nilsfjp.ideophonearena.dto.AnswerResultResponse;
 import io.github.nilsfjp.ideophonearena.dto.GameSessionResponse;
+import io.github.nilsfjp.ideophonearena.dto.LadderFloorsResponse;
 import io.github.nilsfjp.ideophonearena.dto.RoundResponse;
 import io.github.nilsfjp.ideophonearena.dto.StartSessionRequest;
 import io.github.nilsfjp.ideophonearena.dto.SubmitAnswerRequest;
 import io.github.nilsfjp.ideophonearena.service.GameService;
+import io.github.nilsfjp.ideophonearena.service.LadderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
     private final GameService gameService;
+    private final LadderService ladderService;
 
-    public GameController(GameService gameService) {
+    public GameController(GameService gameService, LadderService ladderService) {
         this.gameService = gameService;
+        this.ladderService = ladderService;
     }
 
     @PostMapping("/sessions")
@@ -34,6 +38,16 @@ public class GameController {
             @Valid @RequestBody StartSessionRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(gameService.startSession(userDetails, request));
+    }
+
+    // Perception Ladder overview: floors in climb order, each with its easy->hard pairs and
+    // the caller's own progress (cleared + best score). A floor appears only once it has
+    // served trials.
+    @GetMapping("/ladder/floors")
+    public ResponseEntity<LadderFloorsResponse> getLadderFloors(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(ladderService.getFloors(userDetails));
     }
 
     @GetMapping("/sessions/{sessionUuid}/rounds/next")

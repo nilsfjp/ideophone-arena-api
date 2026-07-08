@@ -72,10 +72,10 @@ class PracticeRoundHttpTests {
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.CONDITION_1_SOKUON, 1, true, KNOWN_SEED));
+                user, ConditionName.CONDITION_1_SOKUON, true, KNOWN_SEED));
         String sessionUuid = session.getSessionUuid();
 
-        List<Trial> scored = trialRepository.findByPracticeFalseOrderByIdAsc();
+        List<Trial> scored = trialRepository.findScoredChoosingTrials();
         List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();
         List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(KNOWN_SEED, practice.subList(0, 2));
         List<DerivedRound> derivedScored = roundShuffler.deriveScoredRounds(KNOWN_SEED, scored);
@@ -129,9 +129,9 @@ class PracticeRoundHttpTests {
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.CONDITION_1_SOKUON, 1, false, KNOWN_SEED));
+                user, ConditionName.CONDITION_1_SOKUON, false, KNOWN_SEED));
 
-        List<Trial> scored = trialRepository.findByPracticeFalseOrderByIdAsc();
+        List<Trial> scored = trialRepository.findScoredChoosingTrials();
         DerivedRound firstScored = roundShuffler.deriveScoredRounds(KNOWN_SEED, scored).get(0);
 
         String roundJson = getNextRound(token, session.getSessionUuid());
@@ -148,7 +148,7 @@ class PracticeRoundHttpTests {
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.CONDITION_1_SOKUON, 1, true, KNOWN_SEED));
+                user, ConditionName.CONDITION_1_SOKUON, true, KNOWN_SEED));
         String sessionUuid = session.getSessionUuid();
 
         List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();

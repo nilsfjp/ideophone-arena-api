@@ -203,7 +203,7 @@ class LeaderboardPaginationHttpTests {
 
     private GameSession session(AppUser user, List<Trial> trials, int answered, int correct) {
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.CONDITION_1_SOKUON, 1));
+                user, ConditionName.CONDITION_1_SOKUON, false, 0L));
         for (int index = 0; index < answered; index++) {
             Trial trial = trials.get(index);
             Word word = trial.getPairing().getWordA();
@@ -219,6 +219,6 @@ class LeaderboardPaginationHttpTests {
     // constraint is respected because each session answers distinct trials and
     // answered <= 47.
     private List<Trial> createIsolatedRounds(String suffix, int count) {
-        return trialRepository.findByPracticeFalseOrderByIdAsc().subList(0, count);
+        return trialRepository.findScoredChoosingTrials().subList(0, count);
     }
 }

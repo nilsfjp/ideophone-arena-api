@@ -234,9 +234,9 @@ EXPANSION_WORKBOOK = "stimulus-expansion-signoff.xlsx"
 # carries the plan date. Hardcoded (not date.today()) so --check stays reproducible.
 EXPANSION_APPROVED_AT = "2026-07-02"
 EXPANSION_CONDITION_NAMES = ("CONDITION_1_SOKUON", "CONDITION_2_SOKUON", "CONDITION_3_SOKUON")
-# NIL-60: A/V/I expansion pairs go live (trials seeded); HAPTIC expansion pairs stay
-# dark because HAPTIC serves in no existing mode -- their go-live rides the Touch floor
-# (NIL-41/42). Matches the Modality enum token and the CSV modality column verbatim.
+# NIL-60 flipped A/V/I expansion live in Meaning Match; NIL-41 flips the 4 HAPTIC pairs
+# live too, served only through the Perception Ladder's Touch floor (never in Meaning
+# Match). Matches the Modality enum token and the CSV modality column verbatim.
 HAPTIC_MODALITY = "HAPTIC"
 
 # Audio provenance per word (SPEC-tts-synthesis 6.6/6.8). Every current jpn stimulus
@@ -736,7 +736,7 @@ def validate_unique_constraints(
     pairings: OrderedDict[str, Pairing],
 ) -> None:
     # 68 thesis/practice + 34 expansion words; 204 + 102 presentations; 34 thesis/practice
-    # pairings + 21 expansion pairings (17 A/V/I now serve trials; the 4 HAPTIC stay dark).
+    # pairings + 21 expansion pairings (all serve trials now: 17 A/V/I in Meaning Match, 4 HAPTIC in the ladder).
     if len(words) != 102:
         raise ValueError(f"Expected 102 words, found {len(words)}")
     if len(presentations) != 306:
@@ -1186,7 +1186,9 @@ def render_sql(
         "        UNIQUE,",
         "    user_id BIGINT NOT NULL,",
         "    difficulty_level INT NOT NULL DEFAULT 1,",
-        "    condition_name VARCHAR(50) NOT NULL DEFAULT 'TEXT_ONLY',",
+        "    condition_name VARCHAR(50) NOT NULL,",
+        "    game_mode VARCHAR(30) NOT NULL DEFAULT 'CHOOSING',",
+        "    ladder_floor VARCHAR(30) NULL,",
         "    include_practice BOOLEAN NOT NULL DEFAULT FALSE,",
         "    practice_answered INT NOT NULL DEFAULT 0,",
         "    shuffle_seed BIGINT NOT NULL,",
@@ -1262,10 +1264,10 @@ def render_sql(
         ") ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;",
         "",
         "-- Reference data + trial content generated from src/main/resources/condition-*-choosing-sokuon.csv.",
-        "-- NIL-86 seeded 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv). NIL-60 flips the",
-        "-- 17 A/V/I pairs live (trials seeded, NULL correct_word_id -- no thesis target); the 4 HAPTIC pairs",
-        "-- stay dark (no served mode until the Touch floor, NIL-41/42). Every jpn stimulus is ja-JP-Wavenet-B",
-        "-- TTS; per-stimulus provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).",
+        "-- NIL-86 seeded 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv). NIL-60 flipped the",
+        "-- 17 A/V/I pairs live in Meaning Match; NIL-41 brings the 4 HAPTIC pairs live too (NULL correct_word_id",
+        "-- -- no thesis target), served only through the Perception Ladder's Touch floor. Every jpn stimulus is",
+        "-- ja-JP-Wavenet-B TTS; per-stimulus provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).",
     ]
 
     language_rows = list(LANGUAGES)
@@ -1315,11 +1317,12 @@ def render_sql(
                 pairing.approved_at,        # None for thesis; sign-off date for expansion
             )
         )
-    # NIL-60: A/V/I expansion pairs now emit trials and serve in the live pool; the
-    # HAPTIC expansion pairs stay dark (no served mode until the Touch floor, NIL-41/42),
-    # and a pairing without a trial is unserved (ADR-3). Expansion trials carry a NULL
-    # correct_word_id: that column documents the thesis fixed target, which the new pairs
-    # never had -- the served target is shuffle-derived (RoundShuffler), unread here.
+    # NIL-41: every pairing now emits a trial -- the Touch floor go-live brings the 4
+    # HAPTIC expansion pairs live. They are served ONLY through the Perception Ladder's
+    # Touch floor; Meaning Match (CHOOSING) stays the 47 A/V/I trials by excluding HAPTIC
+    # at serve time, so the frozen shuffle contract is untouched. Expansion trials carry a
+    # NULL correct_word_id: that column documents the thesis fixed target, which the new
+    # pairs never had -- the served target is shuffle-derived (RoundShuffler), unread here.
     trial_rows = [
         (
             pairing_ids[code],  # trial id == pairing id (1:1 today, same order)
@@ -1330,7 +1333,6 @@ def render_sql(
             pairing.practice,   # is_practice
         )
         for code, pairing in pairings.items()
-        if pairing.source != EXPANSION_SOURCE or pairing.modality != HAPTIC_MODALITY
     ]
 
     lines.extend(insert_block("languages", ["id", "iso_code", "name", "family", "player_note"], language_rows))
@@ -1414,9 +1416,9 @@ def main() -> int:
     rendered = render_sql(words, presentations, pairings, choosing, ratings)
     expansion_pairs = [p for p in pairings.values() if p.source == EXPANSION_SOURCE]
     thesis_pairs = [p for p in pairings.values() if p.source != EXPANSION_SOURCE]
-    live_expansion = [p for p in expansion_pairs if p.modality != HAPTIC_MODALITY]
-    dark_expansion = [p for p in expansion_pairs if p.modality == HAPTIC_MODALITY]
-    trial_count = len(thesis_pairs) + len(live_expansion)
+    avi_expansion = [p for p in expansion_pairs if p.modality != HAPTIC_MODALITY]
+    haptic_expansion = [p for p in expansion_pairs if p.modality == HAPTIC_MODALITY]
+    trial_count = len(pairings)  # NIL-41: every pairing emits a trial (Touch floor live)
     thesis_member_audios = {a for p in thesis_pairs for a in (p.word_a_audio, p.word_b_audio)}
     mixed = sum(
         1 for p in expansion_pairs
@@ -1424,7 +1426,7 @@ def main() -> int:
     )
     summary = (
         f"{len(words)} words, {len(presentations)} presentations, {len(pairings)} pairings "
-        f"({len(live_expansion)} A/V/I expansion live, {len(dark_expansion)} HAPTIC expansion dark, "
+        f"({len(avi_expansion)} A/V/I + {len(haptic_expansion)} HAPTIC expansion, all live, "
         f"{mixed} mixed thesis x expansion, provenance-homogeneous), "
         f"{trial_count} trials, {THESIS_USER_COUNT} thesis users, "
         f"{len(choosing)} answers, {len(ratings)} ratings"

@@ -140,7 +140,9 @@ CREATE TABLE game_sessions (
         UNIQUE,
     user_id BIGINT NOT NULL,
     difficulty_level INT NOT NULL DEFAULT 1,
-    condition_name VARCHAR(50) NOT NULL DEFAULT 'TEXT_ONLY',
+    condition_name VARCHAR(50) NOT NULL,
+    game_mode VARCHAR(30) NOT NULL DEFAULT 'CHOOSING',
+    ladder_floor VARCHAR(30) NULL,
     include_practice BOOLEAN NOT NULL DEFAULT FALSE,
     practice_answered INT NOT NULL DEFAULT 0,
     shuffle_seed BIGINT NOT NULL,
@@ -216,10 +218,10 @@ CREATE TABLE ratings (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Reference data + trial content generated from src/main/resources/condition-*-choosing-sokuon.csv.
--- NIL-86 seeded 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv). NIL-60 flips the
--- 17 A/V/I pairs live (trials seeded, NULL correct_word_id -- no thesis target); the 4 HAPTIC pairs
--- stay dark (no served mode until the Touch floor, NIL-41/42). Every jpn stimulus is ja-JP-Wavenet-B
--- TTS; per-stimulus provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).
+-- NIL-86 seeded 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv). NIL-60 flipped the
+-- 17 A/V/I pairs live in Meaning Match; NIL-41 brings the 4 HAPTIC pairs live too (NULL correct_word_id
+-- -- no thesis target), served only through the Perception Ladder's Touch floor. Every jpn stimulus is
+-- ja-JP-Wavenet-B TTS; per-stimulus provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).
 INSERT INTO languages (id, iso_code, name, family, player_note)
 VALUES
 (1, 'jpn', 'Japanese', 'Japonic', NULL);
@@ -738,6 +740,10 @@ VALUES
 (38, 'CHOOSING', 38, NULL, NULL, 0),
 (39, 'CHOOSING', 39, NULL, NULL, 0),
 (40, 'CHOOSING', 40, NULL, NULL, 0),
+(41, 'CHOOSING', 41, NULL, NULL, 0),
+(42, 'CHOOSING', 42, NULL, NULL, 0),
+(43, 'CHOOSING', 43, NULL, NULL, 0),
+(44, 'CHOOSING', 44, NULL, NULL, 0),
 (45, 'CHOOSING', 45, NULL, NULL, 0),
 (46, 'CHOOSING', 46, NULL, NULL, 0),
 (47, 'CHOOSING', 47, NULL, NULL, 0),

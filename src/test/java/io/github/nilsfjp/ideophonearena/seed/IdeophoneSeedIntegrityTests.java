@@ -28,10 +28,12 @@ import org.junit.jupiter.api.Test;
  * an entity (68 thesis/practice + 34 expansion = 102 words) with its script
  * manipulations split into presentations (306), the condition dimension collapses
  * into the scored+practice trials, and the thesis backfill and per-word audio
- * (invariant 2) are correct. NIL-86 added 21 expansion pairings as dark inventory
- * (55 pairings); NIL-60 flips the 17 A/V/I pairs live (51 trials = 30 thesis + 17
- * A/V/I expansion + 4 practice) while the 4 HAPTIC pairs stay dark. Parses the
- * generated SQL directly so the schema owner (generate_seed_sql.py) stays the truth.
+ * (invariant 2) are correct. NIL-86 added 21 expansion pairings (55 pairings);
+ * NIL-60 flipped the 17 A/V/I pairs live in Meaning Match and NIL-41 flips the 4
+ * HAPTIC pairs live for the Perception Ladder's Touch floor, so all 21 expansion
+ * pairs now serve trials (55 trials = 30 thesis + 17 A/V/I + 4 HAPTIC + 4 practice;
+ * HAPTIC is served only through the ladder). Parses the generated SQL directly so
+ * the schema owner (generate_seed_sql.py) stays the truth.
  */
 class IdeophoneSeedIntegrityTests {
 
@@ -225,7 +227,7 @@ class IdeophoneSeedIntegrityTests {
         List<PairingRow> thesis = pairings.stream().filter(p -> "THESIS".equals(p.source())).toList();
         List<PairingRow> expansion = pairings.stream().filter(p -> "EXPANSION".equals(p.source())).toList();
         assertEquals(34, thesis.size(), "30 thesis trial pairs + 4 practice pairs");
-        assertEquals(21, expansion.size(), "the 21 signed-off expansion pairs (dark)");
+        assertEquals(21, expansion.size(), "the 21 signed-off expansion pairs");
 
         for (PairingRow pairing : pairings) {
             assertTrue(pairing.core(), pairing.pairCode() + " must be is_core (invariant 4)");
@@ -240,19 +242,19 @@ class IdeophoneSeedIntegrityTests {
             assertEquals(practice, "NULL".equals(pairing.thesisAccuracy()),
                     pairing.pairCode() + " thesis_accuracy presence must match trial/practice status");
         }
-        // Expansion: dark inventory carries no thesis_accuracy and uses the exp- pair_code namespace.
+        // Expansion pairs carry no thesis_accuracy and use the exp- pair_code namespace.
         for (PairingRow pairing : expansion) {
             assertEquals("NULL", pairing.thesisAccuracy(), pairing.pairCode() + " expansion has no thesis_accuracy");
             assertTrue(pairing.pairCode().startsWith("exp-"), pairing.pairCode() + " expansion pair_code prefix");
         }
     }
 
-    // NIL-60 go-live: the 17 A/V/I expansion pairings now emit trials and serve in the
-    // live pool; only the 4 HAPTIC expansion pairings stay dark (ADR-3: a pairing without
-    // a trial is unserved -- HAPTIC has no served mode until the Touch floor, NIL-41/42).
-    // The served pool must therefore contain every A/V/I expansion pairing and zero HAPTIC.
+    // NIL-41 Touch go-live: every expansion pairing now emits a trial. The 17 A/V/I pairs
+    // serve in Meaning Match; the 4 HAPTIC pairs serve only through the Perception Ladder's
+    // Touch floor (excluded from the CHOOSING pool at serve time). The seed must therefore
+    // carry a trial for all 21 expansion pairings, including 4 that map to HAPTIC.
     @Test
-    void hapticExpansionStaysDarkWhileAviExpansionServes() {
+    void allExpansionPairsServeTrialsAfterTouchGoLive() {
         Map<Long, PairingRow> pairingsById = new HashMap<>();
         for (PairingRow pairing : pairings) {
             pairingsById.put(pairing.id(), pairing);
@@ -265,39 +267,34 @@ class IdeophoneSeedIntegrityTests {
                 .filter(p -> !"HAPTIC".equals(p.modality())).toList();
         List<PairingRow> haptic = expansion.stream()
                 .filter(p -> "HAPTIC".equals(p.modality())).toList();
-        assertEquals(17, avi.size(), "6 AUDITORY + 6 VISUAL + 5 INTEROCEPTIVE expansion pairs go live");
-        assertEquals(4, haptic.size(), "4 HAPTIC expansion pairs stay dark");
+        assertEquals(17, avi.size(), "6 AUDITORY + 6 VISUAL + 5 INTEROCEPTIVE expansion pairs");
+        assertEquals(4, haptic.size(), "4 HAPTIC expansion pairs (Touch floor)");
 
-        for (PairingRow pairing : avi) {
+        for (PairingRow pairing : expansion) {
             assertTrue(trialPairingIds.contains(pairing.id()),
-                    "A/V/I expansion pairing " + pairing.pairCode() + " must serve a trial");
-        }
-        for (PairingRow pairing : haptic) {
-            assertFalse(trialPairingIds.contains(pairing.id()),
-                    "HAPTIC expansion pairing " + pairing.pairCode() + " must stay dark (no trial)");
+                    "expansion pairing " + pairing.pairCode() + " must serve a trial");
         }
 
-        // No trial serves a HAPTIC pairing or one of the 8 dark HAPTIC words.
+        // The 4 HAPTIC trials now exist and cover the 8 HAPTIC expansion words.
         Set<Long> hapticWordIds = new HashSet<>();
-        for (PairingRow pairing : haptic) {
-            hapticWordIds.add(pairing.wordAId());
-            hapticWordIds.add(pairing.wordBId());
-        }
-        assertEquals(8, hapticWordIds.size(), "8 HAPTIC expansion words stay dark");
+        long hapticTrials = 0;
         for (TrialRow trial : trials) {
             PairingRow pairing = pairingsById.get(trial.pairingId());
-            assertFalse("HAPTIC".equals(pairing.modality()),
-                    "trial " + trial.id() + " must not serve a HAPTIC pairing");
-            assertFalse(hapticWordIds.contains(pairing.wordAId()) || hapticWordIds.contains(pairing.wordBId()),
-                    "trial " + trial.id() + " must not serve a dark HAPTIC word");
+            if ("HAPTIC".equals(pairing.modality())) {
+                hapticTrials++;
+                hapticWordIds.add(pairing.wordAId());
+                hapticWordIds.add(pairing.wordBId());
+            }
         }
+        assertEquals(4, hapticTrials, "4 HAPTIC trials serve the Touch floor");
+        assertEquals(8, hapticWordIds.size(), "8 HAPTIC expansion words are now served");
     }
 
     @Test
-    void trialsAreFortySevenScoredPlusFourPractice() {
-        assertEquals(51, trials.size());
-        assertEquals(47, trials.stream().filter(t -> !t.practice()).count(),
-                "30 thesis + 17 A/V/I expansion scored trials");
+    void trialsAreFiftyOneScoredPlusFourPractice() {
+        assertEquals(55, trials.size());
+        assertEquals(51, trials.stream().filter(t -> !t.practice()).count(),
+                "30 thesis + 17 A/V/I expansion + 4 HAPTIC scored trials");
         assertEquals(4, trials.stream().filter(TrialRow::practice).count());
         for (TrialRow trial : trials) {
             assertEquals("CHOOSING", trial.roundType(), "M2 seeds CHOOSING trials only");

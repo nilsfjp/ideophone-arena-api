@@ -48,7 +48,7 @@ class GameLoopHttpTests {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"conditionName":"CONDITION_1_SOKUON","difficultyLevel":1}
+                                {"conditionName":"CONDITION_1_SOKUON"}
                                 """))
                 .andExpect(status().isCreated())
                 .andReturn()
@@ -95,21 +95,6 @@ class GameLoopHttpTests {
     }
 
     @Test
-    void startSessionRejectsUnsupportedDifficulty() throws Exception {
-        String username = "bad_difficulty_" + System.nanoTime();
-        String token = registerAndGetToken(username);
-
-        mockMvc.perform(post("/api/game/sessions")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"conditionName":"CONDITION_1_SOKUON","difficultyLevel":2}
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Only difficulty level 1 is supported for the current demo"));
-    }
-
-    @Test
     void startSessionRequiresConditionName() throws Exception {
         String username = "missing_condition_" + System.nanoTime();
         String token = registerAndGetToken(username);
@@ -118,44 +103,11 @@ class GameLoopHttpTests {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"difficultyLevel":1}
+                                {}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.validationErrors.conditionName").exists());
-    }
-
-    @Test
-    void startSessionRequiresDifficultyLevel() throws Exception {
-        String username = "missing_difficulty_" + System.nanoTime();
-        String token = registerAndGetToken(username);
-
-        mockMvc.perform(post("/api/game/sessions")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"conditionName":"CONDITION_1_SOKUON"}
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Validation failed"))
-                .andExpect(jsonPath("$.validationErrors.difficultyLevel").exists());
-    }
-
-    @Test
-    void startSessionRejectsTextOnlyCondition() throws Exception {
-        String username = "text_only_condition_" + System.nanoTime();
-        String token = registerAndGetToken(username);
-
-        mockMvc.perform(post("/api/game/sessions")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"conditionName":"TEXT_ONLY","difficultyLevel":1}
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(
-                        "Unsupported conditionName: TEXT_ONLY. Supported values are CONDITION_1_SOKUON, CONDITION_2_SOKUON, CONDITION_3_SOKUON"
-                ));
     }
 
     @Test
@@ -168,7 +120,7 @@ class GameLoopHttpTests {
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"conditionName":"%s","difficultyLevel":1}
+                                    {"conditionName":"%s"}
                                     """.formatted(conditionName.name())))
                     .andExpect(status().isCreated())
                     .andReturn()
@@ -176,7 +128,7 @@ class GameLoopHttpTests {
                     .getContentAsString();
 
             assertEquals(conditionName.name(), JsonPath.read(sessionJson, "$.conditionName"));
-            assertEquals(1, ((Number) JsonPath.read(sessionJson, "$.difficultyLevel")).intValue());
+            assertEquals("CHOOSING", JsonPath.read(sessionJson, "$.gameMode"));
             assertNotNull(JsonPath.read(sessionJson, "$.sessionUuid"));
         }
     }
@@ -191,7 +143,7 @@ class GameLoopHttpTests {
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("""
-                                    {"conditionName":"%s","difficultyLevel":1}
+                                    {"conditionName":"%s"}
                                     """.formatted(conditionName.name())))
                     .andExpect(status().isCreated())
                     .andReturn()
@@ -208,7 +160,6 @@ class GameLoopHttpTests {
 
             assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.completed"));
             assertEquals(conditionName.name(), JsonPath.read(roundJson, "$.conditionName"));
-            assertEquals(1, ((Number) JsonPath.read(roundJson, "$.difficultyLevel")).intValue());
             assertNotNull(JsonPath.read(roundJson, "$.roundId"));
             assertNotNull(JsonPath.read(roundJson, "$.targetTranslation"));
             assertNotNull(JsonPath.read(roundJson, "$.translations.target"));
@@ -216,21 +167,26 @@ class GameLoopHttpTests {
             assertNotNull(JsonPath.read(roundJson, "$.left.kana"));
             assertNotNull(JsonPath.read(roundJson, "$.left.stimulusUrl"));
             assertNotNull(JsonPath.read(roundJson, "$.left.modality"));
-            assertNotNull(JsonPath.read(roundJson, "$.left.canonicalScript"));
             assertNotNull(JsonPath.read(roundJson, "$.right.ideophoneId"));
             assertNotNull(JsonPath.read(roundJson, "$.right.kana"));
             assertNotNull(JsonPath.read(roundJson, "$.right.stimulusUrl"));
             assertNotNull(JsonPath.read(roundJson, "$.right.modality"));
-            assertNotNull(JsonPath.read(roundJson, "$.right.canonicalScript"));
             assertNotNull(JsonPath.read(roundJson, "$.timing.fixationMs"));
+            // A7: script_code exposure (canonicalScript) is gone from the choice cards.
+            assertFalse(roundJson.contains("canonicalScript"));
         }
     }
 
     @Test
-    void seedDataContainsFortySevenScoredConditionFreeTrials() {
-        assertEquals(47L, trialRepository.countByPracticeFalse(),
-                "seed must expose exactly 47 scored (condition-free) trials served to every session "
-                        + "(30 thesis + 17 A/V/I expansion; the 4 HAPTIC expansion pairs stay dark)");
+    void meaningMatchServesFortySevenScoredTrialsExcludingHaptic() {
+        // Meaning Match (CHOOSING) serves exactly the 47 A/V/I scored trials (30 thesis +
+        // 17 A/V/I expansion). The 4 HAPTIC trials are now live too (Touch floor, NIL-41)
+        // but are served only through the Perception Ladder, so the CHOOSING pool -- and its
+        // frozen shuffle -- is unchanged. 51 non-practice trials total, 47 of them non-HAPTIC.
+        assertEquals(47, trialRepository.findScoredChoosingTrials().size(),
+                "Meaning Match must serve exactly the 47 non-HAPTIC scored trials");
+        assertEquals(51L, trialRepository.countByPracticeFalse(),
+                "51 non-practice trials total: 47 A/V/I + 4 HAPTIC (ladder-only)");
     }
 
     @Test
@@ -242,7 +198,7 @@ class GameLoopHttpTests {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"conditionName":"CONDITION_1_SOKUON","difficultyLevel":1}
+                                {"conditionName":"CONDITION_1_SOKUON"}
                                 """))
                 .andExpect(status().isCreated())
                 .andReturn()
@@ -280,7 +236,7 @@ class GameLoopHttpTests {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"conditionName":"UNKNOWN_CONDITION","difficultyLevel":1}
+                                {"conditionName":"UNKNOWN_CONDITION"}
                                 """))
                 .andExpect(status().isBadRequest());
     }
@@ -295,7 +251,7 @@ class GameLoopHttpTests {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"conditionName":"CONDITION_1_SOKUON","difficultyLevel":1}
+                                {"conditionName":"CONDITION_1_SOKUON"}
                                 """))
                 .andExpect(status().isCreated())
                 .andReturn()
@@ -345,7 +301,6 @@ class GameLoopHttpTests {
         assertEquals("Game session is complete", JsonPath.read(completionJson, "$.message"));
         assertEquals(sessionUuid, JsonPath.read(completionJson, "$.sessionUuid"));
         assertEquals("CONDITION_1_SOKUON", JsonPath.read(completionJson, "$.conditionName"));
-        assertEquals(1, ((Number) JsonPath.read(completionJson, "$.difficultyLevel")).intValue());
         assertNull(JsonPath.read(completionJson, "$.roundId"));
 
         // Re-answering an already-answered round is a conflict.

@@ -161,10 +161,11 @@ public class ResearchService {
     @Transactional(readOnly = true)
     public PositionBiasResponse getPositionBias() {
         // Trials are condition-free (ADR-3), so the scored base list is the same
-        // for every session -- fetch it once and derive per session (each shuffle
-        // seed differs). The shuffle algorithm is byte-for-byte unchanged (Rider
-        // B); only the joins moved to word grain.
-        List<Trial> scoredTrials = trialRepository.findByPracticeFalseOrderByIdAsc();
+        // for every CHOOSING session -- fetch it once and derive per session (each
+        // shuffle seed differs). The shuffle algorithm is byte-for-byte unchanged
+        // (Rider B); only the joins moved to word grain. findScoredChoosingTrials
+        // excludes the HAPTIC ladder trials, so this replay stays the frozen 47-pool.
+        List<Trial> scoredTrials = trialRepository.findScoredChoosingTrials();
         Map<Long, Map<Long, DerivedRound>> derivedBySession = new HashMap<>();
 
         long n = 0;

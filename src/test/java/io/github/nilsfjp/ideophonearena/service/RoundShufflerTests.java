@@ -134,6 +134,30 @@ class RoundShufflerTests {
     }
 
     @Test
+    void ladderRoundsKeepFixedOrderAndUseAStreamIndependentOfScoredAndPractice() {
+        List<Trial> floor = trials(10);
+        List<Trial> scored = trials(30);
+        List<Trial> practice = trials(2);
+
+        // The ladder keeps its input (easy->hard map) order -- it never shuffles.
+        List<DerivedRound> derivedFloor = roundShuffler.deriveLadderRounds(11L, floor);
+        for (int index = 0; index < floor.size(); index++) {
+            assertEquals(floor.get(index).getId(), derivedFloor.get(index).getTrial().getId(),
+                    "ladder floor trials must keep their map order");
+        }
+        assertEquals(signature(derivedFloor), signature(roundShuffler.deriveLadderRounds(11L, floor)));
+
+        // Reserved stream +4: distinct from the shuffled +0 scored stream for the same seed
+        // and trials, and deriving ladder rounds leaves the +0 and +1 streams byte-identical.
+        assertNotEquals(signature(derivedFloor), signature(roundShuffler.deriveScoredRounds(11L, floor)));
+        String scoredBefore = signature(roundShuffler.deriveScoredRounds(11L, scored));
+        String practiceBefore = signature(roundShuffler.derivePracticeRounds(11L, practice));
+        roundShuffler.deriveLadderRounds(11L, floor);
+        assertEquals(scoredBefore, signature(new RoundShuffler().deriveScoredRounds(11L, scored)));
+        assertEquals(practiceBefore, signature(new RoundShuffler().derivePracticeRounds(11L, practice)));
+    }
+
+    @Test
     void everyDerivedRoundPairsTargetAndOtherFromTheSameTrial() {
         List<Trial> trials = trials(10);
 

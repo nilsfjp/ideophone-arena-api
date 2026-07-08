@@ -50,6 +50,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
                 join answer.session session
                 join session.user user
                 where session.completedAt is not null
+                  and session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING
                 group by session.id, user.id, user.username
             ) best
             where not exists (
@@ -58,6 +59,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
                 join other.session otherSession
                 where otherSession.user.id = best.userId
                   and otherSession.completedAt is not null
+                  and otherSession.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING
                   and otherSession.id <> best.sessionId
                 group by otherSession.id
                 having sum(case when other.correct = true then 1 else 0 end) > best.correctCount
@@ -76,6 +78,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             select count(distinct session.user.id)
             from GameSession session
             where session.completedAt is not null
+              and session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING
             """)
     Page<LeaderboardEntryProjection> findLeaderboard(Pageable pageable);
 
@@ -162,7 +165,9 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
     // trials (defensive), browser_loop_* automation accounts (the same rows
     // scripts/cleanup-test-accounts.sql deletes), and the thesis_p% ingestion
     // cohort (NIL-54: live-facing, so it shows only live-player data; the thesis
-    // figures surface via /api/research/thesis/divergence) -- no shape change.
+    // figures surface via /api/research/thesis/divergence). NIL-41 adds a
+    // gameMode = CHOOSING guard so Perception Ladder answers keep Meaning Match
+    // divergence semantics intact -- no shape change.
     @Query("""
             select
                 word.id as ideophoneId,
@@ -171,6 +176,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             from PlayerAnswer answer
             join answer.targetWord word
             where answer.trial.practice = false
+              and answer.session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING
               and answer.session.user.username not like 'browser!_loop!_%' escape '!'
               and answer.session.user.username not like 'thesis!_p%' escape '!'
             group by word.id
@@ -181,6 +187,11 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
     // thesis layer (NIL-54). Predicate inverted to INCLUDE only the thesis_p%
     // cohort so /api/research/thesis/divergence reconstructs the vendored
     // per-modality accuracy (68.6/64.2/59.7). Practice trials stay excluded.
+    // NIL-41 adds a gameMode = CHOOSING guard -- distinct in reasoning from the
+    // live aggregates: this endpoint reconstructs a fixed published dataset, so a
+    // LADDER answer from a login-capable thesis_p* account is contamination of the
+    // reconstruction, not extra cohort data. Correct-by-construction (zero such
+    // rows today); no shape change.
     @Query("""
             select
                 word.id as ideophoneId,
@@ -189,6 +200,7 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             from PlayerAnswer answer
             join answer.targetWord word
             where answer.trial.practice = false
+              and answer.session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING
               and answer.session.user.username like 'thesis!_p%' escape '!'
             group by word.id
             """)
@@ -202,7 +214,8 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
     // grain. Rider A excludes browser_loop_* automation accounts and the thesis_p%
     // cohort (NIL-54: its shuffle_seed is synthetic -- Gorilla never exported the
     // real left/right -- so replaying it would fabricate a side; excluding it also
-    // keeps this live aggregate byte-stable).
+    // keeps this live aggregate byte-stable). NIL-41 adds a gameMode = CHOOSING guard:
+    // a ladder answer replayed against the +0 CHOOSING stream would fabricate a side.
     @Query("""
             select answer
             from PlayerAnswer answer
@@ -211,8 +224,27 @@ public interface PlayerAnswerRepository extends JpaRepository<PlayerAnswer, Long
             join fetch answer.selectedWord
             join fetch answer.targetWord
             where answer.trial.practice = false
+              and answer.session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.CHOOSING
               and answer.session.user.username not like 'browser!_loop!_%' escape '!'
               and answer.session.user.username not like 'thesis!_p%' escape '!'
             """)
     List<PlayerAnswer> findScoredForPositionBias();
+
+    // Perception Ladder progress for one player: one row per completed LADDER session,
+    // carrying its floor and score, so the ladder overview can mark each floor cleared
+    // with the caller's best session (LadderService reduces to best-per-floor). Scoped to
+    // gameMode = LADDER so it never sees Meaning Match sessions.
+    @Query("""
+            select
+                session.ladderFloor as floor,
+                count(answer.id) as answered,
+                sum(case when answer.correct = true then 1 else 0 end) as correct
+            from PlayerAnswer answer
+            join answer.session session
+            where session.user.id = :userId
+              and session.gameMode = io.github.nilsfjp.ideophonearena.model.enums.GameMode.LADDER
+              and session.completedAt is not null
+            group by session.id, session.ladderFloor
+            """)
+    List<LadderFloorScoreProjection> findCompletedLadderSessionScores(@Param("userId") Long userId);
 }

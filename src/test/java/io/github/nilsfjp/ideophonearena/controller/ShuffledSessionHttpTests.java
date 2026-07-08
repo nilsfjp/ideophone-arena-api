@@ -70,12 +70,12 @@ class ShuffledSessionHttpTests {
 
         // Seed-only fixtures: every session serves the SAME 30 scored trials
         // (ids 1-30) and, with practice, the first 2 practice trials (31, 32).
-        List<Trial> scored = trialRepository.findByPracticeFalseOrderByIdAsc();
+        List<Trial> scored = trialRepository.findScoredChoosingTrials();
         List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();
         List<Trial> servedPractice = practice.subList(0, 2);
 
         GameSession session = gameSessionRepository.save(new GameSession(
-                user, ConditionName.CONDITION_1_SOKUON, 1, true, SHUFFLE_SEED));
+                user, ConditionName.CONDITION_1_SOKUON, true, SHUFFLE_SEED));
         String sessionUuid = session.getSessionUuid();
 
         List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(SHUFFLE_SEED, servedPractice);

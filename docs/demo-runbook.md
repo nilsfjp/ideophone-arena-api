@@ -349,6 +349,28 @@ Restart continuity — play a few rounds of a session, note the next-round respo
 and repeat the same `GET .../rounds/next`: the response body is identical, and previously answered rounds stay
 answered (verified 2026-06-12: identical `roundId`/`targetTranslation`/`left`/`right` across a kill+restart).
 
+## Perception Ladder proofs (2026-07-08, NIL-41)
+
+The ladder floors API and floor-scoped serving (`$B` = base URL, `$TOKEN` from register/login):
+
+```sh
+# Floors in hierarchy order (Sound -> Sight -> Touch -> Inner states); Touch is a 4-pair floor.
+curl -s $B/api/game/ladder/floors -H "Authorization: Bearer $TOKEN" \
+  | python3 -c 'import sys,json; [print(f["modality"], f["pairCount"], f["finalRungPairCode"], "cleared="+str(f["cleared"])) for f in json.load(sys.stdin)["floors"]]'
+
+# Start a floor-scoped ladder session (no new endpoint; gameMode + floor on session start).
+curl -s -X POST $B/api/game/sessions -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"conditionName":"CONDITION_1_SOKUON","gameMode":"LADDER","floor":"HAPTIC"}'
+# then walk GET .../rounds/next + POST .../answers (4 Touch pairs) to completion; floors[2].cleared -> true.
+```
+
+Meaning Match is unchanged: a `CHOOSING` session (omit `gameMode`) still serves exactly 47 scored rounds — the
+Haptic pairs are served only through the ladder. A `LADDER` session never enters `GET /api/leaderboard`.
+
+Note: after the DDL change (game_mode/ladder_floor), re-init the local MySQL from the regenerated
+`src/main/resources/db/init/ideophone_arena.sql` (the reseed command above) before booting, since
+`ddl-auto=validate` checks the entity against the live schema.
+
 ## Cleaning up browser-loop test accounts
 
 Local browser automation registers throwaway `browser_loop_*` users. They are not seed rows; remove them (and their
