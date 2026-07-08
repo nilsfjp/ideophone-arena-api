@@ -24,24 +24,28 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Guards the experiment invariants of the M2 word-grain seed: word identity is
- * an entity (68 words) with its script manipulations split into presentations
- * (204), the condition dimension collapses into pairings/trials (34 each), and
- * the thesis backfill and per-word audio (invariant 2) are correct. Parses the
- * generated SQL directly so the schema owner (generate_seed_sql.py) stays the
- * source of truth.
+ * an entity (68 thesis/practice + 34 expansion = 102 words) with its script
+ * manipulations split into presentations (306), the condition dimension collapses
+ * into 34 thesis trials, and the thesis backfill and per-word audio (invariant 2)
+ * are correct. NIL-86 adds 21 expansion pairings as dark inventory (55 pairings,
+ * still 34 trials -- expansion pairs carry no trial). Parses the generated SQL
+ * directly so the schema owner (generate_seed_sql.py) stays the source of truth.
  */
 class IdeophoneSeedIntegrityTests {
 
     private static final Path SEED_PATH =
             Path.of("src/main/resources/db/init/ideophone_arena.sql");
 
+    // NIL-86: modality letter class gains 'h' (HAPTIC) and the pairing index widens
+    // to \\d+ (expansion words continue past the thesis single-digit band, e.g. a10).
     private static final Pattern AUDIO_PATTERN = Pattern.compile(
-            "audio/([avip])(\\d)([hk])-([A-Za-z]+)\\.m4a");
+            "audio/([aviph])(\\d+)([hk])-([A-Za-z]+)\\.m4a");
 
     private static final Map<String, String> MODALITY_BY_LETTER = Map.of(
             "a", "AUDITORY",
             "v", "VISUAL",
-            "i", "INTEROCEPTIVE");
+            "i", "INTEROCEPTIVE",
+            "h", "HAPTIC");
 
     private static final Set<String> CONDITIONS = Set.of(
             "CONDITION_1_SOKUON", "CONDITION_2_SOKUON", "CONDITION_3_SOKUON");
@@ -133,18 +137,18 @@ class IdeophoneSeedIntegrityTests {
     }
 
     @Test
-    void seedsSixtyEightWordsSixtyTrialAndEightPractice() {
-        // 60 trial words (a/v/i) plus 8 practice words (p), each a single row.
-        assertEquals(68, words.size());
-        assertEquals(60, words.stream().filter(w -> !isPractice(w)).count());
+    void seedsWordInventoryWithThirtyFourExpansionWords() {
+        // 68 thesis/practice words (60 trial a/v/i + 8 practice p) plus 34 expansion words.
+        assertEquals(102, words.size());
         assertEquals(8, words.stream().filter(IdeophoneSeedIntegrityTests::isPractice).count());
+        assertEquals(94, words.stream().filter(w -> !isPractice(w)).count());
         // words UNIQUE(language_id, romaji): romaji distinct (one language in v1).
-        assertEquals(68, words.stream().map(Word::romaji).distinct().count());
+        assertEquals(102, words.stream().map(Word::romaji).distinct().count());
     }
 
     @Test
     void everyWordHasThreePresentationsOnePerScriptedCondition() {
-        assertEquals(204, presentations.size());
+        assertEquals(306, presentations.size());
         Map<Long, Set<String>> conditionsByWord = new HashMap<>();
         for (Presentation presentation : presentations) {
             assertNotNull(wordsById.get(presentation.wordId()),
@@ -154,7 +158,7 @@ class IdeophoneSeedIntegrityTests {
             conditionsByWord.computeIfAbsent(presentation.wordId(), key -> new HashSet<>())
                     .add(presentation.conditionName());
         }
-        assertEquals(68, conditionsByWord.size());
+        assertEquals(102, conditionsByWord.size());
         for (Map.Entry<Long, Set<String>> entry : conditionsByWord.entrySet()) {
             assertEquals(CONDITIONS, entry.getValue(),
                     "word " + entry.getKey() + " must have exactly the three scripted conditions");
@@ -212,17 +216,72 @@ class IdeophoneSeedIntegrityTests {
     }
 
     @Test
-    void pairingsBackfillIsThirtyThesisPairsPlusFourPractice() {
-        assertEquals(34, pairings.size());
-        assertEquals(34, pairings.stream().map(PairingRow::pairCode).distinct().count());
-        long withThesisAccuracy = pairings.stream().filter(p -> !"NULL".equals(p.thesisAccuracy())).count();
-        assertEquals(30, withThesisAccuracy, "the 30 thesis trial pairs carry an exact per-pair accuracy");
+    void pairingsBackfillIsThirtyFourThesisPlusTwentyOneExpansion() {
+        assertEquals(55, pairings.size());
+        assertEquals(55, pairings.stream().map(PairingRow::pairCode).distinct().count());
+
+        List<PairingRow> thesis = pairings.stream().filter(p -> "THESIS".equals(p.source())).toList();
+        List<PairingRow> expansion = pairings.stream().filter(p -> "EXPANSION".equals(p.source())).toList();
+        assertEquals(34, thesis.size(), "30 thesis trial pairs + 4 practice pairs");
+        assertEquals(21, expansion.size(), "the 21 signed-off expansion pairs (dark)");
+
         for (PairingRow pairing : pairings) {
-            assertTrue(pairing.core(), pairing.pairCode() + " must be is_core");
-            assertEquals("THESIS", pairing.source(), pairing.pairCode() + " must be source THESIS");
+            assertTrue(pairing.core(), pairing.pairCode() + " must be is_core (invariant 4)");
+            assertTrue("THESIS".equals(pairing.source()) || "EXPANSION".equals(pairing.source()),
+                    pairing.pairCode() + " has unexpected source " + pairing.source());
+        }
+        // Thesis: exactly the 30 trial pairs carry a per-pair accuracy; the 4 practice pairs do not.
+        long thesisWithAccuracy = thesis.stream().filter(p -> !"NULL".equals(p.thesisAccuracy())).count();
+        assertEquals(30, thesisWithAccuracy, "the 30 thesis trial pairs carry an exact per-pair accuracy");
+        for (PairingRow pairing : thesis) {
             boolean practice = pairing.pairCode().startsWith("p");
             assertEquals(practice, "NULL".equals(pairing.thesisAccuracy()),
                     pairing.pairCode() + " thesis_accuracy presence must match trial/practice status");
+        }
+        // Expansion: dark inventory carries no thesis_accuracy and uses the exp- pair_code namespace.
+        for (PairingRow pairing : expansion) {
+            assertEquals("NULL", pairing.thesisAccuracy(), pairing.pairCode() + " expansion has no thesis_accuracy");
+            assertTrue(pairing.pairCode().startsWith("exp-"), pairing.pairCode() + " expansion pair_code prefix");
+        }
+    }
+
+    // The dark mechanism (ADR-3): the 21 expansion pairings are inventory with NO
+    // trial, so trial-driven round generation never reaches them, and none of the 34
+    // new expansion words is ever a trial target. (Reused thesis words in mixed pairs
+    // stay served by their own thesis pairings -- that is expected, not a leak.)
+    @Test
+    void expansionPairingsAreDarkWithNoTrials() {
+        Set<Long> expansionPairingIds = pairings.stream()
+                .filter(p -> "EXPANSION".equals(p.source()))
+                .map(PairingRow::id).collect(Collectors.toSet());
+        assertEquals(21, expansionPairingIds.size());
+        for (TrialRow trial : trials) {
+            assertFalse(expansionPairingIds.contains(trial.pairingId()),
+                    "trial " + trial.id() + " must not reference a dark expansion pairing");
+        }
+
+        Set<Long> thesisWordIds = new HashSet<>();
+        for (PairingRow pairing : pairings) {
+            if ("THESIS".equals(pairing.source())) {
+                thesisWordIds.add(pairing.wordAId());
+                thesisWordIds.add(pairing.wordBId());
+            }
+        }
+        Set<Long> darkWordIds = new HashSet<>();
+        for (PairingRow pairing : pairings) {
+            if ("EXPANSION".equals(pairing.source())) {
+                if (!thesisWordIds.contains(pairing.wordAId())) {
+                    darkWordIds.add(pairing.wordAId());
+                }
+                if (!thesisWordIds.contains(pairing.wordBId())) {
+                    darkWordIds.add(pairing.wordBId());
+                }
+            }
+        }
+        assertEquals(34, darkWordIds.size(), "34 newly minted expansion words are dark");
+        for (TrialRow trial : trials) {
+            assertFalse(darkWordIds.contains(trial.correctWordId()),
+                    "trial " + trial.id() + " must not serve a dark expansion word");
         }
     }
 

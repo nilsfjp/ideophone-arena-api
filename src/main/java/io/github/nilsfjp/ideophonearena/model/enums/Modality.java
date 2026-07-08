@@ -4,6 +4,7 @@ public enum Modality {
     AUDITORY,
     VISUAL,
     TACTILE,
+    HAPTIC,
     INTEROCEPTIVE,
     MOTION
 }

@@ -1034,3 +1034,66 @@ api repo.
 
 Next single task:
 NIL-84 (essence review, Fable, morning).
+
+## 2026-07-08 ("NIL-86: stimulus-expansion pipeline — dark inventory + TTS route + foil_distance")
+
+Session goal:
+Build the expansion pipeline in the api repo: ingest the signed-off expansion pairs from the sign-off
+workbook into words/presentations/pairings as dark inventory (zero live pools until audio exists), fill
+the A6 sign-off trail (signoff_ref/approved_at) and compute+store foil_distance (validation-only), report
+the mixed-pair count, and emit the GCP TTS script + manifest for Nils to run. Seed changes via
+generate_seed_sql.py --check only; contract shapes frozen.
+
+Changed:
+- scripts/generate_seed_sql.py: reads docs/research/data/stimulus-expansion-{pairs,candidates}.csv (committed
+  derived exports of the .xlsx; generator stays stdlib-only), mints 34 new words + 3 presentations each,
+  appends 21 pairings (source='EXPANSION', pair_code exp-<id>) with NO trials (dark), resolves the 8 mixed
+  pairs' reused word_2 to existing rows (word_a = lower id, preserving the shuffle-order invariant). New:
+  hepburn_to_kunrei validator, mora_segments/feature_vector/foil_distance (SPEC-free-form-entry §5, Decimal-
+  deterministic), pair-provenance-homogeneity assertion. Count asserts 68/204/34 -> 102/306/55; foil_distance
+  DECIMAL(6,4) branch in sql_literal; signoff_ref/approved_at wired; trials gated to THESIS only.
+- src/main/java/.../model/enums/Modality.java: + HAPTIC (additive; 4 clean Haptic pairs).
+- src/test/java/.../seed/IdeophoneSeedIntegrityTests.java: counts 102/306/55; AUDIO_PATTERN \d+ and 'h'->HAPTIC;
+  pairings split THESIS(34)/EXPANSION(21); new expansionPairingsAreDarkWithNoTrials.
+- New: docs/research/data/stimulus-expansion-pairs.csv (21) + stimulus-expansion-candidates.csv (34);
+  scripts/generate_tts_audio.py + scripts/tts-manifest.json (34 pending + 68 present backfill; Nils runs the batch,
+  this session does NOT call GCP); docs/research/phonology-golden.json + scripts/generate_phonology_golden.py
+  (ADR-8.2 Python side; Java PhonologyService parity owed to NIL-62). Docs: backend-contract changelog, AGENTS.md
+  punch list.
+- Scope decision (Nils, in chat): defer H2/H3 (fuwafuwa/gotsugotsu, shittori/bosabosa — reuse VISUAL thesis words
+  34/40 on the Haptic floor; flipping would break the same-modality invariant, crash ResearchService, and re-bucket
+  72 thesis answers). 21 pairs this session; H2/H3 + full Haptic go-live ride NIL-57.
+
+Proof:
+- python3 scripts/generate_seed_sql.py --check -> exit 0 (102 words, 306 presentations, 55 pairings [21 expansion
+  dark, 8 mixed thesis x expansion], 34 trials, 36 thesis users, 1080 answers, 1080 ratings). Byte-diff vs prior
+  seed: only 3 changed lines (former-last row of words/presentations/pairings, `;`->`,` append terminator; data
+  identical); trials/player_answers/ratings INSERT blocks byte-identical.
+- Both new build-failing assertions demonstrated firing (monkeypatch, tree untouched): cross-modality ->
+  "is_core pairing exp-i1 members disagree on modality (VISUAL vs INTEROCEPTIVE)"; provenance-mixed ->
+  "Pairing exp-h1 members disagree on audio provenance (tts:gcp:ja-JP-Wavenet-B vs human)".
+- ./mvnw test -> 20 suites, 98 tests, 0 failures/errors/skipped.
+- Live darkness (booted app on 8081 against reloaded DB): full session serves 30 scored rounds / 60 distinct
+  thesis words, 0 expansion words; ratable pool totalElements=60, 0 expansion; admin byModality =
+  [AUDITORY, INTEROCEPTIVE, VISUAL] (no HAPTIC). DB: 102/306/55/34; max trial correct_word_id = 67.
+- foil_distance hand-check (3 pairs) matches the emitted seed + phonology-golden.json: exp-h1 sarasara/nebaneba
+  0.0750, exp-h4 dorodoro/tsururi 0.5375, exp-a3 zyaazyaa/potopoto 0.2250.
+
+Result:
+The 21 expansion pairs + 34 new words are seeded as dark inventory, invisible to every live pool; the A6 columns
+are filled and foil_distance is computed and stored; the TTS batch tooling + provenance manifest + phonology golden
+are emitted for Nils's GCP run. Zero API/frontend surface changed. Clean tree; commits are Nils's.
+
+Commit:
+Not committed (Nils's). Proposed single commit:
+"NIL-86: seed 21 expansion pairs as dark inventory + fill A6 sign-off/foil_distance + TTS batch tooling".
+
+Blocker:
+None. Open riders (handoff): (a) Nils runs scripts/generate_tts_audio.py --run to synthesize the 34 pending clips,
+then a later session audits the audio and flips them live (add trials); (b) H2/H3 + full Haptic-floor go-live =
+NIL-57 (needs the gotsugotsu/bosabosa modality reclassification, a deliberate thesis-data change); (c) stimulus_sources
+(M5) is the eventual provenance home; (d) Java PhonologyService parity vs phonology-golden.json = NIL-62; (e) the
+launcher said "~180 existing audio files" but the repo has 68 per-word .m4a — manifest covers the 68.
+
+Next single task:
+Nils runs the TTS batch (scripts/generate_tts_audio.py --run) with his GCP credentials.

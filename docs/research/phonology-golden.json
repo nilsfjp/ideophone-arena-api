@@ -1,0 +1,1958 @@
+{
+  "spec": "SPEC-free-form-entry section 5 (feature distance); ARCHITECTURE ADR-8.2 golden reference",
+  "voiced_onset_letters": [
+    "g",
+    "z",
+    "d",
+    "b"
+  ],
+  "weights": {
+    "redup": 0.2,
+    "sokuon": 0.15,
+    "final_n": 0.1,
+    "ri_suffix": 0.1,
+    "voiced_onset": 0.15,
+    "heavy_vowel": 0.15,
+    "mora_count": 0.15
+  },
+  "words": [
+    {
+      "word_id": 1,
+      "romaji": "gosogoso",
+      "morae": [
+        "go",
+        "so",
+        "go",
+        "so"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 2,
+      "romaji": "katakata",
+      "morae": [
+        "ka",
+        "ta",
+        "ka",
+        "ta"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 3,
+      "romaji": "sitosito",
+      "morae": [
+        "si",
+        "to",
+        "si",
+        "to"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 4,
+      "romaji": "batyabatya",
+      "morae": [
+        "ba",
+        "tya",
+        "ba",
+        "tya"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 5,
+      "romaji": "zyaazyaa",
+      "morae": [
+        "zya",
+        "a",
+        "zya",
+        "a"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 6,
+      "romaji": "potapota",
+      "morae": [
+        "po",
+        "ta",
+        "po",
+        "ta"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 7,
+      "romaji": "ziriziri",
+      "morae": [
+        "zi",
+        "ri",
+        "zi",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 4
+    },
+    {
+      "word_id": 8,
+      "romaji": "syakisyaki",
+      "morae": [
+        "sya",
+        "ki",
+        "sya",
+        "ki"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 9,
+      "romaji": "zuruzuru",
+      "morae": [
+        "zu",
+        "ru",
+        "zu",
+        "ru"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 10,
+      "romaji": "poripori",
+      "morae": [
+        "po",
+        "ri",
+        "po",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 11,
+      "romaji": "sororisorori",
+      "morae": [
+        "so",
+        "ro",
+        "ri",
+        "so",
+        "ro",
+        "ri"
+      ],
+      "mora_count": 6,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 12,
+      "romaji": "dotabata",
+      "morae": [
+        "do",
+        "ta",
+        "ba",
+        "ta"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 13,
+      "romaji": "dosari",
+      "morae": [
+        "do",
+        "sa",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 14,
+      "romaji": "katiQ",
+      "morae": [
+        "ka",
+        "ti",
+        "Q"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 15,
+      "romaji": "dosidosi",
+      "morae": [
+        "do",
+        "si",
+        "do",
+        "si"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 16,
+      "romaji": "gisigisi",
+      "morae": [
+        "gi",
+        "si",
+        "gi",
+        "si"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 4
+    },
+    {
+      "word_id": 17,
+      "romaji": "bosori",
+      "morae": [
+        "bo",
+        "so",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 18,
+      "romaji": "kyaakyaa",
+      "morae": [
+        "kya",
+        "a",
+        "kya",
+        "a"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 19,
+      "romaji": "mogomogo",
+      "morae": [
+        "mo",
+        "go",
+        "mo",
+        "go"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 20,
+      "romaji": "sakuQ",
+      "morae": [
+        "sa",
+        "ku",
+        "Q"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 21,
+      "romaji": "kukkiri",
+      "morae": [
+        "ku",
+        "Q",
+        "ki",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 22,
+      "romaji": "tiratira",
+      "morae": [
+        "ti",
+        "ra",
+        "ti",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 23,
+      "romaji": "kurikuri",
+      "morae": [
+        "ku",
+        "ri",
+        "ku",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 24,
+      "romaji": "gizagiza",
+      "morae": [
+        "gi",
+        "za",
+        "gi",
+        "za"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 25,
+      "romaji": "doNyori",
+      "morae": [
+        "do",
+        "N",
+        "yo",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 26,
+      "romaji": "kirakira",
+      "morae": [
+        "ki",
+        "ra",
+        "ki",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 27,
+      "romaji": "pitari",
+      "morae": [
+        "pi",
+        "ta",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 28,
+      "romaji": "hirahira",
+      "morae": [
+        "hi",
+        "ra",
+        "hi",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 29,
+      "romaji": "bissiri",
+      "morae": [
+        "bi",
+        "Q",
+        "si",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 3
+    },
+    {
+      "word_id": 30,
+      "romaji": "barabara",
+      "morae": [
+        "ba",
+        "ra",
+        "ba",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 31,
+      "romaji": "busuri",
+      "morae": [
+        "bu",
+        "su",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 32,
+      "romaji": "nikoniko",
+      "morae": [
+        "ni",
+        "ko",
+        "ni",
+        "ko"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 33,
+      "romaji": "huNwari",
+      "morae": [
+        "hu",
+        "N",
+        "wa",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 34,
+      "romaji": "gotugotu",
+      "morae": [
+        "go",
+        "tu",
+        "go",
+        "tu"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 35,
+      "romaji": "boNyari",
+      "morae": [
+        "bo",
+        "N",
+        "ya",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 36,
+      "romaji": "kiriQ",
+      "morae": [
+        "ki",
+        "ri",
+        "Q"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 37,
+      "romaji": "marumaru",
+      "morae": [
+        "ma",
+        "ru",
+        "ma",
+        "ru"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 38,
+      "romaji": "garigari",
+      "morae": [
+        "ga",
+        "ri",
+        "ga",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 39,
+      "romaji": "mukumuku",
+      "morae": [
+        "mu",
+        "ku",
+        "mu",
+        "ku"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 40,
+      "romaji": "bosabosa",
+      "morae": [
+        "bo",
+        "sa",
+        "bo",
+        "sa"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 41,
+      "romaji": "uNzari",
+      "morae": [
+        "u",
+        "N",
+        "za",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 42,
+      "romaji": "wakuwaku",
+      "morae": [
+        "wa",
+        "ku",
+        "wa",
+        "ku"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 43,
+      "romaji": "geNnari",
+      "morae": [
+        "ge",
+        "N",
+        "na",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 44,
+      "romaji": "gatugatu",
+      "morae": [
+        "ga",
+        "tu",
+        "ga",
+        "tu"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 45,
+      "romaji": "syoboN",
+      "morae": [
+        "syo",
+        "bo",
+        "N"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 46,
+      "romaji": "ruNruN",
+      "morae": [
+        "ru",
+        "N",
+        "ru",
+        "N"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 47,
+      "romaji": "sukkiri",
+      "morae": [
+        "su",
+        "Q",
+        "ki",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 48,
+      "romaji": "iraira",
+      "morae": [
+        "i",
+        "ra",
+        "i",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 49,
+      "romaji": "tyaNto",
+      "morae": [
+        "tya",
+        "N",
+        "to"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 50,
+      "romaji": "dogimagi",
+      "morae": [
+        "do",
+        "gi",
+        "ma",
+        "gi"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 51,
+      "romaji": "nobinobi",
+      "morae": [
+        "no",
+        "bi",
+        "no",
+        "bi"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 52,
+      "romaji": "harahara",
+      "morae": [
+        "ha",
+        "ra",
+        "ha",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 53,
+      "romaji": "noNbiri",
+      "morae": [
+        "no",
+        "N",
+        "bi",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 54,
+      "romaji": "girigiri",
+      "morae": [
+        "gi",
+        "ri",
+        "gi",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 4
+    },
+    {
+      "word_id": 55,
+      "romaji": "hokkori",
+      "morae": [
+        "ho",
+        "Q",
+        "ko",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 56,
+      "romaji": "zokuzoku",
+      "morae": [
+        "zo",
+        "ku",
+        "zo",
+        "ku"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 57,
+      "romaji": "hoQ",
+      "morae": [
+        "ho",
+        "Q"
+      ],
+      "mora_count": 2,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 58,
+      "romaji": "dokiri",
+      "morae": [
+        "do",
+        "ki",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 59,
+      "romaji": "yuttari",
+      "morae": [
+        "yu",
+        "Q",
+        "ta",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 60,
+      "romaji": "dokidoki",
+      "morae": [
+        "do",
+        "ki",
+        "do",
+        "ki"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 61,
+      "romaji": "sotto",
+      "morae": [
+        "so",
+        "Q",
+        "to"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 62,
+      "romaji": "gataN",
+      "morae": [
+        "ga",
+        "ta",
+        "N"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 63,
+      "romaji": "zitto",
+      "morae": [
+        "zi",
+        "Q",
+        "to"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 64,
+      "romaji": "paQ",
+      "morae": [
+        "pa",
+        "Q"
+      ],
+      "mora_count": 2,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 65,
+      "romaji": "sorosoro",
+      "morae": [
+        "so",
+        "ro",
+        "so",
+        "ro"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 66,
+      "romaji": "gaNgaN",
+      "morae": [
+        "ga",
+        "N",
+        "ga",
+        "N"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 67,
+      "romaji": "sokkuri",
+      "morae": [
+        "so",
+        "Q",
+        "ku",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 68,
+      "romaji": "garari",
+      "morae": [
+        "ga",
+        "ra",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 69,
+      "romaji": "batabata",
+      "morae": [
+        "ba",
+        "ta",
+        "ba",
+        "ta"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 70,
+      "romaji": "hissori",
+      "morae": [
+        "hi",
+        "Q",
+        "so",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 71,
+      "romaji": "boribori",
+      "morae": [
+        "bo",
+        "ri",
+        "bo",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 72,
+      "romaji": "potopoto",
+      "morae": [
+        "po",
+        "to",
+        "po",
+        "to"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 73,
+      "romaji": "kerakera",
+      "morae": [
+        "ke",
+        "ra",
+        "ke",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 74,
+      "romaji": "kutukutu",
+      "morae": [
+        "ku",
+        "tu",
+        "ku",
+        "tu"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 75,
+      "romaji": "pokipoki",
+      "morae": [
+        "po",
+        "ki",
+        "po",
+        "ki"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 76,
+      "romaji": "tyokityoki",
+      "morae": [
+        "tyo",
+        "ki",
+        "tyo",
+        "ki"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 77,
+      "romaji": "kisikisi",
+      "morae": [
+        "ki",
+        "si",
+        "ki",
+        "si"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 4
+    },
+    {
+      "word_id": 78,
+      "romaji": "dotadota",
+      "morae": [
+        "do",
+        "ta",
+        "do",
+        "ta"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 79,
+      "romaji": "sarasara",
+      "morae": [
+        "sa",
+        "ra",
+        "sa",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 80,
+      "romaji": "nebaneba",
+      "morae": [
+        "ne",
+        "ba",
+        "ne",
+        "ba"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 81,
+      "romaji": "dorodoro",
+      "morae": [
+        "do",
+        "ro",
+        "do",
+        "ro"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 82,
+      "romaji": "tururi",
+      "morae": [
+        "tu",
+        "ru",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 83,
+      "romaji": "togetoge",
+      "morae": [
+        "to",
+        "ge",
+        "to",
+        "ge"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 84,
+      "romaji": "husahusa",
+      "morae": [
+        "hu",
+        "sa",
+        "hu",
+        "sa"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 85,
+      "romaji": "gyuQ",
+      "morae": [
+        "gyu",
+        "Q"
+      ],
+      "mora_count": 2,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 86,
+      "romaji": "hunyahunya",
+      "morae": [
+        "hu",
+        "nya",
+        "hu",
+        "nya"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 87,
+      "romaji": "uttori",
+      "morae": [
+        "u",
+        "Q",
+        "to",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 88,
+      "romaji": "hiyari",
+      "morae": [
+        "hi",
+        "ya",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 89,
+      "romaji": "daradara",
+      "morae": [
+        "da",
+        "ra",
+        "da",
+        "ra"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 90,
+      "romaji": "kippari",
+      "morae": [
+        "ki",
+        "Q",
+        "pa",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 91,
+      "romaji": "guruguru",
+      "morae": [
+        "gu",
+        "ru",
+        "gu",
+        "ru"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 92,
+      "romaji": "gakuN",
+      "morae": [
+        "ga",
+        "ku",
+        "N"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 93,
+      "romaji": "pokaN",
+      "morae": [
+        "po",
+        "ka",
+        "N"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 94,
+      "romaji": "tirari",
+      "morae": [
+        "ti",
+        "ra",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 95,
+      "romaji": "zikkuri",
+      "morae": [
+        "zi",
+        "Q",
+        "ku",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": true,
+      "heavy_vowels": 1,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 96,
+      "romaji": "potuN",
+      "morae": [
+        "po",
+        "tu",
+        "N"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": true,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 2,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 97,
+      "romaji": "kurukuru",
+      "morae": [
+        "ku",
+        "ru",
+        "ku",
+        "ru"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 98,
+      "romaji": "urouro",
+      "morae": [
+        "u",
+        "ro",
+        "u",
+        "ro"
+      ],
+      "mora_count": 4,
+      "redup": true,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 4,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 99,
+      "romaji": "sassa",
+      "morae": [
+        "sa",
+        "Q",
+        "sa"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 0
+    },
+    {
+      "word_id": 100,
+      "romaji": "pikari",
+      "morae": [
+        "pi",
+        "ka",
+        "ri"
+      ],
+      "mora_count": 3,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 2
+    },
+    {
+      "word_id": 101,
+      "romaji": "metyakutya",
+      "morae": [
+        "me",
+        "tya",
+        "ku",
+        "tya"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": false,
+      "final_n": false,
+      "ri_suffix": false,
+      "voiced_onset": false,
+      "heavy_vowels": 1,
+      "light_vowels": 1
+    },
+    {
+      "word_id": 102,
+      "romaji": "kittiri",
+      "morae": [
+        "ki",
+        "Q",
+        "ti",
+        "ri"
+      ],
+      "mora_count": 4,
+      "redup": false,
+      "sokuon": true,
+      "final_n": false,
+      "ri_suffix": true,
+      "voiced_onset": false,
+      "heavy_vowels": 0,
+      "light_vowels": 3
+    }
+  ],
+  "expansion_pairs": [
+    {
+      "pair_code": "exp-a1",
+      "word_a": "batabata",
+      "word_b": "hissori",
+      "foil_distance": "0.6250"
+    },
+    {
+      "pair_code": "exp-a2",
+      "word_a": "poripori",
+      "word_b": "boribori",
+      "foil_distance": "0.1500"
+    },
+    {
+      "pair_code": "exp-a3",
+      "word_a": "zyaazyaa",
+      "word_b": "potopoto",
+      "foil_distance": "0.2250"
+    },
+    {
+      "pair_code": "exp-a4",
+      "word_a": "kerakera",
+      "word_b": "kutukutu",
+      "foil_distance": "0.1500"
+    },
+    {
+      "pair_code": "exp-a5",
+      "word_a": "pokipoki",
+      "word_b": "tyokityoki",
+      "foil_distance": "0.0000"
+    },
+    {
+      "pair_code": "exp-a6",
+      "word_a": "kisikisi",
+      "word_b": "dotadota",
+      "foil_distance": "0.3000"
+    },
+    {
+      "pair_code": "exp-h1",
+      "word_a": "sarasara",
+      "word_b": "nebaneba",
+      "foil_distance": "0.0750"
+    },
+    {
+      "pair_code": "exp-h4",
+      "word_a": "dorodoro",
+      "word_b": "tururi",
+      "foil_distance": "0.5375"
+    },
+    {
+      "pair_code": "exp-h5",
+      "word_a": "togetoge",
+      "word_b": "husahusa",
+      "foil_distance": "0.0750"
+    },
+    {
+      "pair_code": "exp-h6",
+      "word_a": "gyuQ",
+      "word_b": "hunyahunya",
+      "foil_distance": "0.5750"
+    },
+    {
+      "pair_code": "exp-i1",
+      "word_a": "uNzari",
+      "word_b": "uttori",
+      "foil_distance": "0.1750"
+    },
+    {
+      "pair_code": "exp-i2",
+      "word_a": "hokkori",
+      "word_b": "hiyari",
+      "foil_distance": "0.2875"
+    },
+    {
+      "pair_code": "exp-i3",
+      "word_a": "daradara",
+      "word_b": "kippari",
+      "foil_distance": "0.6750"
+    },
+    {
+      "pair_code": "exp-i4",
+      "word_a": "guruguru",
+      "word_b": "gakuN",
+      "foil_distance": "0.3375"
+    },
+    {
+      "pair_code": "exp-i5",
+      "word_a": "wakuwaku",
+      "word_b": "pokaN",
+      "foil_distance": "0.3375"
+    },
+    {
+      "pair_code": "exp-v1",
+      "word_a": "tirari",
+      "word_b": "zikkuri",
+      "foil_distance": "0.3875"
+    },
+    {
+      "pair_code": "exp-v2",
+      "word_a": "bissiri",
+      "word_b": "potuN",
+      "foil_distance": "0.6875"
+    },
+    {
+      "pair_code": "exp-v3",
+      "word_a": "pitari",
+      "word_b": "kurukuru",
+      "foil_distance": "0.4875"
+    },
+    {
+      "pair_code": "exp-v4",
+      "word_a": "urouro",
+      "word_b": "sassa",
+      "foil_distance": "0.4625"
+    },
+    {
+      "pair_code": "exp-v5",
+      "word_a": "doNyori",
+      "word_b": "pikari",
+      "foil_distance": "0.2875"
+    },
+    {
+      "pair_code": "exp-v6",
+      "word_a": "metyakutya",
+      "word_b": "kittiri",
+      "foil_distance": "0.3250"
+    }
+  ]
+}

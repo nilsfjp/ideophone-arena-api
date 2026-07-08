@@ -634,6 +634,17 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
 
 ## Changelog
 
+- 2026-07-08: **Stimulus-expansion dark inventory (NIL-86)** — 21 signed-off expansion pairs seeded via
+  `generate_seed_sql.py` into `words`/`presentations`/`pairings` (68->102 words, 204->306 presentations, 34->55
+  pairings) with **no trials**, so they serve in zero live pools (round generation, ratable pool, leaderboard, admin
+  stats) until their TTS audio lands — **trials stay 34; every public DTO/endpoint shape is unchanged (zero API/frontend
+  changes).** The A6 `pairings` columns are now filled on the 21 expansion rows: `signoff_ref`
+  (`stimulus-expansion-signoff.xlsx#<pair>`), `approved_at` (2026-07-02), `foil_distance` (a validation-only covariate,
+  never a gameplay/ordering input). `source='EXPANSION'` distinguishes them from `THESIS`; new pair_codes use the
+  `exp-<id>` namespace. `HAPTIC` added to the `Modality` enum (additive; the 4 clean Haptic pairs). Provenance:
+  every jpn stimulus is one `ja-JP-Wavenet-B` TTS voice — the generator asserts pair-provenance homogeneity, and
+  per-stimulus provenance lives in `scripts/tts-manifest.json` until `stimulus_sources` (M5). Audio itself is generated
+  out-of-band (`scripts/generate_tts_audio.py`, run by Nils).
 - 2026-07-06: **Thesis tidy-data ingestion (NIL-54)** — the thesis Gorilla export (36 participants: 2AFC choosing +
   7-point rating) ingested as generator-emitted seed rows (`generate_seed_sql.py`, `--check` clean): 36 `thesis_p##`
   users, 36 `game_sessions` (`completed_at = NULL`), 1080 `player_answers`, 1080 `ratings`. **No schema change, no

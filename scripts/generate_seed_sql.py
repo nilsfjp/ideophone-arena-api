@@ -8,7 +8,12 @@ import sys
 import uuid
 from collections import OrderedDict
 from dataclasses import dataclass
+from decimal import Decimal, ROUND_HALF_EVEN, getcontext
 from pathlib import Path
+
+# Ample precision for the Decimal foil-distance arithmetic; the value is quantized
+# to 4 places at the end, so --check stays byte-stable regardless of platform.
+getcontext().prec = 50
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -215,6 +220,41 @@ THESIS_ROLE = "ROLE_USER"
 # Fixed namespace so uuid5 session uuids are deterministic (RFC 4122 example NS).
 THESIS_UUID_NAMESPACE = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
 
+# --- NIL-86: stimulus-expansion ingestion (dark inventory) -----------------
+# The 21 signed-off expansion pairs (workbook Pairs sheet, minus H2/H3 which reuse
+# thesis words on a mismatched floor -- deferred). Ingested as words/presentations/
+# pairings but NO trials, so they sit as inventory in zero live pools (ADR-3:
+# a pairing without a trial is unserved) until their TTS audio is generated.
+EXPANSION_PAIRS_CSV = TIDY_DIR / "stimulus-expansion-pairs.csv"
+EXPANSION_CANDIDATES_CSV = TIDY_DIR / "stimulus-expansion-candidates.csv"
+EXPANSION_SOURCE = "EXPANSION"
+EXPANSION_WORKBOOK = "stimulus-expansion-signoff.xlsx"
+# Approval of record: fable-week-plan.md sign-off (ARCHITECTURE ADR-6); the workbook
+# sign_off column is blank, so signoff_ref cites the workbook pair and approved_at
+# carries the plan date. Hardcoded (not date.today()) so --check stays reproducible.
+EXPANSION_APPROVED_AT = "2026-07-02"
+EXPANSION_CONDITION_NAMES = ("CONDITION_1_SOKUON", "CONDITION_2_SOKUON", "CONDITION_3_SOKUON")
+
+# Audio provenance per word (SPEC-tts-synthesis 6.6/6.8). Every current jpn stimulus
+# is one synthesized voice (thesis audio is itself ja-JP-Wavenet-B TTS), so all pairs
+# are provenance-homogeneous; the override map is where future vendored/human audio
+# (XL/M6) would diverge and trip the homogeneity assertion. Provenance's schema home
+# is stimulus_sources at M5; until then it lives in scripts/tts-manifest.json + here.
+TTS_VOICE_PROVENANCE = "tts:gcp:ja-JP-Wavenet-B"
+WORD_PROVENANCE_OVERRIDES: dict[str, str] = {}  # romaji -> provenance
+
+# Hepburn (workbook) -> Kunrei/Nihon-shiki (words.romaji key) fold. A validator only:
+# the CSV carries the explicit romaji key; this cross-checks it (the syllabic-n rule
+# below keeps n before y/vowel, which matches the minted set; ambiguous reuse targets
+# like doNyori are resolved from the explicit key, never folded here).
+HEPBURN_FOLDS = (
+    ("sha", "sya"), ("shu", "syu"), ("sho", "syo"), ("shi", "si"),
+    ("cha", "tya"), ("chu", "tyu"), ("cho", "tyo"), ("chi", "ti"),
+    ("tsu", "tu"),
+    ("ja", "zya"), ("ju", "zyu"), ("jo", "zyo"), ("ji", "zi"),
+    ("fu", "hu"),
+)
+
 
 def to_katakana(hiragana: str) -> str:
     return "".join(
@@ -262,6 +302,13 @@ class Pairing:
     correct_audio: str         # thesis fixed target (word-answer column)
     modality: str
     practice: bool
+    # NIL-86 expansion fields; thesis/practice pairings keep the defaults so their
+    # emitted rows stay byte-identical. Expansion pairings are dark (no trial).
+    source: str = "THESIS"
+    difficulty_prior: str | None = None
+    foil_distance: Decimal | None = None
+    signoff_ref: str | None = None
+    approved_at: str | None = None
 
 
 @dataclass(frozen=True)
@@ -411,6 +458,240 @@ def word_id_map(words: OrderedDict[str, Word]) -> dict[str, int]:
     return {audio_file: index for index, audio_file in enumerate(words.keys(), start=1)}
 
 
+def hepburn_to_kunrei(hepburn: str) -> str:
+    text = hepburn
+    for source_form, target_form in HEPBURN_FOLDS:
+        text = text.replace(source_form, target_form)
+    text = re.sub(r"n(?![aiueoy])", "N", text)  # syllabic/final n (n before y/vowel stays)
+    text = re.sub(r"q$", "Q", text)             # final sokuon
+    return text
+
+
+def mora_segments(romaji: str) -> list[str]:
+    # Segment a Kunrei romaji into morae, mirroring romaji_to_hiragana but returning
+    # romaji tokens; a doubled non-vowel consonant becomes a 'Q' (sokuon) mora, so the
+    # feature extraction sees the geminate that words.romaji spells as a doubled letter.
+    morae: list[str] = []
+    index = 0
+    while index < len(romaji):
+        char = romaji[index]
+        if char == "N":
+            morae.append("N")
+            index += 1
+            continue
+        if char == "Q":
+            morae.append("Q")
+            index += 1
+            continue
+        if (
+            index + 1 < len(romaji)
+            and romaji[index] == romaji[index + 1]
+            and char not in {"a", "e", "i", "o", "u", "n"}
+        ):
+            morae.append("Q")
+            index += 1
+            continue
+        for width in (3, 2, 1):
+            token = romaji[index : index + width]
+            if token in KANA_TOKENS:
+                morae.append(token)
+                index += width
+                break
+        else:
+            raise ValueError(f"Cannot segment romaji {romaji} near {romaji[index:]}")
+    return morae
+
+
+def feature_vector(romaji: str) -> dict[str, object]:
+    # The 7 whole-form features of SPEC-free-form-entry section 5 (the metric behind
+    # the rho=-.155 validation result). voicedOnset is pinned to the first mora's
+    # leading letter in {g,z,d,b} (so palatalized zy/gy/by/dz count as voiced).
+    morae = mora_segments(romaji)
+    count = len(morae)
+    heavy = light = 0
+    for mora in morae:
+        if mora in ("N", "Q"):
+            continue
+        vowel = mora[-1]
+        if vowel in ("o", "u"):
+            heavy += 1
+        elif vowel in ("i", "e"):
+            light += 1
+    heavy_ratio = Decimal("0.5") if heavy + light == 0 else Decimal(heavy) / Decimal(heavy + light)
+    redup = count >= 4 and count % 2 == 0 and morae[: count // 2] == morae[count // 2 :]
+    return {
+        "mora": count,
+        "redup": redup,
+        "sokuon": "Q" in morae,
+        "final_n": morae[-1] == "N",
+        "ri_suffix": morae[-1] == "ri" and not redup,
+        "voiced_onset": morae[0][0] in {"g", "z", "d", "b"},
+        "heavy_ratio": heavy_ratio,
+    }
+
+
+def foil_distance(romaji_a: str, romaji_b: str) -> Decimal:
+    # Symmetric featural distance in [0, 1]: 1 - the SPEC section 5 weighted similarity.
+    # A validation-only covariate (rho=-.155 n.s. on the thesis pairs) -- never an
+    # ordering/difficulty input for is_core content (ARCHITECTURE ADR-6).
+    a = feature_vector(romaji_a)
+    b = feature_vector(romaji_b)
+
+    def agree(key: str) -> Decimal:
+        return Decimal(1) if a[key] == b[key] else Decimal(0)
+
+    similarity = (
+        Decimal("0.20") * agree("redup")
+        + Decimal("0.15") * agree("sokuon")
+        + Decimal("0.10") * agree("final_n")
+        + Decimal("0.10") * agree("ri_suffix")
+        + Decimal("0.15") * agree("voiced_onset")
+        + Decimal("0.15") * (Decimal(1) - abs(a["heavy_ratio"] - b["heavy_ratio"]))
+        + Decimal("0.15")
+        * (Decimal(1) - abs(Decimal(a["mora"]) - Decimal(b["mora"])) / Decimal(max(a["mora"], b["mora"])))
+    )
+    return (Decimal(1) - similarity).quantize(Decimal("0.0001"), rounding=ROUND_HALF_EVEN)
+
+
+def read_expansion_candidates(path: Path) -> dict[str, dict[str, str]]:
+    with path.open("r", encoding="utf-8-sig", newline="") as source:
+        return {row["romaji"]: row for row in csv.DictReader(source)}
+
+
+def read_expansion_pairs(path: Path) -> list[dict[str, str]]:
+    with path.open("r", encoding="utf-8-sig", newline="") as source:
+        return list(csv.DictReader(source))
+
+
+def mint_expansion_word(
+    words: OrderedDict[str, Word],
+    presentations: list[Presentation],
+    romaji: str,
+    candidate: dict[str, str],
+    modality: str,
+    audio_prefix: str,
+) -> str:
+    kana = romaji_to_hiragana(romaji)  # raises on a malformed Kunrei key
+    if hepburn_to_kunrei(candidate["romaji_hepburn"]) != romaji:
+        raise ValueError(f"Hepburn {candidate['romaji_hepburn']!r} does not fold to Kunrei {romaji!r}")
+    if candidate["pool"] == "A" and candidate["workbook_hira"] and kana != candidate["workbook_hira"]:
+        raise ValueError(f"Derived kana {kana!r} for {romaji!r} != workbook hira {candidate['workbook_hira']!r}")
+
+    kata_share = candidate["kata_share"]
+    canonical_script = "K" if (kata_share and float(kata_share) > 0.5) else "H"  # ADR-6: kata_share > 0.5
+    hiragana_form, katakana_form = LONG_VOWEL_FORMS.get(romaji, (kana, to_katakana(kana)))
+    canonical_form = hiragana_form if canonical_script == "H" else katakana_form
+    incongruent_form = katakana_form if canonical_script == "H" else hiragana_form
+    audio_file = f"audio/{audio_prefix}{canonical_script.lower()}-{romaji}.m4a"
+    if audio_file in words:
+        raise ValueError(f"Expansion word audio_file already present: {audio_file}")
+
+    words[audio_file] = Word(
+        audio_file=audio_file,
+        romaji=romaji,
+        kana=kana,
+        canonical_form=canonical_form,
+        canonical_script=canonical_script,
+        gloss=candidate["gloss"],
+        modality=modality,
+    )
+    other_script = "K" if canonical_script == "H" else "H"
+    # CONDITION_1 audio-only (canonical reveal, U/D code); CONDITION_2 congruent
+    # (canonical script); CONDITION_3 incongruent (opposite script) -- invariants 1/3.
+    condition_specs = (
+        (EXPANSION_CONDITION_NAMES[0], canonical_form, canonical_script + ("U" if canonical_script == "H" else "D")),
+        (EXPANSION_CONDITION_NAMES[1], canonical_form, canonical_script + canonical_script),
+        (EXPANSION_CONDITION_NAMES[2], incongruent_form, canonical_script + other_script),
+    )
+    for condition_name, display_form, script_code in condition_specs:
+        presentations.append(
+            Presentation(
+                audio_file=audio_file,
+                condition_name=condition_name,
+                display_form=display_form,
+                script_code=script_code,
+            )
+        )
+    return audio_file
+
+
+def collect_expansion(
+    words: OrderedDict[str, Word],
+    presentations: list[Presentation],
+    pairings: OrderedDict[str, Pairing],
+) -> None:
+    # Appends after the thesis+practice pass so thesis words keep ids 1-68 and thesis
+    # pairings 1-34 (the shuffle/trial-id contract). Expansion words -> ids 69+, expansion
+    # pairings -> 35+ with NO trials (dark). word_a is always the lower-id member so the
+    # word_a_id < word_b_id shuffle-order invariant holds (reused word before new word).
+    if not EXPANSION_PAIRS_CSV.exists() or not EXPANSION_CANDIDATES_CSV.exists():
+        raise FileNotFoundError(f"Expansion CSVs missing: {EXPANSION_PAIRS_CSV}, {EXPANSION_CANDIDATES_CSV}")
+    candidates = read_expansion_candidates(EXPANSION_CANDIDATES_CSV)
+    romaji_to_audio = {word.romaji: audio for audio, word in words.items()}
+
+    for row in read_expansion_pairs(EXPANSION_PAIRS_CSV):
+        pair_id = row["pair_id"]
+        pair_code = "exp-" + pair_id.lower()
+        modality = row["modality"]
+        audio_prefix = row["audio_prefix"]
+        word_1 = row["word_1"]
+        word_2 = row["word_2"]
+
+        if word_1 not in candidates:
+            raise ValueError(f"Expansion word_1 {word_1!r} ({pair_id}) missing from candidates")
+        word_1_audio = mint_expansion_word(words, presentations, word_1, candidates[word_1], modality, audio_prefix)
+
+        if row["word_2_is_existing"] == "1":
+            if word_2 not in romaji_to_audio:
+                raise ValueError(f"Expansion reuse target {word_2!r} ({pair_id}) is not an existing word")
+            word_2_audio = romaji_to_audio[word_2]
+        else:
+            if word_2 not in candidates:
+                raise ValueError(f"Expansion word_2 {word_2!r} ({pair_id}) missing from candidates")
+            word_2_audio = mint_expansion_word(words, presentations, word_2, candidates[word_2], modality, audio_prefix)
+
+        romaji_to_audio[word_1] = word_1_audio
+        romaji_to_audio.setdefault(word_2, word_2_audio)
+
+        ids = word_id_map(words)
+        word_a_audio, word_b_audio = sorted((word_1_audio, word_2_audio), key=lambda audio: ids[audio])
+        if pair_code in pairings:
+            raise ValueError(f"Duplicate expansion pair_code {pair_code}")
+        pairings[pair_code] = Pairing(
+            pair_code=pair_code,
+            word_a_audio=word_a_audio,
+            word_b_audio=word_b_audio,
+            correct_audio=word_a_audio,  # placeholder member; expansion pairs are dark (no trial)
+            modality=modality,
+            practice=False,
+            source=EXPANSION_SOURCE,
+            difficulty_prior=row["difficulty_prior"],
+            foil_distance=foil_distance(words[word_a_audio].romaji, words[word_b_audio].romaji),
+            signoff_ref=f"{EXPANSION_WORKBOOK}#{pair_id}",
+            approved_at=EXPANSION_APPROVED_AT,
+        )
+
+
+def word_provenance(word: Word) -> str:
+    return WORD_PROVENANCE_OVERRIDES.get(word.romaji, TTS_VOICE_PROVENANCE)
+
+
+def validate_pair_provenance(
+    words: OrderedDict[str, Word], pairings: OrderedDict[str, Pairing]
+) -> None:
+    # Pair-provenance homogeneity (SPEC-tts-synthesis 6.8): both members of every 2AFC
+    # pair must share audio provenance. Trivially true today (all ja-JP-Wavenet-B TTS);
+    # fences future vendored/human x TTS mixes beside the invariant-4 modality check.
+    for pairing in pairings.values():
+        provenance_a = word_provenance(words[pairing.word_a_audio])
+        provenance_b = word_provenance(words[pairing.word_b_audio])
+        if provenance_a != provenance_b:
+            raise ValueError(
+                f"Pairing {pairing.pair_code} members disagree on audio provenance "
+                f"({provenance_a} vs {provenance_b})"
+            )
+
+
 def collect_data() -> tuple[OrderedDict[str, Word], list[Presentation], OrderedDict[str, Pairing]]:
     words: OrderedDict[str, Word] = OrderedDict()
     presentations: list[Presentation] = []
@@ -437,7 +718,11 @@ def collect_data() -> tuple[OrderedDict[str, Word], list[Presentation], OrderedD
             raise ValueError(f"Expected 4 practice rows in {path.name}, found {len(practice_rows)}")
         collect_rows(words, presentations, pairings, practice_rows, condition_name, path, practice=True)
 
+    # NIL-86: expansion pairs append last (dark inventory, no trials).
+    collect_expansion(words, presentations, pairings)
+
     validate_unique_constraints(words, presentations, pairings)
+    validate_pair_provenance(words, pairings)
     return words, presentations, pairings
 
 
@@ -446,12 +731,14 @@ def validate_unique_constraints(
     presentations: list[Presentation],
     pairings: OrderedDict[str, Pairing],
 ) -> None:
-    if len(words) != 68:
-        raise ValueError(f"Expected 68 words, found {len(words)}")
-    if len(presentations) != 204:
-        raise ValueError(f"Expected 204 presentations, found {len(presentations)}")
-    if len(pairings) != 34:
-        raise ValueError(f"Expected 34 pairings, found {len(pairings)}")
+    # 68 thesis/practice + 34 expansion words; 204 + 102 presentations; 34 thesis/practice
+    # pairings + 21 expansion pairings (the expansion pairings carry no trials -- dark).
+    if len(words) != 102:
+        raise ValueError(f"Expected 102 words, found {len(words)}")
+    if len(presentations) != 306:
+        raise ValueError(f"Expected 306 presentations, found {len(presentations)}")
+    if len(pairings) != 55:
+        raise ValueError(f"Expected 55 pairings, found {len(pairings)}")
 
     # words UNIQUE(language_id, romaji): one language in v1, so romaji is the key.
     romaji_keys: dict[str, str] = {}
@@ -549,6 +836,8 @@ def sql_literal(value: object) -> str:
     if isinstance(value, int):
         return str(value)
     if isinstance(value, float):           # thesis_accuracy DECIMAL(5,4)
+        return f"{value:.4f}"
+    if isinstance(value, Decimal):         # foil_distance DECIMAL(6,4)
         return f"{value:.4f}"
     return sql_string(str(value))
 
@@ -969,6 +1258,10 @@ def render_sql(
         ") ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;",
         "",
         "-- Reference data + trial content generated from src/main/resources/condition-*-choosing-sokuon.csv.",
+        "-- NIL-86: 21 expansion pairs (docs/research/data/stimulus-expansion-*.csv) seeded as dark",
+        "-- inventory -- words/presentations/pairings but no trials, so they serve in zero live pools",
+        "-- until their TTS audio lands. Every jpn stimulus is ja-JP-Wavenet-B TTS; per-stimulus",
+        "-- provenance lives in scripts/tts-manifest.json until stimulus_sources (M5).",
     ]
 
     language_rows = list(LANGUAGES)
@@ -1010,14 +1303,16 @@ def render_sql(
                 word_ids[pairing.word_b_audio],
                 pairing.modality,
                 True,       # is_core: real contrastive same-modality pairs (invariant 4)
-                "THESIS",   # source
-                None,       # difficulty_prior: thesis pairs use thesis_accuracy
-                thesis_accuracy,
-                None,       # foil_distance
-                None,       # signoff_ref
-                None,       # approved_at
+                pairing.source,             # THESIS (default) or EXPANSION
+                pairing.difficulty_prior,   # thesis pairs None (use thesis_accuracy); expansion sets it
+                thesis_accuracy,            # None for expansion codes
+                pairing.foil_distance,      # None for thesis; computed for expansion
+                pairing.signoff_ref,        # None for thesis; workbook ref for expansion
+                pairing.approved_at,        # None for thesis; sign-off date for expansion
             )
         )
+    # Expansion pairings emit NO trial (dark): a pairing without a trial is unserved
+    # (ADR-3), so round generation -- which is trial-driven -- never reaches them.
     trial_rows = [
         (
             pairing_ids[code],  # trial id == pairing id (1:1 today, same order)
@@ -1028,6 +1323,7 @@ def render_sql(
             pairing.practice,   # is_practice
         )
         for code, pairing in pairings.items()
+        if pairing.source != EXPANSION_SOURCE
     ]
 
     lines.extend(insert_block("languages", ["id", "iso_code", "name", "family", "player_note"], language_rows))
@@ -1109,9 +1405,18 @@ def main() -> int:
     ratings = read_rating(RATING_CSV)
     validate_thesis(choosing, ratings, words, pairings)
     rendered = render_sql(words, presentations, pairings, choosing, ratings)
+    expansion_pairs = [p for p in pairings.values() if p.source == EXPANSION_SOURCE]
+    thesis_pairs = [p for p in pairings.values() if p.source != EXPANSION_SOURCE]
+    thesis_member_audios = {a for p in thesis_pairs for a in (p.word_a_audio, p.word_b_audio)}
+    mixed = sum(
+        1 for p in expansion_pairs
+        if p.word_a_audio in thesis_member_audios or p.word_b_audio in thesis_member_audios
+    )
     summary = (
-        f"{len(words)} words, {len(presentations)} presentations, {len(pairings)} pairings/trials, "
-        f"{THESIS_USER_COUNT} thesis users, {len(choosing)} answers, {len(ratings)} ratings"
+        f"{len(words)} words, {len(presentations)} presentations, {len(pairings)} pairings "
+        f"({len(expansion_pairs)} expansion dark, {mixed} mixed thesis x expansion, provenance-homogeneous), "
+        f"{len(thesis_pairs)} trials, {THESIS_USER_COUNT} thesis users, "
+        f"{len(choosing)} answers, {len(ratings)} ratings"
     )
 
     if args.check:

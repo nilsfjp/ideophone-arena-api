@@ -1,0 +1,930 @@
+{
+  "voice": {
+    "languageCode": "ja-JP",
+    "name": "ja-JP-Wavenet-B",
+    "ssmlGender": "FEMALE"
+  },
+  "project": "enduring-sign-501717-f4",
+  "audio_dir": "/code/js/ideophone-arena-web/stimuli/audio",
+  "note": "This session emits the manifest; Nils runs the batch. status=present means audio already shipped; status=pending awaits synthesis. Provenance is splittable per row.",
+  "words": [
+    {
+      "word_id": 1,
+      "romaji": "gosogoso",
+      "stimulus_file": "audio/a0h-gosogoso.m4a",
+      "input_text": "ごそごそ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 2,
+      "romaji": "katakata",
+      "stimulus_file": "audio/a0k-katakata.m4a",
+      "input_text": "カタカタ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 3,
+      "romaji": "sitosito",
+      "stimulus_file": "audio/a1h-sitosito.m4a",
+      "input_text": "しとしと",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 4,
+      "romaji": "batyabatya",
+      "stimulus_file": "audio/a1k-batyabatya.m4a",
+      "input_text": "バチャバチャ",
+      "char_count": 6,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 5,
+      "romaji": "zyaazyaa",
+      "stimulus_file": "audio/a2h-zyaazyaa.m4a",
+      "input_text": "じゃーじゃー",
+      "char_count": 6,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 6,
+      "romaji": "potapota",
+      "stimulus_file": "audio/a2k-potapota.m4a",
+      "input_text": "ポタポタ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 7,
+      "romaji": "ziriziri",
+      "stimulus_file": "audio/a3h-ziriziri.m4a",
+      "input_text": "じりじり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 8,
+      "romaji": "syakisyaki",
+      "stimulus_file": "audio/a3k-syakisyaki.m4a",
+      "input_text": "シャキシャキ",
+      "char_count": 6,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 9,
+      "romaji": "zuruzuru",
+      "stimulus_file": "audio/a4h-zuruzuru.m4a",
+      "input_text": "ずるずる",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 10,
+      "romaji": "poripori",
+      "stimulus_file": "audio/a4k-poripori.m4a",
+      "input_text": "ポリポリ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 11,
+      "romaji": "sororisorori",
+      "stimulus_file": "audio/a5h-sororisorori.m4a",
+      "input_text": "そろりそろり",
+      "char_count": 6,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 12,
+      "romaji": "dotabata",
+      "stimulus_file": "audio/a5k-dotabata.m4a",
+      "input_text": "ドタバタ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 13,
+      "romaji": "dosari",
+      "stimulus_file": "audio/a6h-dosari.m4a",
+      "input_text": "どさり",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 14,
+      "romaji": "katiQ",
+      "stimulus_file": "audio/a6k-katiQ.m4a",
+      "input_text": "カチッ",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 15,
+      "romaji": "dosidosi",
+      "stimulus_file": "audio/a7h-dosidosi.m4a",
+      "input_text": "どしどし",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 16,
+      "romaji": "gisigisi",
+      "stimulus_file": "audio/a7k-gisigisi.m4a",
+      "input_text": "ギシギシ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 17,
+      "romaji": "bosori",
+      "stimulus_file": "audio/a8h-bosori.m4a",
+      "input_text": "ぼそり",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 18,
+      "romaji": "kyaakyaa",
+      "stimulus_file": "audio/a8k-kyaakyaa.m4a",
+      "input_text": "キャーキャー",
+      "char_count": 6,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 19,
+      "romaji": "mogomogo",
+      "stimulus_file": "audio/a9h-mogomogo.m4a",
+      "input_text": "もごもご",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 20,
+      "romaji": "sakuQ",
+      "stimulus_file": "audio/a9k-sakuQ.m4a",
+      "input_text": "サクッ",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 21,
+      "romaji": "kukkiri",
+      "stimulus_file": "audio/v0h-kukkiri.m4a",
+      "input_text": "くっきり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 22,
+      "romaji": "tiratira",
+      "stimulus_file": "audio/v0k-tiratira.m4a",
+      "input_text": "チラチラ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 23,
+      "romaji": "kurikuri",
+      "stimulus_file": "audio/v1h-kurikuri.m4a",
+      "input_text": "くりくり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 24,
+      "romaji": "gizagiza",
+      "stimulus_file": "audio/v1k-gizagiza.m4a",
+      "input_text": "ギザギザ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 25,
+      "romaji": "doNyori",
+      "stimulus_file": "audio/v2h-doNyori.m4a",
+      "input_text": "どんより",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 26,
+      "romaji": "kirakira",
+      "stimulus_file": "audio/v2k-kirakira.m4a",
+      "input_text": "キラキラ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 27,
+      "romaji": "pitari",
+      "stimulus_file": "audio/v3h-pitari.m4a",
+      "input_text": "ぴたり",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 28,
+      "romaji": "hirahira",
+      "stimulus_file": "audio/v3k-hirahira.m4a",
+      "input_text": "ヒラヒラ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 29,
+      "romaji": "bissiri",
+      "stimulus_file": "audio/v4h-bissiri.m4a",
+      "input_text": "びっしり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 30,
+      "romaji": "barabara",
+      "stimulus_file": "audio/v4k-barabara.m4a",
+      "input_text": "バラバラ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 31,
+      "romaji": "busuri",
+      "stimulus_file": "audio/v5h-busuri.m4a",
+      "input_text": "ぶすり",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 32,
+      "romaji": "nikoniko",
+      "stimulus_file": "audio/v5k-nikoniko.m4a",
+      "input_text": "ニコニコ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 33,
+      "romaji": "huNwari",
+      "stimulus_file": "audio/v6h-huNwari.m4a",
+      "input_text": "ふんわり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 34,
+      "romaji": "gotugotu",
+      "stimulus_file": "audio/v6k-gotugotu.m4a",
+      "input_text": "ゴツゴツ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 35,
+      "romaji": "boNyari",
+      "stimulus_file": "audio/v7h-boNyari.m4a",
+      "input_text": "ぼんやり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 36,
+      "romaji": "kiriQ",
+      "stimulus_file": "audio/v7k-kiriQ.m4a",
+      "input_text": "キリッ",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 37,
+      "romaji": "marumaru",
+      "stimulus_file": "audio/v8h-marumaru.m4a",
+      "input_text": "まるまる",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 38,
+      "romaji": "garigari",
+      "stimulus_file": "audio/v8k-garigari.m4a",
+      "input_text": "ガリガリ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 39,
+      "romaji": "mukumuku",
+      "stimulus_file": "audio/v9h-mukumuku.m4a",
+      "input_text": "むくむく",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 40,
+      "romaji": "bosabosa",
+      "stimulus_file": "audio/v9k-bosabosa.m4a",
+      "input_text": "ボサボサ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 41,
+      "romaji": "uNzari",
+      "stimulus_file": "audio/i0h-uNzari.m4a",
+      "input_text": "うんざり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 42,
+      "romaji": "wakuwaku",
+      "stimulus_file": "audio/i0k-wakuwaku.m4a",
+      "input_text": "ワクワク",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 43,
+      "romaji": "geNnari",
+      "stimulus_file": "audio/i1h-geNnari.m4a",
+      "input_text": "げんなり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 44,
+      "romaji": "gatugatu",
+      "stimulus_file": "audio/i1k-gatugatu.m4a",
+      "input_text": "ガツガツ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 45,
+      "romaji": "syoboN",
+      "stimulus_file": "audio/i2h-syoboN.m4a",
+      "input_text": "しょぼん",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 46,
+      "romaji": "ruNruN",
+      "stimulus_file": "audio/i2k-ruNruN.m4a",
+      "input_text": "ルンルン",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 47,
+      "romaji": "sukkiri",
+      "stimulus_file": "audio/i3h-sukkiri.m4a",
+      "input_text": "すっきり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 48,
+      "romaji": "iraira",
+      "stimulus_file": "audio/i3k-iraira.m4a",
+      "input_text": "イライラ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 49,
+      "romaji": "tyaNto",
+      "stimulus_file": "audio/i4h-tyaNto.m4a",
+      "input_text": "ちゃんと",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 50,
+      "romaji": "dogimagi",
+      "stimulus_file": "audio/i4k-dogimagi.m4a",
+      "input_text": "ドギマギ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 51,
+      "romaji": "nobinobi",
+      "stimulus_file": "audio/i5h-nobinobi.m4a",
+      "input_text": "のびのび",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 52,
+      "romaji": "harahara",
+      "stimulus_file": "audio/i5k-harahara.m4a",
+      "input_text": "ハラハラ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 53,
+      "romaji": "noNbiri",
+      "stimulus_file": "audio/i6h-noNbiri.m4a",
+      "input_text": "のんびり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 54,
+      "romaji": "girigiri",
+      "stimulus_file": "audio/i6k-girigiri.m4a",
+      "input_text": "ギリギリ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 55,
+      "romaji": "hokkori",
+      "stimulus_file": "audio/i7h-hokkori.m4a",
+      "input_text": "ほっこり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 56,
+      "romaji": "zokuzoku",
+      "stimulus_file": "audio/i7k-zokuzoku.m4a",
+      "input_text": "ゾクゾク",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 57,
+      "romaji": "hoQ",
+      "stimulus_file": "audio/i8h-hoQ.m4a",
+      "input_text": "ほっ",
+      "char_count": 2,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 58,
+      "romaji": "dokiri",
+      "stimulus_file": "audio/i8k-dokiri.m4a",
+      "input_text": "ドキリ",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 59,
+      "romaji": "yuttari",
+      "stimulus_file": "audio/i9h-yuttari.m4a",
+      "input_text": "ゆったり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 60,
+      "romaji": "dokidoki",
+      "stimulus_file": "audio/i9k-dokidoki.m4a",
+      "input_text": "ドキドキ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 61,
+      "romaji": "sotto",
+      "stimulus_file": "audio/p0h-sotto.m4a",
+      "input_text": "そっと",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 62,
+      "romaji": "gataN",
+      "stimulus_file": "audio/p0k-gataN.m4a",
+      "input_text": "ガタン",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 63,
+      "romaji": "zitto",
+      "stimulus_file": "audio/p1h-zitto.m4a",
+      "input_text": "じっと",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 64,
+      "romaji": "paQ",
+      "stimulus_file": "audio/p1k-paQ.m4a",
+      "input_text": "パッ",
+      "char_count": 2,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 65,
+      "romaji": "sorosoro",
+      "stimulus_file": "audio/p2h-sorosoro.m4a",
+      "input_text": "そろそろ",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 66,
+      "romaji": "gaNgaN",
+      "stimulus_file": "audio/p2k-gaNgaN.m4a",
+      "input_text": "ガンガン",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 67,
+      "romaji": "sokkuri",
+      "stimulus_file": "audio/p3h-sokkuri.m4a",
+      "input_text": "そっくり",
+      "char_count": 4,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 68,
+      "romaji": "garari",
+      "stimulus_file": "audio/p3k-garari.m4a",
+      "input_text": "ガラリ",
+      "char_count": 3,
+      "status": "present",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2025-03-27"
+    },
+    {
+      "word_id": 69,
+      "romaji": "batabata",
+      "stimulus_file": "audio/a10k-batabata.m4a",
+      "input_text": "バタバタ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 70,
+      "romaji": "hissori",
+      "stimulus_file": "audio/a10h-hissori.m4a",
+      "input_text": "ひっそり",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 71,
+      "romaji": "boribori",
+      "stimulus_file": "audio/a11h-boribori.m4a",
+      "input_text": "ぼりぼり",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 72,
+      "romaji": "potopoto",
+      "stimulus_file": "audio/a12h-potopoto.m4a",
+      "input_text": "ぽとぽと",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 73,
+      "romaji": "kerakera",
+      "stimulus_file": "audio/a13h-kerakera.m4a",
+      "input_text": "けらけら",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 74,
+      "romaji": "kutukutu",
+      "stimulus_file": "audio/a13h-kutukutu.m4a",
+      "input_text": "くつくつ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 75,
+      "romaji": "pokipoki",
+      "stimulus_file": "audio/a14h-pokipoki.m4a",
+      "input_text": "ぽきぽき",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 76,
+      "romaji": "tyokityoki",
+      "stimulus_file": "audio/a14h-tyokityoki.m4a",
+      "input_text": "ちょきちょき",
+      "char_count": 6,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 77,
+      "romaji": "kisikisi",
+      "stimulus_file": "audio/a15h-kisikisi.m4a",
+      "input_text": "きしきし",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 78,
+      "romaji": "dotadota",
+      "stimulus_file": "audio/a15h-dotadota.m4a",
+      "input_text": "どたどた",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 79,
+      "romaji": "sarasara",
+      "stimulus_file": "audio/h1k-sarasara.m4a",
+      "input_text": "サラサラ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 80,
+      "romaji": "nebaneba",
+      "stimulus_file": "audio/h1k-nebaneba.m4a",
+      "input_text": "ネバネバ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 81,
+      "romaji": "dorodoro",
+      "stimulus_file": "audio/h4k-dorodoro.m4a",
+      "input_text": "ドロドロ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 82,
+      "romaji": "tururi",
+      "stimulus_file": "audio/h4h-tururi.m4a",
+      "input_text": "つるり",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 83,
+      "romaji": "togetoge",
+      "stimulus_file": "audio/h5h-togetoge.m4a",
+      "input_text": "とげとげ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 84,
+      "romaji": "husahusa",
+      "stimulus_file": "audio/h5h-husahusa.m4a",
+      "input_text": "ふさふさ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 85,
+      "romaji": "gyuQ",
+      "stimulus_file": "audio/h6h-gyuQ.m4a",
+      "input_text": "ぎゅっ",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 86,
+      "romaji": "hunyahunya",
+      "stimulus_file": "audio/h6h-hunyahunya.m4a",
+      "input_text": "ふにゃふにゃ",
+      "char_count": 6,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 87,
+      "romaji": "uttori",
+      "stimulus_file": "audio/i10h-uttori.m4a",
+      "input_text": "うっとり",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 88,
+      "romaji": "hiyari",
+      "stimulus_file": "audio/i11h-hiyari.m4a",
+      "input_text": "ひやり",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 89,
+      "romaji": "daradara",
+      "stimulus_file": "audio/i12k-daradara.m4a",
+      "input_text": "ダラダラ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 90,
+      "romaji": "kippari",
+      "stimulus_file": "audio/i12h-kippari.m4a",
+      "input_text": "きっぱり",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 91,
+      "romaji": "guruguru",
+      "stimulus_file": "audio/i13h-guruguru.m4a",
+      "input_text": "ぐるぐる",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 92,
+      "romaji": "gakuN",
+      "stimulus_file": "audio/i13k-gakuN.m4a",
+      "input_text": "ガクン",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 93,
+      "romaji": "pokaN",
+      "stimulus_file": "audio/i14h-pokaN.m4a",
+      "input_text": "ぽかん",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 94,
+      "romaji": "tirari",
+      "stimulus_file": "audio/v10h-tirari.m4a",
+      "input_text": "ちらり",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 95,
+      "romaji": "zikkuri",
+      "stimulus_file": "audio/v10h-zikkuri.m4a",
+      "input_text": "じっくり",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 96,
+      "romaji": "potuN",
+      "stimulus_file": "audio/v11h-potuN.m4a",
+      "input_text": "ぽつん",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 97,
+      "romaji": "kurukuru",
+      "stimulus_file": "audio/v12h-kurukuru.m4a",
+      "input_text": "くるくる",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 98,
+      "romaji": "urouro",
+      "stimulus_file": "audio/v13h-urouro.m4a",
+      "input_text": "うろうろ",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 99,
+      "romaji": "sassa",
+      "stimulus_file": "audio/v13h-sassa.m4a",
+      "input_text": "さっさ",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 100,
+      "romaji": "pikari",
+      "stimulus_file": "audio/v14h-pikari.m4a",
+      "input_text": "ぴかり",
+      "char_count": 3,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 101,
+      "romaji": "metyakutya",
+      "stimulus_file": "audio/v15h-metyakutya.m4a",
+      "input_text": "めちゃくちゃ",
+      "char_count": 6,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    },
+    {
+      "word_id": 102,
+      "romaji": "kittiri",
+      "stimulus_file": "audio/v15h-kittiri.m4a",
+      "input_text": "きっちり",
+      "char_count": 4,
+      "status": "ok",
+      "provenance": "tts:gcp:ja-JP-Wavenet-B:2026-07-08"
+    }
+  ]
+}
