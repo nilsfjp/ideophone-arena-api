@@ -68,6 +68,8 @@ class LadderHttpTests {
         assertEquals("LADDER", JsonPath.read(sessionJson, "$.gameMode"));
         assertEquals("HAPTIC", JsonPath.read(sessionJson, "$.floor"));
         String sessionUuid = JsonPath.read(sessionJson, "$.sessionUuid");
+        // A ladder session's scored total is its floor's pair count, not the CHOOSING pool.
+        int announcedTotalRounds = ((Number) JsonPath.read(sessionJson, "$.totalRounds")).intValue();
 
         int served = 0;
         String completionJson = null;
@@ -95,6 +97,8 @@ class LadderHttpTests {
 
         assertNotNull(completionJson, "the ladder floor must reach completion");
         assertEquals(4, served, "the Touch floor serves exactly its 4 pairs");
+        assertEquals(served, announcedTotalRounds,
+                "the session's announced totalRounds must equal the rounds it actually serves");
 
         // The floor now reports cleared with the caller's best score.
         String floorsJson = getFloors(token);

@@ -1308,3 +1308,146 @@ Next single task:
 NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->
 romaji input -> reveal card reusing the feedback-panel layout + `StimulusPlayback`, motion-reveal choreography
 (essence-review D1), only the frozen SPEC-view-designs section 8 strings, kana discipline per invariant 1.
+
+## 2026-07-09 ("NIL-88: A10 automation exemption + ratings tie-break + AuthService Locale.ROOT")
+
+Session goal:
+Land three adjudicated api fixes and, as their proof-of-life, take NIL-42's sanctioned browser loop to green end to
+end -- closing the proof gate the A10 guard had been blocking.
+
+Changed:
+- `validation/ReservedUsernamePrefixValidator`: gains a constructor
+  `@Value("${app.automation.allow-reserved-registration:false}") boolean` and returns `true` early when set. Spring's
+  autoconfigured `LocalValidatorFactoryBean` installs `SpringConstraintValidatorFactory`, which instantiates
+  validators through `beanFactory.createBean(...)`, so the lone constructor is autowired without `@Autowired` (Boot
+  4.0.6 / Framework 7.0.7, read from source before relying on it). Prefix list, message, and the NIL-41 `Locale.ROOT`
+  fold are untouched.
+- `src/main/resources/application-automation.properties` (new, tracked): the property's only source in the repo.
+  Loads solely under the `automation` profile. **A10 stays pre-deploy-hard**: `docker-compose.yml` sets no
+  `SPRING_PROFILES_ACTIVE`, so the container's active profile stays `local` and this file is never read; the `@Value`
+  default is `false`. `./mvnw test` also runs `local`-only, which is precisely what keeps `RegistrationHttpTests`
+  honest as the guarded-default proof. Placement was adjudicated in-session: putting the key in
+  `application-local.properties` would have been loaded by the test JVM, failing the three rejection tests and making
+  "absent => guarded" untestable.
+- `repository/RatingRepository` + `service/RatingService`: `findByUserIdOrderByRatedAtDesc` ->
+  `findByUserIdOrderByRatedAtDescIdDesc` (single call site), with the rationale comment mirrored from
+  `ProductionRepository`. No response-shape change; resolves the defect NIL-62 deferred.
+- `service/AuthService`: the registration email fold takes `Locale.ROOT`. Swept `src/main/java`: this was the last
+  bare `toLowerCase()`; `PhonologyService`, `ProductionService`, and the validator already passed `Locale.ROOT`, and
+  there is no `toUpperCase(` anywhere. No register/login mismatch exists -- login authenticates by username, and the
+  username is never case-folded.
+- Tests: new `RegistrationAutomationHttpTests`
+  (`@SpringBootTest(properties = "app.automation.allow-reserved-registration=true")`, the `StaticResourceHttpTests`
+  precedent) asserts `browser_loop_*` -> 201. It deliberately never registers a `thesis_p*` row. `RatingHttpTests`
+  gains `sameSecondRatedAtTiesBreakByDescendingId`, which fabricates an exact tie with a raw-JDBC
+  `update ratings set rated_at = ?` (JPA maps the column `updatable = false`) and asserts id-descending order.
+- Docs: contract changelog entry + the ratings tie sentence + the NIL-62 "known defect" note marked RESOLVED;
+  demo-runbook gains a "Booting for the browser loop (automation profile)" section; grading checklist retires its last
+  open box ("live browser click-through outside MockMvc") with evidence and records the A10 default/exemption proof.
+- `docs/specs/SPEC-free-form-entry.md`: re-copied from planning canon by Nils mid-session; now carries both NIL-62
+  as-built corrections (`normalized_form VARCHAR(40)`, `similarity_score` rounding pinned HALF_EVEN).
+- web `scripts/verify-browser-loop.mjs` (3 harness-correctness edits, authorised in-session; no product/copy change):
+  removed the `"difficultyLevel":1` session-request assertion (A3 deleted the field in NIL-41); raised the 40-round
+  runaway cap to 60 and de-hardcoded its message; relaxed `Round 1 / 30` to `Round 1 / ` since the scored total moved
+  30 -> 47 in NIL-60 and the backend seed tests own that number. All three sat *past* the A10 register wall, so none
+  had executed since NIL-41/NIL-60 landed.
+
+Proof:
+- `./mvnw test` -> **Tests run: 157, Failures: 0, Errors: 0** (was 155). `RegistrationHttpTests` 4/4 still reject
+  under `local`; `RegistrationAutomationHttpTests` 1/1 allows under the flag; `RatingHttpTests` 4 -> 5.
+- The tie test genuinely bites: reverted to `findByUserIdOrderByRatedAtDesc` and re-ran it -> `AssertionFailedError:
+  expected: <1161> but was: <1159>` (MySQL surfaced ascending PK order for the tied rows). Restored, green. Recorded
+  honestly: post-fix the assertion is deterministic; pre-fix red is empirical, since SQL leaves tied-row order
+  unspecified.
+- Boot `./mvnw spring-boot:run` (profiles: `local`): `POST /api/auth/register` `browser_loop_smoke_<ts>` -> **400**
+  `{"validationErrors":{"username":"Username uses a reserved prefix"}}`; `thesis_p99` -> **400**; normal -> **201**.
+- Boot `-Dspring-boot.run.profiles=local,automation` (log: `The following 2 profiles are active: "local",
+  "automation"`): the same `browser_loop_*` register -> **201** + token; normal -> **201**.
+- **Sanctioned loop green** (backend `:8081` on `local,automation`, Vite `:5174`, headless Chromium CDP `:9224`):
+  `node scripts/verify-browser-loop.mjs` exit 0 at **1280** (`scrollWidth 1265 <= 1280`) and at **375**
+  (`391 == 391`), plus the default-desktop window. Each run: 49 answered rounds (47 scored + 2 practice), completion
+  + leaderboard + recent attempts visible, ladder played to `finalRungSeen` over 10 pairs, 7/7 rating scale enabled
+  and a rating confirmed, ratable pool 86 with fresh-client parity (85 = 86 - 1 rated), meaning-order both-ways
+  across 59 asserted rounds, `staleControlCount: 0`, `mutedStimulusCount: 0`, **0 console errors**.
+- `pnpm lint` clean after the harness edits.
+
+Result:
+All three patches landed behind a green suite, and NIL-42's sanctioned-loop proof gate is closed. A10 is unchanged in
+every boot a grader or the deploy will use; the exemption exists only where the fence needs it.
+
+Commit:
+Not committed (Nils's). Proposed single commit (api):
+"NIL-88: dev-profile automation exemption for reserved prefixes + ratings tie-break + AuthService Locale.ROOT".
+The web harness edits are a separate, uncommitted web-tree change.
+
+Blocker:
+None. Four notes for the record:
+- **Found here, fixed in the NIL-89 entry below:** `src/App.tsx:39` `const DEMO_TOTAL_ROUNDS = 30` fed
+  `TrialPlayer.totalRounds` on the CHOOSING path while a session serves 47 scored rounds (NIL-60). Every loop run
+  above shows the head of it (`firstScoredRound.progressText: "Round 1 / 30"`).
+- **The A10 exemption is wholesale**, per the decision of record: under `automation`, `thesis_p*` registers too. It is
+  dev-only and the allow-path test never creates such a row, but the profile must never be activated against a
+  research database. Narrowing the skip to `browser_loop_` alone would remove the foot-gun and still serve the loop.
+- The loop's 375px run flaked once ("Timed out waiting for feedback panel") and passed on retry -- the same
+  Web-Audio-throttling flake this log already records for headless. 1280 and default-desktop passed first try.
+- The harness reports `relevantFailedRequestCount: 355` (`ERR_ABORTED` on `<audio>` fetches, exactly half of 710
+  stimulus requests, identical on both viewports) but never asserts on it -- it gates on console errors only. Audio
+  did play: `mutedStimulusCount: 0` and 49 rounds cleared the audio gate.
+
+Next single task:
+NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->
+romaji input -> reveal card reusing the feedback-panel layout + `StimulusPlayback`, motion-reveal choreography
+(essence-review D1), only the frozen SPEC-view-designs section 8 strings, kana discipline per invariant 1.
+
+## 2026-07-09 ("NIL-89: GameSessionResponse.totalRounds -- the client stops guessing the round count")
+
+Session goal:
+Fix the CHOOSING progress bug NIL-88's green loop exposed, and make the harness structurally able to catch its class.
+
+Changed:
+- `dto/GameSessionResponse`: new `totalRounds` (int). `mapper/GameMapper.toSessionResponse(session, totalRounds)`
+  takes the count as an argument -- it is derived from the `RoundSource` seam, not from the entity, and mappers never
+  reach for repositories. `service/GameService.startSession` supplies `scoredRoundsForSession(saved).size()`, so the
+  number is mode-aware for free: CHOOSING reports the scored pool (47), LADDER its floor's pair count. Practice rounds
+  are excluded -- they are not scored and never enter the denominator. Additive; no field removed.
+- web `src/api/types.ts`: `totalRounds: number` required on `GameSessionResponse`. `src/App.tsx`: `DEMO_TOTAL_ROUNDS`
+  deleted, `totalRounds={session.totalRounds}`.
+- web `scripts/verify-browser-loop.mjs`: the first-scored-round check now asserts a **relationship** -- the displayed
+  denominator must equal the number of scored rounds the session actually served -- instead of a literal. It fails
+  closed (an unparseable progress text yields `NaN`, which never equals the count).
+- Tests: `GameLoopHttpTests.sessionStartReportsTheScoredRoundTotalSoTheClientNeedNotGuessIt` asserts `totalRounds`
+  equals `trialRepository.findScoredChoosingTrials().size()` and is unchanged by `includePractice`.
+  `LadderHttpTests` asserts the announced `totalRounds` equals the rounds the Touch floor actually serves.
+  `GameServiceTests.startSessionCreatesLadderSessionForServedFloor` now stubs a trial carrying a **real** floor pair
+  code (the old fixture used `"code"`, which `LadderRoundSource` filters out, so the stub had been inert) and asserts
+  the mapper receives the seam's count. `TrialPlayer.test.tsx` gains a case that counts past the old hardcoded 30.
+
+Proof:
+- `./mvnw test` -> **Tests run: 158, Failures: 0, Errors: 0** (was 157).
+- web `pnpm lint` clean · `pnpm exec tsc -b` clean · `pnpm vitest run` -> **205 passed** (was 204).
+- Sanctioned loop re-run against the fix (backend `local,automation`, Vite :5174, headless Chromium CDP :9224):
+  exit 0 at **1280** (`scrollWidth 1265 <= 1280`) and **375** (`385 == 385`), 49 answered rounds each (47 scored + 2
+  practice), ladder to `finalRungSeen`, 0 console errors. `firstScoredRound.progressText` now reads
+  **"Round 1 / 47"** (was "Round 1 / 30"), and the new denominator assertion passed on both.
+
+Result:
+The player is no longer told a 47-round session ended at round 30. The wrong number is now unrepresentable: the
+backend states the total, the type system requires the client to read it, and three tests assert it against the rounds
+actually served rather than against a literal.
+
+Commit:
+Not committed (Nils's). Proposed commits:
+- api: "NIL-89: GameSessionResponse.totalRounds so the client stops guessing the scored-round count"
+- web: "NIL-89: read totalRounds from the session; assert the progress denominator against rounds served"
+
+Blocker:
+None. One note: `validateLadderStart` checks only that `findScoredTrialsByPairCodes` is non-empty, while
+`LadderRoundSource.scoredRounds` additionally keys trials by the floor's pair codes. A floor whose trials all carry
+unexpected pair codes would therefore pass validation and then serve zero rounds (`totalRounds: 0`). Unreachable with
+the current seed, and the ladder HTTP test now pins announced-total == served-count, but the two predicates should
+probably be the same one.
+
+Next single task:
+NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->
+romaji input -> reveal card reusing the feedback-panel layout + `StimulusPlayback`, motion-reveal choreography
+(essence-review D1), only the frozen SPEC-view-designs section 8 strings, kana discipline per invariant 1.

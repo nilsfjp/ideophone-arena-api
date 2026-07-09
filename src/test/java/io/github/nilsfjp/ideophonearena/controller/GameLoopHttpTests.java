@@ -190,6 +190,35 @@ class GameLoopHttpTests {
     }
 
     @Test
+    void sessionStartReportsTheScoredRoundTotalSoTheClientNeedNotGuessIt() throws Exception {
+        // The client renders "Round n / total" and cannot derive the denominator, so the
+        // session response carries it. Asserted against the live pool rather than a literal:
+        // the number moved 30 -> 47 with NIL-60 and belongs to the seed, not to this test.
+        int expectedScoredRounds = trialRepository.findScoredChoosingTrials().size();
+        String token = registerAndGetToken("session_total_" + System.nanoTime());
+
+        mockMvc.perform(post("/api/game/sessions")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"conditionName":"CONDITION_1_SOKUON"}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalRounds").value(expectedScoredRounds));
+
+        // Practice rounds are not scored, so they never enter the denominator.
+        mockMvc.perform(post("/api/game/sessions")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"conditionName":"CONDITION_1_SOKUON","includePractice":true}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.includePractice").value(true))
+                .andExpect(jsonPath("$.totalRounds").value(expectedScoredRounds));
+    }
+
+    @Test
     void submitAnswerRequiresResponseTimeWithinBounds() throws Exception {
         String username = "answer_validation_" + System.nanoTime();
         String token = registerAndGetToken(username);

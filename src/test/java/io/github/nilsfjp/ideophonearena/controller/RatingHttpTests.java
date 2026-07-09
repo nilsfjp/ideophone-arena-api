@@ -11,12 +11,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.repository.WordRepository;
+import java.sql.Timestamp;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -28,6 +31,9 @@ class RatingHttpTests {
 
     @Autowired
     private WordRepository wordRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void ratingRoundTripCreatesPersistsAndRejectsDuplicatesAndOutOfRange() throws Exception {
@@ -61,7 +67,7 @@ class RatingHttpTests {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        assertEquals(1, ((java.util.List<?>) JsonPath.read(myRatingsJson, "$.entries")).size());
+        assertEquals(1, ((List<?>) JsonPath.read(myRatingsJson, "$.entries")).size());
         assertEquals(createdId.longValue(), ((Number) JsonPath.read(myRatingsJson, "$.entries[0].id")).longValue());
         assertEquals(ideophoneId, ((Number) JsonPath.read(myRatingsJson, "$.entries[0].ideophoneId")).longValue());
         assertEquals(5, ((Number) JsonPath.read(myRatingsJson, "$.entries[0].rating")).intValue());
@@ -99,7 +105,7 @@ class RatingHttpTests {
 
     @Test
     void myRatingsArePaginatedAndSizeIsClamped() throws Exception {
-        java.util.List<Long> ideophoneIds = distinctIdeophoneIds(3);
+        List<Long> ideophoneIds = distinctIdeophoneIds(3);
         String suffix = Long.toString(System.nanoTime());
         String token = registerAndGetToken("rating_page_" + suffix);
 
@@ -164,6 +170,47 @@ class RatingHttpTests {
                 .andExpect(status().isNotFound());
     }
 
+    // rated_at is a second-resolution TIMESTAMP and same-second ties exist in live data, so
+    // "most recent first" is only well-defined with the descending-id tiebreak. The tie is
+    // fabricated rather than raced for: raw JDBC writes rated_at directly (JPA maps it
+    // updatable = false), and each POST above has already committed in its own transaction.
+    @Test
+    void sameSecondRatedAtTiesBreakByDescendingId() throws Exception {
+        List<Long> ideophoneIds = distinctIdeophoneIds(3);
+        String token = registerAndGetToken("rating_tie_" + System.nanoTime());
+
+        long[] ratingIds = new long[3];
+        for (int i = 0; i < 3; i++) {
+            String createdJson = mockMvc.perform(post("/api/ratings")
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"ideophoneId":%d,"rating":4}
+                                    """.formatted(ideophoneIds.get(i))))
+                    .andExpect(status().isCreated())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+            ratingIds[i] = ((Number) JsonPath.read(createdJson, "$.id")).longValue();
+        }
+
+        jdbcTemplate.update("update ratings set rated_at = ? where id in (?, ?, ?)",
+                Timestamp.valueOf("2020-01-01 00:00:00"), ratingIds[0], ratingIds[1], ratingIds[2]);
+
+        String myRatingsJson = mockMvc.perform(get("/api/game/me/ratings")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Identical rated_at across all three: the page must fall back to id descending.
+        assertEquals(ratingIds[2], ((Number) JsonPath.read(myRatingsJson, "$.entries[0].id")).longValue());
+        assertEquals(ratingIds[1], ((Number) JsonPath.read(myRatingsJson, "$.entries[1].id")).longValue());
+        assertEquals(ratingIds[0], ((Number) JsonPath.read(myRatingsJson, "$.entries[2].id")).longValue());
+    }
+
     private long anyIdeophoneId() {
         return wordRepository.findAll().stream()
                 .findFirst()
@@ -171,7 +218,7 @@ class RatingHttpTests {
                 .orElseThrow();
     }
 
-    private java.util.List<Long> distinctIdeophoneIds(int n) {
+    private List<Long> distinctIdeophoneIds(int n) {
         return wordRepository.findAll().stream()
                 .map(Word::getId)
                 .distinct()

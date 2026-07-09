@@ -8,6 +8,7 @@ import io.github.nilsfjp.ideophonearena.exception.ConflictException;
 import io.github.nilsfjp.ideophonearena.model.AppUser;
 import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.security.JwtService;
+import java.util.Locale;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,9 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         String username = request.getUsername().trim();
-        String email = request.getEmail().trim().toLowerCase();
+        // Locale.ROOT keeps the fold ASCII: a Turkish-locale JVM would otherwise map 'I'
+        // to the dotless 'i', so the same address could register twice.
+        String email = request.getEmail().trim().toLowerCase(Locale.ROOT);
 
         if (appUserRepository.existsByUsername(username)) {
             throw new ConflictException("Username is already taken");

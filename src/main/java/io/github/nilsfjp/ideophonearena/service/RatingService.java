@@ -80,7 +80,7 @@ public class RatingService {
         int effectivePage = Math.max(page, 0);
         int effectiveSize = Math.min(Math.max(size, 1), MAX_RATINGS_PAGE_SIZE);
         return ratingMapper.toPageResponse(
-                ratingRepository.findByUserIdOrderByRatedAtDesc(user.getId(),
+                ratingRepository.findByUserIdOrderByRatedAtDescIdDesc(user.getId(),
                         PageRequest.of(effectivePage, effectiveSize)));
     }
 

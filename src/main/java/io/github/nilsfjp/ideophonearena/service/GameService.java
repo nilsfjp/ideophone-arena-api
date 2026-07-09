@@ -90,7 +90,8 @@ public class GameService {
 
         GameSession session = new GameSession(user, conditionName, gameMode, floor, includePractice,
                 shuffleSeedSource.nextLong());
-        return gameMapper.toSessionResponse(gameSessionRepository.save(session));
+        GameSession savedSession = gameSessionRepository.save(session);
+        return gameMapper.toSessionResponse(savedSession, scoredRoundsForSession(savedSession).size());
     }
 
     @Transactional(readOnly = true)

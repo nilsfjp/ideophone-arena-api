@@ -13,15 +13,17 @@ public class GameSessionResponse {
     private Modality floor;
     private boolean includePractice;
     private Instant startedAt;
+    private int totalRounds;
 
     public GameSessionResponse(String sessionUuid, ConditionName conditionName, GameMode gameMode,
-            Modality floor, boolean includePractice, Instant startedAt) {
+            Modality floor, boolean includePractice, Instant startedAt, int totalRounds) {
         this.sessionUuid = sessionUuid;
         this.conditionName = conditionName;
         this.gameMode = gameMode;
         this.floor = floor;
         this.includePractice = includePractice;
         this.startedAt = startedAt;
+        this.totalRounds = totalRounds;
     }
 
     public String getSessionUuid() {
@@ -46,5 +48,12 @@ public class GameSessionResponse {
 
     public Instant getStartedAt() {
         return startedAt;
+    }
+
+    // Scored rounds this session will serve, so the client never has to guess the
+    // denominator of "Round n / total". Practice rounds are excluded: they are not
+    // scored and the progress display counts scored rounds only.
+    public int getTotalRounds() {
+        return totalRounds;
     }
 }

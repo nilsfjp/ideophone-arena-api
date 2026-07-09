@@ -148,7 +148,12 @@ Request body (`includePractice` optional, default `false`):
 ```
 
 The session response echoes `conditionName`, `gameMode`, `floor` (null for CHOOSING), `includePractice`, and
-`startedAt`.
+`startedAt`, and adds `totalRounds`.
+
+`totalRounds` is the number of **scored** rounds this session will serve — the denominator of the client's
+"Round n / total". Practice rounds are excluded (they are not scored). It is mode-aware, derived through the same
+`RoundSource` seam that serves the rounds: a CHOOSING session reports the full scored pool (47 since NIL-60), a
+LADDER session reports only its floor's pair count. Clients must read it rather than assume a pool size.
 
 Get next round:
 
@@ -484,7 +489,8 @@ GET /api/game/me/ratings?page=0&size=10
 Query params: `page` (default `0`, clamped to `>= 0`) and `size` (default `10`, clamped to `1..50`). Out-of-range
 values are clamped, not rejected; the response metadata reports the effective values.
 
-Response shape (entries are `{ id, ideophoneId, rating, responseTimeMs, ratedAt }`, most recent first):
+Response shape (entries are `{ id, ideophoneId, rating, responseTimeMs, ratedAt }`, most recent first). `rated_at`
+is a second-resolution `TIMESTAMP`, so the descending id breaks same-second ties by insertion order:
 
 ```json
 {
@@ -821,6 +827,30 @@ one row per word that has **any** data — at least one guess, rating, or produc
 
 ## Changelog
 
+- 2026-07-09: **`GameSessionResponse.totalRounds` (NIL-89)** — **additive** field on `POST /api/game/sessions`: the
+  count of scored rounds the session will serve, derived through the `RoundSource` seam so it is mode-aware (CHOOSING
+  = the scored pool, 47; LADDER = the floor's pair count). Practice rounds are excluded. It exists because the client
+  had no way to learn the denominator of "Round n / total" and was hardcoding `30`, which NIL-60 (30 -> 47) turned
+  into a frozen counter and a progress bar pegged at 100% for the last 17 rounds. Backend `GameMapper` now takes the
+  count from the service (mappers never reach for repositories). No other shape change; no field removed.
+
+- 2026-07-09: **api patch pass (NIL-88)** — three behaviour-internal fixes, no DTO or endpoint shape change.
+  (1) **A10 gains a dev-profile exemption.** `ReservedUsernamePrefixValidator` skips the reserved-prefix
+  rejection when `app.automation.allow-reserved-registration=true`. The property has exactly one source, the new
+  `application-automation.properties`, which loads only under the `automation` profile
+  (`./mvnw spring-boot:run -Dspring-boot.run.profiles=local,automation`). **A10 stays pre-deploy-hard**: the
+  `@Value` default is `false`, `docker-compose.yml` sets no `SPRING_PROFILES_ACTIVE`, so the container's active
+  profile stays `local` and the file is never read. `./mvnw test` likewise runs under `local` alone, which is what
+  lets `RegistrationHttpTests` keep proving the guarded default. The exemption exists so the sanctioned browser
+  loop can register the throwaway `browser_loop_*` account that fences its playthrough out of the frozen research
+  aggregates — the guard was blocking the fence. Note the skip is wholesale: under the profile `thesis_p*` is
+  accepted too, so the `automation` profile must never be activated against a research database.
+  (2) `GET /api/game/me/ratings` breaks same-second `rated_at` ties by descending id
+  (`findByUserIdOrderByRatedAtDescIdDesc`), resolving the defect deferred by NIL-62 below and matching the
+  productions vertical. (3) `AuthService` folds the registration email with `Locale.ROOT`, so a Turkish-locale JVM
+  cannot dot-fold `I` and let one address register twice; it was the last bare `toLowerCase()` in `src/main/java`.
+  `./mvnw test` -> 157 tests, 0 failures. Browser loop green at 1280 and 375 (47 scored + 2 practice rounds).
+
 - 2026-07-09: **Production / free-form entry (NIL-62)** — the third measure. New generator-emitted table
   `productions` (M3, ADR-0 word grain: `word_id` FK + `UNIQUE(user_id, word_id)`), seeded empty. Three
   authenticated endpoints (`GET /api/productions/next`, `POST /api/productions`, `GET /api/game/me/productions`)
@@ -837,9 +867,9 @@ one row per word that has **any** data — at least one guess, rating, or produc
   the Touch floor live. `/api/research/divergence` is untouched and its aggregates are reused verbatim.
   `ddl-auto=validate` unchanged; all seed via `generate_seed_sql.py --check` (byte-stable, purely additive). Also
   fixed: `GET /api/game/me/productions` breaks same-second `created_at` ties by descending id. **Known defect,
-  not fixed here:** `GET /api/game/me/ratings` has the same tie ambiguity (`rated_at` is second-resolution and
-  same-second ties already exist in live data) — a one-line derived-query change, deliberately left to its own
-  patch. `./mvnw test` -> 155 tests, 0 failures.
+  not fixed here (RESOLVED 2026-07-09 by NIL-88, above):** `GET /api/game/me/ratings` has the same tie ambiguity
+  (`rated_at` is second-resolution and same-second ties already exist in live data) — a one-line derived-query
+  change, deliberately left to its own patch. `./mvnw test` -> 155 tests, 0 failures.
 - 2026-07-08: **Perception Ladder backend + M1 game_mode + essence-review riders (NIL-41)** — new game mode `LADDER`
   and the floors API. `game_sessions` gains `game_mode` (NOT NULL DEFAULT `CHOOSING`) and `ladder_floor` (nullable
   modality). `GET /api/game/ladder/floors` returns the floors in hierarchy order (Sound → Sight → Touch → Inner

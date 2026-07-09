@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.nilsfjp.ideophonearena.dto.AnswerResultResponse;
+import io.github.nilsfjp.ideophonearena.dto.GameSessionResponse;
 import io.github.nilsfjp.ideophonearena.dto.RoundResponse;
 import io.github.nilsfjp.ideophonearena.dto.StartSessionRequest;
 import io.github.nilsfjp.ideophonearena.dto.SubmitAnswerRequest;
@@ -182,18 +183,25 @@ class GameServiceTests {
         request.setConditionName(ConditionName.CONDITION_1_SOKUON);
         request.setGameMode(GameMode.LADDER);
         request.setFloor(Modality.AUDITORY);
+        // LadderRoundSource keys trials by the floor's pair codes, so the served trial must
+        // carry one of them -- an arbitrary code resolves to an empty floor.
+        String servedPairCode = new LadderFloors().pairCodesInOrder(Modality.AUDITORY).get(0);
         when(trialRepository.findScoredTrialsByPairCodes(any())).thenReturn(List.of(
-                trial(1L, word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
+                ladderTrial(1L, servedPairCode,
+                        word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
         when(gameSessionRepository.save(any(GameSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        gameService.startSession(userDetails, request);
+        GameSessionResponse response = gameService.startSession(userDetails, request);
 
         ArgumentCaptor<GameSession> sessionCaptor = ArgumentCaptor.forClass(GameSession.class);
         verify(gameSessionRepository).save(sessionCaptor.capture());
         GameSession savedSession = sessionCaptor.getValue();
         assertEquals(GameMode.LADDER, savedSession.getGameMode());
         assertEquals(Modality.AUDITORY, savedSession.getLadderFloor());
+        // totalRounds comes off the RoundSource seam, so it tracks the mode's scored rounds
+        // -- a ladder floor's pair count, never the CHOOSING pool.
+        assertEquals(1, response.getTotalRounds());
     }
 
     @Test
@@ -548,6 +556,14 @@ class GameServiceTests {
 
     private Trial trial(Long id, Word wordA, Word wordB) {
         Trial trial = new Trial(pairing(wordA, wordB), wordA, false);
+        setId(trial, id);
+        return trial;
+    }
+
+    // A trial whose pairing carries a specific pair code, as the ladder floors key on.
+    private Trial ladderTrial(Long id, String pairCode, Word wordA, Word wordB) {
+        Trial trial = new Trial(
+                new Pairing(pairCode, null, wordA, wordB, Modality.AUDITORY, true, "THESIS"), wordA, false);
         setId(trial, id);
         return trial;
     }

@@ -28,14 +28,17 @@ public class GameMapper {
     private static final int PRE_CHOICE_DELAY_MS = 0;
     private static final String STIMULUS_URL_PREFIX = "/stimuli/";
 
-    public GameSessionResponse toSessionResponse(GameSession session) {
+    // totalRounds is derived from the RoundSource seam, not from the entity, so the
+    // service supplies it rather than the mapper reaching for a repository.
+    public GameSessionResponse toSessionResponse(GameSession session, int totalRounds) {
         return new GameSessionResponse(
                 session.getSessionUuid(),
                 session.getConditionName(),
                 session.getGameMode(),
                 session.getLadderFloor(),
                 session.isIncludePractice(),
-                session.getStartedAt()
+                session.getStartedAt(),
+                totalRounds
         );
     }
 

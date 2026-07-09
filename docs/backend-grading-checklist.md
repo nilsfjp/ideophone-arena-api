@@ -687,4 +687,13 @@ Update this section after each architecture pass.
 - [x] Verified no local credentials are tracked.
 - [x] Verified CORS includes the active frontend origin.
 - [x] Verified session start externally supports only the three sokuon conditions at difficulty `1`.
-- [ ] Live browser click-through still needs to be run outside MockMvc.
+- [x] Live browser click-through run outside MockMvc (2026-07-09, NIL-88): the sanctioned
+      `scripts/verify-browser-loop.mjs` drives a real headless-Chromium session end to end against the dev backend on
+      `:8081` and Vite on `:5174` — register, session start, 49 answered rounds (47 scored + 2 practice), completion,
+      leaderboard, rating scale, and the Perception Ladder to its final rung. Green at 1280 and 375 px, 0 console
+      errors, no horizontal overflow. Boot the backend with `-Dspring-boot.run.profiles=local,automation` so the loop's
+      `browser_loop_*` account can register (see `docs/demo-runbook.md`); the guard is active in every other boot.
+- [x] Registration rejects the reserved `thesis_p*` / `browser_loop_*` username prefixes by default (A10), and the
+      `automation` profile is the only way to lift it — proven by `RegistrationHttpTests` (guarded, runs under `local`)
+      and `RegistrationAutomationHttpTests` (`properties = "app.automation.allow-reserved-registration=true"`).
+      `docker-compose.yml` sets no `SPRING_PROFILES_ACTIVE`, so the container can never activate the exemption.

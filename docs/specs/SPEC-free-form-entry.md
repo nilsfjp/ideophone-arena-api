@@ -36,8 +36,8 @@ CREATE TABLE productions (
     ideophone_id BIGINT NOT NULL,
     session_id BIGINT NULL,                -- provenance only, like ratings
     raw_input VARCHAR(24) NOT NULL,        -- as typed (post trim/lowercase)
-    normalized_form VARCHAR(32) NOT NULL,  -- canonical phoneme string (§5)
-    similarity_score SMALLINT NOT NULL,    -- 0–100
+    normalized_form VARCHAR(40) NOT NULL,  -- canonical phoneme string (§5). AS-BUILT CORRECTION (NIL-62, 2026-07-09): was VARCHAR(32); "ja"x12 (24 chars, valid) folds to "zya"x12 = 36 chars -> spurious 409
+    similarity_score SMALLINT NOT NULL,    -- 0–100. AS-BUILT (NIL-62): rounding pinned HALF_EVEN (generator foil_distance convention; 3,142/10,404 pairs hit exact .5; HALF_EVEN vs HALF_UP disagree on 1,608)
     scorer_version SMALLINT NOT NULL,      -- re-scoring from raw_input stays possible
     response_time_ms INT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

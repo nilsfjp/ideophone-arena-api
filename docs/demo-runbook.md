@@ -440,6 +440,20 @@ Note: after the DDL change (game_mode/ladder_floor), re-init the local MySQL fro
 `src/main/resources/db/init/ideophone_arena.sql` (the reseed command above) before booting, since
 `ddl-auto=validate` checks the entity against the live schema.
 
+## Booting for the browser loop (automation profile)
+
+Registration rejects the reserved `browser_loop_*` / `thesis_p*` username prefixes (A10), which is exactly what the
+sanctioned `verify-browser-loop.mjs` needs to register. Boot with the `automation` profile alongside `local` to lift
+the rejection for that run:
+
+```sh
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local,automation
+```
+
+The plain `./mvnw spring-boot:run` boot and the `docker compose` container both keep the guard active — the container
+sets no `SPRING_PROFILES_ACTIVE`, so its active profile stays `local` and `application-automation.properties` is never
+read. Never activate `automation` against a research database: the skip is wholesale, so `thesis_p*` registers too.
+
 ## Cleaning up browser-loop test accounts
 
 Local browser automation registers throwaway `browser_loop_*` users. They are not seed rows; remove them (and their

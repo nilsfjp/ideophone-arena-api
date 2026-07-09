@@ -12,8 +12,11 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
     boolean existsByUserIdAndWordId(Long userId, Long wordId);
 
+    // rated_at is a TIMESTAMP with second resolution, so two ratings minted in the same
+    // second tie. The descending id breaks the tie by insertion order, which is what
+    // "most recent first" means (mirrors ProductionRepository).
     @EntityGraph(attributePaths = "word")
-    Page<Rating> findByUserIdOrderByRatedAtDesc(Long userId, Pageable pageable);
+    Page<Rating> findByUserIdOrderByRatedAtDescIdDesc(Long userId, Pageable pageable);
 
     // Mean rating per word (divergence rating side), word-keyed (ADR-0). Rider A
     // excludes browser_loop_* automation accounts and the thesis_p% ingestion
