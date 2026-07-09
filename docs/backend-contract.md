@@ -693,8 +693,153 @@ Response shape (`meaning` is the word's own gloss — exactly the mapping the fe
   for any multi-device hosted user (the W30 deploy blocker). The frontend now sources the pool from this endpoint;
   the localStorage pool is discarded without migration (only pre-deploy test data existed).
 
+## Production — free-form entry (2026-07-09, NIL-62)
+
+The third measure. The player is shown a **meaning only** and invents a Japanese-sounding word in romaji; on
+submit the attested word is revealed with a feature-by-feature similarity score. Choosing is recognition, Rating
+is reflection, Production is **generation**.
+
+A standalone `productions` table, `ratings`-shaped: keyed `UNIQUE(user_id, word_id)` — one invented word per word
+per user, so "your first instinct is the datum" is a database fact — with a nullable `session_id` for provenance.
+`raw_input` and `scorer_version` are the durable facts; the feature breakdown recomputes on read, so there is no
+JSON column and the scorer stays tunable. `normalized_form` is `VARCHAR(40)`, not 32: the `ja/ju/jo -> zya/zyu/zyo`
+folds grow 2 characters to 3, so a legal 24-character entry (`"ja" x 12`) normalizes to 36.
+
+Get the next meaning to produce a word for (authenticated):
+
+```text
+GET /api/productions/next
+```
+
+- `200 {"completed": false, "ideophoneId": 1, "gloss": "with a rustling sound", "modality": "AUDITORY"}`. No
+  romaji, no kana, no audio — the meaning is the whole prompt.
+- Once the caller has produced every word: `200 {"completed": true, "ideophoneId": null, "gloss": null,
+  "modality": null}` (the completion-sentinel precedent).
+- Selection is deterministic and stateless: the caller's production count is the cycle cursor. The cycle is
+  `AUDITORY -> VISUAL -> HAPTIC -> INTEROCEPTIVE`, lowest word id within a modality, skipping exhausted
+  modalities. Candidates are the 94 seeded words that belong to at least one non-practice trial (practice is a
+  trial fact, ADR-3), so practice words never appear. HAPTIC is in the cycle because the Touch floor is live
+  (NIL-41) and its 8 words carry real audio, glosses, and scored trials.
+
+Submit an invented word (authenticated):
+
+```text
+POST /api/productions
+```
+
+```json
+{ "ideophoneId": 60, "input": "pikapika", "responseTimeMs": 5200, "sessionUuid": null }
+```
+
+- `input` is trimmed and lowercased, then must match `^[a-z]{2,24}$` **and** segment into Japanese morae. Either
+  failure returns `400` with `validationErrors.input`, and the attempt is **not consumed** — parsing happens
+  before anything is written.
+- `responseTimeMs`, if present, must be between `0` and `600000`. Unknown `ideophoneId` returns `404`.
+- `sessionUuid` is optional provenance and is **agnostic to `gameMode`**: any session the caller owns is valid,
+  CHOOSING or LADDER. An unknown UUID returns `404`, another user's returns `403`.
+- Producing the same word twice as the same user returns `409` (`saveAndFlush` +
+  `DataIntegrityViolationException` translation, the answer-race pattern), including under concurrent duplicates.
+- `201 Created`:
+
+```json
+{
+  "id": 40, "ideophoneId": 60, "input": "pikapika", "similarityScore": 78,
+  "features": [
+    { "feature": "redup",           "yours": true,  "target": true,  "matched": true  },
+    { "feature": "sokuon",          "yours": false, "target": false, "matched": true  },
+    { "feature": "finalN",          "yours": false, "target": false, "matched": true  },
+    { "feature": "riSuffix",        "yours": false, "target": false, "matched": true  },
+    { "feature": "voicedOnset",     "yours": false, "target": true,  "matched": false },
+    { "feature": "heavyVowelRatio", "yours": 0.00,  "target": 0.50,  "matched": false },
+    { "feature": "moraCount",       "yours": 4,     "target": 4,     "matched": true  }
+  ],
+  "target": { "displayForm": "どきどき", "romaji": "dokidoki", "gloss": "with a rapid heartbeat",
+              "stimulusUrl": "/stimuli/audio/i9h-dokidoki.m4a" }
+}
+```
+
+- `features` always carries all **seven** entries in the frozen chip order of `SPEC-view-designs.md` §8.3. `yours`
+  and `target` are heterogeneous by design: five booleans, `moraCount` an integer, `heavyVowelRatio` a 2-dp
+  decimal. `matched` means the feature contributed its full weight — a shared absence still matches. The client
+  decides which chips to render.
+- `target.displayForm` is `words.canonical_form` verbatim (ADR-0: production is not a scripted-condition surface,
+  so there is no presentation lookup). **Invariant 1:** the player's `input` is echoed as typed romaji and is never
+  converted to kana; the only kana in the response is `displayForm`.
+- `similarityScore` is `round_half_even(100 x similarity)` under `scorer_version = 1`. HALF_EVEN because
+  `100 x similarity` lands on an exact `.5` tie for roughly a third of word pairs, and it is the rounding the seed
+  generator already uses for `pairings.foil_distance` — one rounding convention across the whole scorer. An exact
+  form match scores exactly `100`.
+
+The scorer lives in `service/PhonologyService.java` (ADR-8.1): pure functions, no repository access, every method
+taking a `PhonologyProfile` (Japanese the only v1 profile). It is the Java half of the ADR-8.2 dual
+implementation — `PhonologyServiceTests` asserts byte-for-byte parity against the whole of
+`docs/research/phonology-golden.json` (102 words, 21 `foil_distance` values). **Scope fence:** the similarity
+formula is a production-scoring instrument, never a difficulty dial between real words.
+
+Read the caller's own productions, paginated (authenticated; the leaderboard/ratings wrapper):
+
+```text
+GET /api/game/me/productions?page=0&size=10
+```
+
+Query params `page` (default `0`, clamped `>= 0`) and `size` (default `10`, clamped `1..50`). Entries are
+`{ id, ideophoneId, input, similarityScore, createdAt }`, most recent first. `created_at` is a second-resolution
+`TIMESTAMP`, so the descending id breaks same-second ties by insertion order.
+
+## Triangulation — three measures per word (2026-07-09, NIL-62)
+
+```text
+GET /api/research/triangulation
+```
+
+Public (no authentication), like `GET /api/research/divergence`, which stays untouched. Returns a JSON array with
+one row per word that has **any** data — at least one guess, rating, or production — ordered by `ideophoneId`:
+
+```json
+[
+  {
+    "ideophoneId": 60, "romaji": "dokidoki", "gloss": "with a rapid heartbeat", "modality": "INTEROCEPTIVE",
+    "guessAccuracy": 0.625, "guessCount": 32,
+    "meanRating": null, "ratingCount": 0,
+    "meanProductionScore": 78.0, "productionCount": 4
+  }
+]
+```
+
+- Each measure is **`null`** exactly when its count is zero, independently per measure — "no data" never
+  masquerades as "always wrong" or "lowest score". Clients gate on the three counts.
+- Three separate `GROUP BY` queries merged per word in the service. A single join across `player_answers`,
+  `ratings`, and `productions` would form a cartesian product; the 27B warning applies threefold.
+- The guess and rating aggregates are the **same repository methods divergence uses**, so `guessAccuracy`,
+  `guessCount`, `meanRating`, and `ratingCount` can never disagree between the two endpoints. The production
+  aggregate carries the same Rider A username fences (`browser_loop_%`, `thesis_p%`) for symmetry; it carries no
+  `gameMode` fence, because a production has no game mode.
+- Triangulation's key set is a **superset** of divergence's: a word with a production but no guess and no rating
+  appears here and not there. In particular HAPTIC words show a real `meanProductionScore` (and can show a real
+  `meanRating`) with `guessAccuracy: null`, because the guess aggregate is `gameMode = CHOOSING` only and HAPTIC
+  serves through the Perception Ladder. That is honest, not a bug.
+
 ## Changelog
 
+- 2026-07-09: **Production / free-form entry (NIL-62)** — the third measure. New generator-emitted table
+  `productions` (M3, ADR-0 word grain: `word_id` FK + `UNIQUE(user_id, word_id)`), seeded empty. Three
+  authenticated endpoints (`GET /api/productions/next`, `POST /api/productions`, `GET /api/game/me/productions`)
+  and one public one (`GET /api/research/triangulation`, which needs its own `permitAll` — there is no
+  `/api/research/**` wildcard). `service/PhonologyService.java` lands as the shared feature/normalization engine
+  with the `PhonologyProfile` seam from day one (ADR-8.1 / NIL-84 X8); it is the Java half of the ADR-8.2 dual
+  implementation and asserts full parity against `docs/research/phonology-golden.json`. NIL-58 must import it, not
+  fork it. **Two spec corrections, both adjudicated in chat:** (1) `normalized_form` is `VARCHAR(40)`, not the
+  spec's 32 — `"ja" x 12` is a legal 24-char entry that folds to 36 chars and would otherwise hit the column
+  limit and surface as a spurious `409`; (2) `similarityScore` rounds **HALF_EVEN** (the spec was silent, and
+  `100 x similarity` is an exact `.5` tie for 3142 of 10404 word pairs, where HALF_EVEN and HALF_UP disagree on
+  1608). **The `/api/productions/next` cycle includes HAPTIC** (`AUDITORY -> VISUAL -> HAPTIC -> INTEROCEPTIVE`,
+  94-word pool): both stated activation triggers were met once NIL-86 seeded the 8 HAPTIC words and NIL-41 brought
+  the Touch floor live. `/api/research/divergence` is untouched and its aggregates are reused verbatim.
+  `ddl-auto=validate` unchanged; all seed via `generate_seed_sql.py --check` (byte-stable, purely additive). Also
+  fixed: `GET /api/game/me/productions` breaks same-second `created_at` ties by descending id. **Known defect,
+  not fixed here:** `GET /api/game/me/ratings` has the same tie ambiguity (`rated_at` is second-resolution and
+  same-second ties already exist in live data) — a one-line derived-query change, deliberately left to its own
+  patch. `./mvnw test` -> 155 tests, 0 failures.
 - 2026-07-08: **Perception Ladder backend + M1 game_mode + essence-review riders (NIL-41)** — new game mode `LADDER`
   and the floors API. `game_sessions` gains `game_mode` (NOT NULL DEFAULT `CHOOSING`) and `ladder_floor` (nullable
   modality). `GET /api/game/ladder/floors` returns the floors in hierarchy order (Sound → Sight → Touch → Inner

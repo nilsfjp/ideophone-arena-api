@@ -43,6 +43,14 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
     }
 
+    // Free-form romaji that failed the gate or did not segment. Shaped exactly like a Bean
+    // Validation failure on the same field, so the client renders one inline helper.
+    @ExceptionHandler(UnparseableInputException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnparseableInput(UnparseableInputException ex,
+            HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "Validation failed", request, Map.of("input", ex.getMessage()));
+    }
+
     @ExceptionHandler(AuthenticationFailedException.class)
     public ResponseEntity<ApiErrorResponse> handleAuthenticationFailed(AuthenticationFailedException ex,
             HttpServletRequest request) {

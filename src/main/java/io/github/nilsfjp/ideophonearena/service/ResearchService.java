@@ -3,6 +3,7 @@ package io.github.nilsfjp.ideophonearena.service;
 import io.github.nilsfjp.ideophonearena.dto.DivergenceResponse;
 import io.github.nilsfjp.ideophonearena.dto.PositionBiasResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingDistributionsResponse;
+import io.github.nilsfjp.ideophonearena.dto.TriangulationResponse;
 import io.github.nilsfjp.ideophonearena.mapper.ResearchMapper;
 import io.github.nilsfjp.ideophonearena.model.DerivedRound;
 import io.github.nilsfjp.ideophonearena.model.GameSession;
@@ -11,9 +12,11 @@ import io.github.nilsfjp.ideophonearena.model.Trial;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import io.github.nilsfjp.ideophonearena.repository.IdeophoneGuessStatsProjection;
+import io.github.nilsfjp.ideophonearena.repository.IdeophoneProductionStatsProjection;
 import io.github.nilsfjp.ideophonearena.repository.IdeophoneRatingStatsProjection;
 import io.github.nilsfjp.ideophonearena.repository.ModalityRatingDistributionProjection;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
+import io.github.nilsfjp.ideophonearena.repository.ProductionRepository;
 import io.github.nilsfjp.ideophonearena.repository.RatingRepository;
 import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import io.github.nilsfjp.ideophonearena.repository.WordRepository;
@@ -40,6 +43,7 @@ public class ResearchService {
 
     private final PlayerAnswerRepository playerAnswerRepository;
     private final RatingRepository ratingRepository;
+    private final ProductionRepository productionRepository;
     private final WordRepository wordRepository;
     private final TrialRepository trialRepository;
     private final RoundShuffler roundShuffler;
@@ -47,11 +51,12 @@ public class ResearchService {
     private final ResearchMapper researchMapper;
 
     public ResearchService(PlayerAnswerRepository playerAnswerRepository, RatingRepository ratingRepository,
-            WordRepository wordRepository, TrialRepository trialRepository,
-            RoundShuffler roundShuffler, PositionBiasCalculator positionBiasCalculator,
-            ResearchMapper researchMapper) {
+            ProductionRepository productionRepository, WordRepository wordRepository,
+            TrialRepository trialRepository, RoundShuffler roundShuffler,
+            PositionBiasCalculator positionBiasCalculator, ResearchMapper researchMapper) {
         this.playerAnswerRepository = playerAnswerRepository;
         this.ratingRepository = ratingRepository;
+        this.productionRepository = productionRepository;
         this.wordRepository = wordRepository;
         this.trialRepository = trialRepository;
         this.roundShuffler = roundShuffler;
@@ -78,6 +83,66 @@ public class ResearchService {
         return mergeDivergence(
                 playerAnswerRepository.aggregateThesisGuessStatsByWord(),
                 ratingRepository.aggregateThesisRatingStatsByWord());
+    }
+
+    // The three-measure surface (ADR-5 word grain): guessability vs iconicity rating vs
+    // producibility. It reuses the divergence aggregates verbatim, so guessAccuracy and
+    // guessCount can never disagree between the two endpoints; the production aggregate is
+    // the only new query. Its key set is a superset of divergence's -- a word with a
+    // production but no guess or rating appears here and not there. HAPTIC words show a
+    // real meanRating with a null guessAccuracy, because the guess aggregate is
+    // gameMode = CHOOSING only and HAPTIC serves through the ladder.
+    @Transactional(readOnly = true)
+    public List<TriangulationResponse> getTriangulation() {
+        Map<Long, IdeophoneGuessStatsProjection> guessStats = new LinkedHashMap<>();
+        for (IdeophoneGuessStatsProjection row : playerAnswerRepository.aggregateGuessStatsByWord()) {
+            guessStats.put(row.getIdeophoneId(), row);
+        }
+
+        Map<Long, IdeophoneRatingStatsProjection> ratingStats = new LinkedHashMap<>();
+        for (IdeophoneRatingStatsProjection row : ratingRepository.aggregateRatingStatsByWord()) {
+            ratingStats.put(row.getIdeophoneId(), row);
+        }
+
+        // A third separate GROUP BY: the cartesian-product hazard applies threefold, so
+        // the three measures are never joined in SQL, only merged on the word id here.
+        Map<Long, IdeophoneProductionStatsProjection> productionStats = new LinkedHashMap<>();
+        for (IdeophoneProductionStatsProjection row : productionRepository.aggregateProductionStatsByWord()) {
+            productionStats.put(row.getIdeophoneId(), row);
+        }
+
+        TreeSet<Long> wordIds = new TreeSet<>();
+        wordIds.addAll(guessStats.keySet());
+        wordIds.addAll(ratingStats.keySet());
+        wordIds.addAll(productionStats.keySet());
+
+        Map<Long, Word> words = new LinkedHashMap<>();
+        for (Word word : wordRepository.findAllById(wordIds)) {
+            words.put(word.getId(), word);
+        }
+
+        List<TriangulationResponse> triangulation = new ArrayList<>();
+        for (Long wordId : wordIds) {
+            Word word = words.get(wordId);
+            if (word == null) {
+                continue;
+            }
+            IdeophoneGuessStatsProjection guess = guessStats.get(wordId);
+            long guessCount = guess == null ? 0L : valueOrZero(guess.getGuesses());
+            long correct = guess == null ? 0L : valueOrZero(guess.getCorrect());
+
+            IdeophoneRatingStatsProjection rating = ratingStats.get(wordId);
+            long ratingCount = rating == null ? 0L : valueOrZero(rating.getRatingCount());
+            Double meanRating = rating == null ? null : rating.getMeanRating();
+
+            IdeophoneProductionStatsProjection production = productionStats.get(wordId);
+            long productionCount = production == null ? 0L : valueOrZero(production.getProductionCount());
+            Double meanProductionScore = production == null ? null : production.getMeanProductionScore();
+
+            triangulation.add(researchMapper.toTriangulationResponse(word, guessCount, correct,
+                    ratingCount, meanRating, productionCount, meanProductionScore));
+        }
+        return triangulation;
     }
 
     // Guess accuracy (from player_answers) and mean rating (from ratings) are

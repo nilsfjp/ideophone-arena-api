@@ -301,6 +301,75 @@ words (`ideophoneId`, `canonicalForm`, `romaji`, `stimulusFile`, `modality`, `me
 answered scored round appear; practice words never do; rating a word (the `POST` above) removes it from the next
 fetch. Unauthenticated `GET` returns `401`.
 
+## Production — free-form entry (2026-07-09, NIL-62)
+
+Schema note: `productions` is generator-owned. After pulling this change, regenerate and reload before running the
+app or the tests (`ddl-auto=validate` will not create the table for you):
+
+```sh
+python3 scripts/generate_seed_sql.py --check     # must print "SQL is up to date"
+python3 scripts/generate_phonology_golden.py --check
+```
+
+The next meaning the caller has not produced a word for. A fresh account always gets word `1` (`gosogoso`,
+AUDITORY); the cycle then walks `AUDITORY -> VISUAL -> HAPTIC -> INTEROCEPTIVE`:
+
+```sh
+curl -i http://localhost:8081/api/productions/next \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Expected `200 {"completed":false,"ideophoneId":1,"gloss":"with a rustling sound","modality":"AUDITORY"}` — no
+romaji, no kana, no audio. Once every word is produced: `{"completed":true, ...}`.
+
+Submit an invented word. The adjudicated worked example (`pikapika` against word `60`, `dokidoki`) scores `78`:
+
+```sh
+curl -i -X POST http://localhost:8081/api/productions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"ideophoneId":60,"input":"pikapika","responseTimeMs":5200}'
+```
+
+Expected `201 Created` with `similarityScore: 78`, a seven-entry `features` array (the mismatched chips here are
+`voicedOnset` and `heavyVowelRatio`), and a `target` block carrying `displayForm` (kana verbatim), `romaji`,
+`gloss`, and `stimulusUrl`. Submitting the exact form (`{"ideophoneId":1,"input":"gosogoso"}`) scores `100`.
+
+The error paths, in order:
+
+```sh
+# repeat the same word -> 409
+curl -s -o /dev/null -w '%{http_code}\n' -X POST http://localhost:8081/api/productions \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"ideophoneId":1,"input":"kasakasa"}'
+
+# unparseable romaji -> 400 with validationErrors.input, and the attempt is NOT consumed
+curl -s -X POST http://localhost:8081/api/productions \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"ideophoneId":21,"input":"ngrk"}'
+curl -s http://localhost:8081/api/productions/next -H "Authorization: Bearer $TOKEN"   # word 21 still on offer
+```
+
+An unknown `ideophoneId` returns `404`; an unknown `sessionUuid` returns `404` and another user's returns `403`;
+`responseTimeMs` outside `0..600000` returns `400` with `validationErrors.responseTimeMs`; unauthenticated returns
+`401`. Read the caller's own productions (wrapper; `size` clamps to `50`):
+
+```sh
+curl -i 'http://localhost:8081/api/game/me/productions?page=0&size=999' \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Triangulation — three measures per word, public, no auth:
+
+```sh
+curl -s http://localhost:8081/api/research/triangulation | head -c 400
+```
+
+Rows carry `guessAccuracy`/`guessCount`, `meanRating`/`ratingCount`, `meanProductionScore`/`productionCount`, each
+mean `null` when its count is `0`. It is a superset of `/api/research/divergence` and agrees with it exactly on
+the shared measures; the extra rows are words with a production but no guess or rating (HAPTIC words, whose
+guesses only exist in the ladder).
+
 ## Thesis data — Observatory thesis layer (2026-07-06, NIL-54)
 
 The thesis Gorilla export (36 participants) lives in the seed as `thesis_p##` accounts (`completed_at = NULL`,

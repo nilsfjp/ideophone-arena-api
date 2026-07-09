@@ -1229,3 +1229,82 @@ flags rides NIL-42.
 Next single task:
 28B/NIL-42: Perception Ladder frontend (floor chrome from the floors API) + the web `difficultyLevel`/`canonicalScript`
 sweep.
+
+## 2026-07-09
+
+Session goal:
+NIL-62 backend half: build the production vertical (free-form entry / Word Mint) -- the third measure -- on the
+adopted architecture (M3 productions table, ADR-8.1 PhonologyService with the profile seam, ADR-5 triangulation).
+
+Changed:
+- `scripts/generate_seed_sql.py`: `productions` DDL (DROP + CREATE, no INSERT -- the measure is player-generated).
+  `--check` clean; the seed diff is purely additive (37 insertions, 0 deletions), so thesis rows stay byte-stable.
+  `generate_phonology_golden.py --check` still up to date (the golden is untouched).
+- `service/PhonologyProfile` + `PhonologyFeatures` + `PhonologyService`: the SPEC section 5 engine. Pure functions,
+  no repository access, `PhonologyProfile` on every method (Japanese the only v1 profile). Java half of the ADR-8.2
+  dual implementation. Two entry points, deliberately: `normalizeInput()` is the player path (gate + Hepburn folds
+  + n->N + trailing q->Q), while `morae()`/`features()` take canonical romaji, which already carries N/Q markers.
+- Production vertical, mirroring ratings 1:1: `model/Production`, `repository/ProductionRepository` (+
+  `IdeophoneProductionStatsProjection`), `service/ProductionService`, `mapper/ProductionMapper`,
+  `controller/ProductionController`, seven DTOs, `exception/UnparseableInputException` + its handler.
+- `GET /api/research/triangulation` (public): reuses the two divergence aggregates verbatim and adds one production
+  aggregate; three separate GROUP BYs merged on word id. `/api/research/divergence` untouched. `SecurityConfig`
+  gains the one `permitAll` line it needs.
+
+Two spec defects found by running the Python oracle rather than reading it, both adjudicated in chat:
+- `normalized_form VARCHAR(32)` overflows on legal input: `"ja" x 12` is 24 chars, passes the gate, parses to 12
+  morae, and folds to `"zya" x 12` = 36 chars. It would have reached `saveAndFlush` and surfaced as a spurious 409.
+  Column is now VARCHAR(40).
+- The scorer's rounding mode was unspecified and is highly observable: `100 x similarity` is an exact .5 tie for
+  3142 of 10404 word pairs, and HALF_EVEN vs HALF_UP disagree on 1608. Pinned to HALF_EVEN (the generator's own
+  convention for `foil_distance`), recorded by `scorer_version = 1`.
+
+Decisions:
+- HAPTIC joins the prompt cycle now (`AUDITORY -> VISUAL -> HAPTIC -> INTEROCEPTIVE`, 94-word pool). Both stated
+  activation triggers are met: NIL-86 seeded the 8 HAPTIC words, and NIL-41 brought the Touch floor live. Deferring
+  would have left HAPTIC with a permanently-null `meanProductionScore` beside a real `meanRating`, and adding it
+  later would reorder every existing player's prompts.
+- `features[]` carries all seven chips with polymorphic `yours`/`target` (5 booleans, an int, a decimal).
+- No `ProductionAlreadyExistsException` (reuse `ConflictException`) and no `OpenApiConfig` change (`@Tag` lives on
+  the controller). Both deviate from the SPEC section 6 file list, deliberately.
+
+Proof:
+- `python3 scripts/generate_seed_sql.py --check` -> "SQL is up to date: 102 words, 306 presentations, 55 pairings,
+  55 trials, 36 thesis users, 1080 answers, 1080 ratings". `generate_phonology_golden.py --check` -> up to date.
+- `./mvnw test` -> 155 tests, 0 failures, 0 errors (was 113). `PhonologyServiceTests` (20) asserts byte-for-byte
+  parity against the ENTIRE `docs/research/phonology-golden.json`: 102 words (morae, all 7 features, heavy/light
+  counts) and 21 `foil_distance` strings, plus the SPEC section 10.1 goldens, the adjudicated
+  `pikapika -> dokidoki = 78` mockup example, and the seven silent-divergence traps.
+- Booted on 8081 with `ddl-auto=validate` unchanged. Live: `GET /api/productions/next` -> word 1 gosogoso AUDITORY
+  (no romaji/kana/audio); `POST` exact form -> 201 score 100 with 7 features + `displayForm` ごそごそ;
+  `pikapika` vs word 60 -> 201 score 78, mismatched chips `voicedOnset` + `heavyVowelRatio`; repeat -> 409;
+  `"ngrk"` -> 400 `validationErrors.input` and word 21 still on offer; unknown ideophone -> 404; unknown session ->
+  404, another user's -> 403, own -> 201; `me/productions?page=-3&size=999` -> page 0 size 50, most recent first;
+  unauthenticated `GET /api/research/triangulation` -> 200, 87 rows vs divergence's 86 (the extra is HAPTIC word 79
+  `sarasara`: real `meanProductionScore`, `guessAccuracy: null`), 0 shared-measure mismatches with divergence,
+  0 null-for-zero-count violations. Swagger lists all four endpoints.
+
+Result:
+The measurement triad is complete on the backend. Production scoring is a proven port of the seed generator's
+metric, not a re-derivation from prose -- the golden file is the contract, and NIL-58 must import
+`PhonologyService.features()`/`distance()` rather than fork it. Clean api tree except the generated seed + code +
+tests + docs; commits are Nils's.
+
+Commit:
+Not committed (Nils's). Proposed single commit (api):
+"NIL-62: production vertical (free-form entry) + PhonologyService + triangulation endpoint".
+
+Blocker:
+None. Two notes for the record:
+- Found but NOT fixed (own patch, own contract line): `GET /api/game/me/ratings` has the same same-second ordering
+  ambiguity this session fixed for productions. `rated_at` is a second-resolution TIMESTAMP and ties already exist
+  in live data (3 ratings sharing one `rated_at`), so "most recent first" is currently insertion-order-dependent.
+  The fix is `findByUserIdOrderByRatedAtDescIdDesc`; no response-shape change.
+- The launcher asks for a spec-staleness diff against planning canon. The planning folder is not mounted in this
+  session, so the repo copies were only checked for internal currency (`SPEC-free-form-entry.md` has section 13 and
+  the section 9 supersession banner; `SPEC-view-designs.md` section 8 has the frozen NIL-83 strings).
+
+Next single task:
+NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->
+romaji input -> reveal card reusing the feedback-panel layout + `StimulusPlayback`, motion-reveal choreography
+(essence-review D1), only the frozen SPEC-view-designs section 8 strings, kana discipline per invariant 1.

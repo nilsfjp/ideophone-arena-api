@@ -4,6 +4,7 @@ import io.github.nilsfjp.ideophonearena.dto.DivergenceResponse;
 import io.github.nilsfjp.ideophonearena.dto.PositionBiasResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingDistributionCell;
 import io.github.nilsfjp.ideophonearena.dto.RatingDistributionsResponse;
+import io.github.nilsfjp.ideophonearena.dto.TriangulationResponse;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
 import java.util.ArrayList;
@@ -35,6 +36,25 @@ public class ResearchMapper {
                 guessCount,
                 meanRating,
                 ratingCount);
+    }
+
+    // Three measures, one word. Same null-for-zero-count rule as divergence, applied
+    // independently per measure: producibility can exist where guessability does not.
+    public TriangulationResponse toTriangulationResponse(Word word, long guessCount, long correct,
+            long ratingCount, Double meanRating, long productionCount, Double meanProductionScore) {
+        Double guessAccuracy = guessCount == 0 ? null : (double) correct / guessCount;
+        String modality = word.getModality() == null ? null : word.getModality().name();
+        return new TriangulationResponse(
+                word.getId(),
+                word.getRomaji(),
+                word.getGloss(),
+                modality,
+                guessAccuracy,
+                guessCount,
+                meanRating,
+                ratingCount,
+                productionCount == 0 ? null : meanProductionScore,
+                productionCount);
     }
 
     // Lays the per-modality bins out as a dense 1-7 grid, ordered by Modality

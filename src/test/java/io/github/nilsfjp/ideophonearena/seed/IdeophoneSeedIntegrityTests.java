@@ -361,6 +361,31 @@ class IdeophoneSeedIntegrityTests {
         }
     }
 
+    // NIL-62: productions ship as DDL only -- the measure is player-generated, so the seed
+    // must never carry rows. normalized_form is 40 wide because the ja/ju/jo folds grow
+    // 2 chars to 3, so a legal 24-char entry normalizes to 36.
+    @Test
+    void productionsAreSchemaOnlyWithTheWordKeyedUniqueness() {
+        assertTrue(seedSql.contains("CREATE TABLE productions ("), "productions DDL is generator-owned");
+        assertTrue(seedSql.contains("DROP TABLE IF EXISTS productions;"), "productions is dropped before create");
+        // Guard before parsing: rows() would silently return another table's rows here.
+        assertFalse(seedSql.contains("INSERT INTO productions"), "productions must seed empty");
+
+        List<String> columns = insertColumns(seedSql, "words");
+        assertFalse(columns.isEmpty(), "sanity: the seed still parses");
+
+        String ddl = seedSql.substring(seedSql.indexOf("CREATE TABLE productions ("));
+        ddl = ddl.substring(0, ddl.indexOf(");") + 2);
+        assertTrue(ddl.contains("UNIQUE (user_id, word_id)"), "one production per word per user");
+        assertTrue(ddl.contains("word_id BIGINT NOT NULL"), "ADR-0 word grain");
+        assertTrue(ddl.contains("session_id BIGINT NULL"), "session is nullable provenance");
+        assertTrue(ddl.contains("raw_input VARCHAR(24) NOT NULL"), "raw_input mirrors the input gate");
+        assertTrue(ddl.contains("normalized_form VARCHAR(40) NOT NULL"), "normalized_form fits the ja-fold worst case");
+        assertTrue(ddl.contains("similarity_score SMALLINT NOT NULL"), "score is 0-100");
+        assertTrue(ddl.contains("scorer_version SMALLINT NOT NULL"), "raw_input stays re-scorable");
+        assertTrue(ddl.contains("REFERENCES words (id)"), "word_id points at words");
+    }
+
     @Test
     void thesisSessionsAreThirtySixIncompleteWithTheConditionSplit() {
         // completed_at must be absent from the INSERT so it takes the DDL default

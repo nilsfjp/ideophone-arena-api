@@ -3,6 +3,7 @@ package io.github.nilsfjp.ideophonearena.controller;
 import io.github.nilsfjp.ideophonearena.dto.DivergenceResponse;
 import io.github.nilsfjp.ideophonearena.dto.PositionBiasResponse;
 import io.github.nilsfjp.ideophonearena.dto.RatingDistributionsResponse;
+import io.github.nilsfjp.ideophonearena.dto.TriangulationResponse;
 import io.github.nilsfjp.ideophonearena.service.ResearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,12 @@ public class ResearchController {
     @Operation(summary = "Thesis-cohort divergence (NIL-54): the vendored per-pair experiment, in-DB")
     public ResponseEntity<List<DivergenceResponse>> getThesisDivergence() {
         return ResponseEntity.ok(researchService.getThesisDivergence());
+    }
+
+    @GetMapping("/triangulation")
+    @Operation(summary = "Per-ideophone guess accuracy vs mean rating vs mean production score")
+    public ResponseEntity<List<TriangulationResponse>> getTriangulation() {
+        return ResponseEntity.ok(researchService.getTriangulation());
     }
 
     @GetMapping("/rating-distributions")

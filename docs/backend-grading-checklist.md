@@ -276,9 +276,13 @@ GET  /api/game/sessions/{uuid}/rounds/next  authenticated
 POST /api/game/sessions/{uuid}/answers      authenticated
 GET  /api/game/me/attempts       authenticated
 GET  /api/game/me/ratable-words  authenticated (own rating pool)
+GET  /api/game/me/productions    authenticated (own productions)
+GET  /api/productions/next       authenticated
+POST /api/productions            authenticated
 GET  /api/leaderboard            public (paginated)
 GET  /api/research/divergence    public (read-only aggregate)
 GET  /api/research/thesis/divergence     public (read-only aggregate)
+GET  /api/research/triangulation         public (read-only aggregate)
 GET  /api/research/rating-distributions  public (read-only aggregate)
 GET  /api/research/position-bias         public (read-only aggregate)
 GET  /api/admin/stats            ROLE_ADMIN
@@ -345,6 +349,31 @@ answers with `UNIQUE(session_id, trial_id)`, 1080 ratings 1-7 with `UNIQUE(user_
 reseed + validate-boot -> `GET /api/research/divergence` = `[]` and `/api/research/rating-distributions` empty (thesis
 excluded from the live layer) while `GET /api/research/thesis/divergence` = 200 with 30 rows rolling up to
 68.6/64.2/59.7. `./mvnw test` -> 97 tests, 0 failures.
+
+2026-07-09 evidence (production / free-form entry, NIL-62): the third measure ships as a standalone vertical on the
+ratings pattern — `model/Production`, `repository/ProductionRepository`, `service/ProductionService`,
+`mapper/ProductionMapper`, `controller/ProductionController`, seven DTOs, and `exception/UnparseableInputException`
+with a `GlobalExceptionHandler` handler that emits the Bean-Validation-shaped `{message:"Validation failed",
+validationErrors:{input:...}}`. Controllers stay thin (`ResponseEntity`, `@Valid`, `@AuthenticationPrincipal`, no
+repository access); the service owns `@Transactional` and never returns entities; all entity-to-DTO mapping lives in
+`ProductionMapper`. The `productions` table is generator-emitted (`generate_seed_sql.py --check` clean, diff purely
+additive) and seeds empty; `ddl-auto=validate` boots against it unchanged. `service/PhonologyService` is pure (no
+repository access) and takes a `PhonologyProfile` on every method (ADR-8.1 seam, Japanese the only v1 profile).
+`GET /api/research/triangulation` needed its own `permitAll` line — there is no `/api/research/**` wildcard, and
+`ProductionHttpTests.allProductionEndpointsRequireAuthentication` proves the three authenticated endpoints return
+`401` anonymously. Proof: `PhonologyServiceTests` (20) asserts byte-for-byte parity against the whole committed
+`docs/research/phonology-golden.json` — 102 words (morae, all 7 features, heavy/light counts) and 21 `foil_distance`
+values — plus the SPEC section 10.1 goldens and the adjudicated `pikapika -> dokidoki = 78` worked example;
+`ProductionHttpTests` (12) covers the A->V->H->I cycle, exact-form `100`, duplicate `409`, parse-error `400` that
+does **not** consume the attempt, `404`/`403` session resolution, and the clamped wrapper; `TriangulationHttpTests`
+(3) proves the endpoint is public, null-for-zero-count per measure, and byte-identical to `divergence` on the shared
+measures; `ProductionServiceTests` (6) pins the stateless cycle cursor and the skip-empty fallback;
+`IdeophoneSeedIntegrityTests` (15) guards the DDL-only `productions` table. Live curl: `next` -> word 1 AUDITORY;
+`POST` exact form -> `201` score `100`; `pikapika` vs word 60 -> `201` score `78`; repeat -> `409`; `"ngrk"` -> `400`
+`validationErrors.input` with word still on offer; `size=999` -> clamped to `50`; unauthenticated
+`GET /api/research/triangulation` -> `200` with 87 rows to divergence's 86 (the extra is HAPTIC word 79, a real
+`meanProductionScore` with `guessAccuracy: null`), 0 shared-measure mismatches, 0 null-for-zero-count violations;
+Swagger lists all four endpoints. `./mvnw test` -> 155 tests, 0 failures.
 
 ### CORS
 
