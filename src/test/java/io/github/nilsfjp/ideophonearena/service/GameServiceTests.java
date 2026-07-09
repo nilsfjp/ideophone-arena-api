@@ -71,12 +71,15 @@ class GameServiceTests {
     private UserDetails userDetails;
 
     private final RoundShuffler roundShuffler = new RoundShuffler();
+    private final LadderFloors ladderFloors = new LadderFloors();
+    private LadderTrials ladderTrials;
     private GameService gameService;
     private AppUser user;
     private GameSession session;
 
     @BeforeEach
     void setUp() {
+        ladderTrials = new LadderTrials(trialRepository, ladderFloors);
         gameService = new GameService(
                 appUserRepository,
                 gameSessionRepository,
@@ -85,7 +88,7 @@ class GameServiceTests {
                 playerAnswerRepository,
                 new GameMapper(),
                 roundShuffler,
-                new LadderFloors(),
+                ladderTrials,
                 roundSources()
         );
         user = new AppUser(USERNAME, "player@example.test", "hash");
@@ -101,7 +104,7 @@ class GameServiceTests {
     private List<RoundSource> roundSources() {
         return List.of(
                 new ChoosingRoundSource(trialRepository, roundShuffler),
-                new LadderRoundSource(trialRepository, roundShuffler, new LadderFloors())
+                new LadderRoundSource(ladderTrials, roundShuffler)
         );
     }
 
@@ -147,7 +150,8 @@ class GameServiceTests {
         request.setFloor(Modality.AUDITORY);
         request.setIncludePractice(true);
         when(trialRepository.findScoredTrialsByPairCodes(any())).thenReturn(List.of(
-                trial(1L, word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
+                ladderTrial(1L, servedPairCode(Modality.AUDITORY),
+                        word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
 
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
@@ -155,6 +159,28 @@ class GameServiceTests {
         );
 
         assertEquals("Ladder sessions do not include practice rounds", exception.getMessage());
+        verify(gameSessionRepository, never()).save(any(GameSession.class));
+    }
+
+    @Test
+    void startSessionRejectsAFloorWhoseTrialsCarryUnexpectedPairCodes() {
+        // Validation and serving ask LadderTrials the same question, so a floor whose trials
+        // exist but sit under codes the floor does not list is rejected at the door. Before
+        // the predicates were unified this passed validation and then served zero rounds.
+        StartSessionRequest request = new StartSessionRequest();
+        request.setConditionName(ConditionName.CONDITION_1_SOKUON);
+        request.setGameMode(GameMode.LADDER);
+        request.setFloor(Modality.AUDITORY);
+        when(trialRepository.findScoredTrialsByPairCodes(any())).thenReturn(List.of(
+                ladderTrial(1L, "not-a-floor-code",
+                        word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> gameService.startSession(userDetails, request)
+        );
+
+        assertEquals("Unsupported ladder floor: AUDITORY", exception.getMessage());
         verify(gameSessionRepository, never()).save(any(GameSession.class));
     }
 
@@ -183,11 +209,10 @@ class GameServiceTests {
         request.setConditionName(ConditionName.CONDITION_1_SOKUON);
         request.setGameMode(GameMode.LADDER);
         request.setFloor(Modality.AUDITORY);
-        // LadderRoundSource keys trials by the floor's pair codes, so the served trial must
-        // carry one of them -- an arbitrary code resolves to an empty floor.
-        String servedPairCode = new LadderFloors().pairCodesInOrder(Modality.AUDITORY).get(0);
+        // LadderTrials keys trials by the floor's pair codes, so the served trial must carry
+        // one of them -- an arbitrary code resolves to an empty floor.
         when(trialRepository.findScoredTrialsByPairCodes(any())).thenReturn(List.of(
-                ladderTrial(1L, servedPairCode,
+                ladderTrial(1L, servedPairCode(Modality.AUDITORY),
                         word(1L, "a", "a", "a", "audio/a9h-a.m4a"), word(2L, "b", "b", "b", "audio/a9k-b.m4a"))));
         when(gameSessionRepository.save(any(GameSession.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -274,7 +299,7 @@ class GameServiceTests {
                 playerAnswerRepository,
                 new GameMapper(),
                 new RoundShuffler(),
-                new LadderFloors(),
+                ladderTrials,
                 roundSources()
         );
 
@@ -558,6 +583,11 @@ class GameServiceTests {
         Trial trial = new Trial(pairing(wordA, wordB), wordA, false);
         setId(trial, id);
         return trial;
+    }
+
+    // The first pair code the given floor actually lists, easy end first.
+    private String servedPairCode(Modality floor) {
+        return ladderFloors.pairCodesInOrder(floor).get(0);
     }
 
     // A trial whose pairing carries a specific pair code, as the ladder floors key on.

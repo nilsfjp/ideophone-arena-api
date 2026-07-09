@@ -827,6 +827,20 @@ one row per word that has **any** data — at least one guess, rating, or produc
 
 ## Changelog
 
+- 2026-07-09: **A10 exemption narrowed + ladder predicate unified (NIL-90 / NIL-91)** — no endpoint or DTO change.
+  **NIL-90:** the automation exemption now lifts the guard for `browser_loop_` **only**; `thesis_p*` is rejected under
+  every profile, including `automation`. That cohort is the one prefix whose rows are *read back as data*
+  (`/api/research/thesis/divergence` includes it rather than excluding it), so a stray `thesis_p` row is silent
+  corruption of the thesis layer, not just noise. The property is renamed to match what it does:
+  `app.automation.allow-browser-loop-registration` (was `app.automation.allow-reserved-registration`), default
+  `false`. **Prod is now unreachable four ways:** the `@Value` default; `docker-compose.yml` sets no
+  `SPRING_PROFILES_ACTIVE`; `.dockerignore` keeps `application-automation.properties` out of the image, so the key
+  has no source there even if the profile were activated; and `thesis_p` is not exempt at all. **NIL-91:** a new
+  `LadderTrials` component owns the single predicate "which trials does this floor serve". `validateLadderStart` and
+  `LadderRoundSource` both ask it, so a floor can no longer pass the start check and then serve zero rounds — a floor
+  whose trials sit under unexpected pair codes is now a `400 Unsupported ladder floor`. `GameService` drops its
+  `LadderFloors` dependency. `./mvnw test` -> 163 tests, 0 failures.
+
 - 2026-07-09: **`GameSessionResponse.totalRounds` (NIL-89)** — **additive** field on `POST /api/game/sessions`: the
   count of scored rounds the session will serve, derived through the `RoundSource` seam so it is mode-aware (CHOOSING
   = the scored pool, 47; LADDER = the floor's pair count). Practice rounds are excluded. It exists because the client

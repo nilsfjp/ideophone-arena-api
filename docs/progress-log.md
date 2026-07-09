@@ -1441,11 +1441,82 @@ Not committed (Nils's). Proposed commits:
 - web: "NIL-89: read totalRounds from the session; assert the progress denominator against rounds served"
 
 Blocker:
-None. One note: `validateLadderStart` checks only that `findScoredTrialsByPairCodes` is non-empty, while
-`LadderRoundSource.scoredRounds` additionally keys trials by the floor's pair codes. A floor whose trials all carry
-unexpected pair codes would therefore pass validation and then serve zero rounds (`totalRounds: 0`). Unreachable with
-the current seed, and the ladder HTTP test now pins announced-total == served-count, but the two predicates should
-probably be the same one.
+None. One note, now closed by NIL-91 below: `validateLadderStart` checked only that `findScoredTrialsByPairCodes` is
+non-empty, while `LadderRoundSource.scoredRounds` additionally keys trials by the floor's pair codes.
+
+Next single task:
+NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->
+romaji input -> reveal card reusing the feedback-panel layout + `StimulusPlayback`, motion-reveal choreography
+(essence-review D1), only the frozen SPEC-view-designs section 8 strings, kana discipline per invariant 1.
+
+## 2026-07-09 ("NIL-90/91/92: narrow the exemption, unify the ladder predicate, stop the harness at the last wall")
+
+Session goal:
+Apply the three follow-ups the NIL-88/89 sessions filed against themselves.
+
+Changed:
+- **NIL-90** `validation/ReservedUsernamePrefixValidator`: the exemption now lifts the guard for `browser_loop_` only.
+  `thesis_p*` is rejected under every profile -- it is the one reserved prefix whose rows are READ BACK as data
+  (`/api/research/thesis/divergence` includes the cohort rather than excluding it), so a stray thesis_p row is silent
+  corruption, not noise. Property renamed `app.automation.allow-reserved-registration` ->
+  `app.automation.allow-browser-loop-registration`, because a name that promises more than it delivers is the same
+  class of trap the finding was about. `.dockerignore` now excludes `application-automation.properties`: the key has
+  no source inside the image even if someone activates the profile there, so the `@Value` default wins. Prod is
+  unreachable four independent ways.
+- **NIL-91** new `service/LadderTrials`: the single owner of "which trials does this floor serve", keyed by the floor's
+  pair codes. `LadderRoundSource.scoredRounds` and `GameService.validateLadderStart` both ask it, so validation and
+  serving cannot diverge; a floor whose trials sit under unexpected codes is now a `400 Unsupported ladder floor`
+  instead of a saved session that serves zero rounds. `GameService` drops its `LadderFloors` dependency;
+  `LadderRoundSource` drops `TrialRepository` and `LadderFloors`.
+- **NIL-92** web `scripts/verify-browser-loop.mjs`: verdict assertions are collected (`check()`, 33 sites) and reported
+  together at the end; the process exit code is decided there. Independent proof stages run under `runStage()`, so a
+  broken Perception Ladder walk no longer hides console errors or geometry findings. Navigation, timeout and
+  prerequisite failures still throw -- nothing downstream of them means anything. A stage that drives the UI sets
+  `domStateTrusted = false` when it throws, and the live-DOM checks (muted media, stale controls, overflow) are then
+  skipped rather than measured against whatever view happened to be mounted; passive evidence (captured requests,
+  console errors, sampled geometry) is still reported. `assertionFailureCount` / `assertionFailures` / `domStateTrusted`
+  join the JSON summary.
+- Tests: `RegistrationAutomationHttpTests` 1 -> 5 (browser_loop 201, BROWSER_LOOP 201 under the same fold, thesis_p99
+  400, THESIS_P37 400, normal 201). `GameServiceTests.startSessionRejectsAFloorWhoseTrialsCarryUnexpectedPairCodes` is
+  new. Two Mockito fixtures that stubbed a trial under pairCode `"code"` were **inert** -- `LadderRoundSource` silently
+  discarded it -- and now carry a real floor pair code, which is what gives the assertions force.
+
+Proof:
+- `./mvnw test` -> **Tests run: 163, Failures: 0, Errors: 0** (was 158).
+- Both new guards proven red before green, by temporarily restoring the old code:
+  - wholesale skip -> `thesis_p99` and `THESIS_P37` both returned **201** where the tests demand 400;
+  - old ladder predicate -> `startSessionRejectsAFloorWhoseTrialsCarryUnexpectedPairCodes` did not throw
+    `BadRequestException` (it reached `gameSessionRepository.save`, which the test asserts is never called).
+- Live, backend on `local,automation` (log: `The following 2 profiles are active: "local", "automation"`):
+  `browser_loop_n90_*` -> **201**; `thesis_p99` -> **400** `validationErrors.username`; `THESIS_P37` -> **400**;
+  normal -> **201**.
+- **NIL-92 demonstrated, not asserted:** two deliberate failures injected at opposite ends of the run (a landing-card
+  verdict and a session-request verdict). One run reported **both**, exited 1, and still completed all 49 rounds, the
+  ladder walk, and the full JSON summary. The pre-NIL-92 harness would have aborted on the landing card, before it
+  even registered.
+- Sanctioned loop green after restore: exit 0 at **1280** (`scrollWidth 1265 <= 1280`) and **375** (`386 == 386`),
+  49 answered rounds each, ladder to `finalRungSeen`, `assertionFailureCount: 0`, `domStateTrusted: true`,
+  0 console errors, `Round 1 / 47`.
+- web `pnpm lint` clean · `tsc -b` clean · `pnpm vitest run` 205 passed · `verify-presentation-logic.mjs` OK.
+
+Result:
+The exemption can no longer touch the thesis cohort, and its name no longer suggests it can. Validation and serving
+ask the ladder one question instead of two that could disagree. The harness reports what a run found rather than what
+it hit first.
+
+Commit:
+Not committed (Nils's). Proposed commits:
+- api: "NIL-90/91: narrow the automation exemption to browser_loop_; unify the ladder served-floor predicate"
+- web: "NIL-92: collect browser-loop verdict failures instead of aborting at the first"
+
+Blocker:
+None. Two notes:
+- The property rename is a breaking change for any local `application-automation.properties` copy that predates this
+  session; the tracked file is updated, and the old key is now inert (its absence means "guarded").
+- 88 `throw`s remain in the harness. They are navigation, timeout and prerequisite failures -- an element that is not
+  there, a session that never completed -- where nothing downstream is meaningful. Converting them would report
+  cascades of consequences, not findings. The line drawn is: verdicts on data already in hand are collected;
+  everything the rest of the run depends on still stops it.
 
 Next single task:
 NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->

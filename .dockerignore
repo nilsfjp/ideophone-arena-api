@@ -20,6 +20,11 @@ src/main/resources/application-local.properties
 .env.*
 !.env.example
 
+# Dev-only automation profile: it lifts the A10 reserved-prefix guard for the browser loop.
+# Keeping it out of the image means the property has no source there even if someone
+# activates the `automation` profile in a container -- the @Value default (false) then wins.
+src/main/resources/application-automation.properties
+
 # Docs are not needed in the build context
 docs/
 README.md

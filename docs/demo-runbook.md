@@ -450,9 +450,14 @@ the rejection for that run:
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local,automation
 ```
 
-The plain `./mvnw spring-boot:run` boot and the `docker compose` container both keep the guard active — the container
-sets no `SPRING_PROFILES_ACTIVE`, so its active profile stays `local` and `application-automation.properties` is never
-read. Never activate `automation` against a research database: the skip is wholesale, so `thesis_p*` registers too.
+The exemption covers `browser_loop_*` **only**. `thesis_p*` is rejected under every profile, because that cohort is
+read back as data by `/api/research/thesis/divergence` rather than fenced out of it, so a stray `thesis_p` row is
+silent corruption rather than noise.
+
+The plain `./mvnw spring-boot:run` boot and the `docker compose` container both keep the guard fully active. The
+container sets no `SPRING_PROFILES_ACTIVE`, so its active profile stays `local`; and `.dockerignore` keeps
+`application-automation.properties` out of the image, so `app.automation.allow-browser-loop-registration` has no
+source there even if someone activates the profile — the `@Value` default (`false`) then wins.
 
 ## Cleaning up browser-loop test accounts
 

@@ -693,7 +693,11 @@ Update this section after each architecture pass.
       leaderboard, rating scale, and the Perception Ladder to its final rung. Green at 1280 and 375 px, 0 console
       errors, no horizontal overflow. Boot the backend with `-Dspring-boot.run.profiles=local,automation` so the loop's
       `browser_loop_*` account can register (see `docs/demo-runbook.md`); the guard is active in every other boot.
-- [x] Registration rejects the reserved `thesis_p*` / `browser_loop_*` username prefixes by default (A10), and the
-      `automation` profile is the only way to lift it — proven by `RegistrationHttpTests` (guarded, runs under `local`)
-      and `RegistrationAutomationHttpTests` (`properties = "app.automation.allow-reserved-registration=true"`).
-      `docker-compose.yml` sets no `SPRING_PROFILES_ACTIVE`, so the container can never activate the exemption.
+- [x] Registration rejects the reserved `thesis_p*` / `browser_loop_*` username prefixes by default (A10). The
+      `automation` profile lifts it for `browser_loop_` **only** (NIL-90); `thesis_p*` is rejected under every profile.
+      Proven by `RegistrationHttpTests` (guarded, runs under `local`) and `RegistrationAutomationHttpTests`
+      (`properties = "app.automation.allow-browser-loop-registration=true"`, which still 400s `thesis_p99` and
+      `THESIS_P37`). Production is unreachable four ways: the `@Value` default is `false`; `docker-compose.yml` sets no
+      `SPRING_PROFILES_ACTIVE`, so the container's active profile stays `local`; `.dockerignore` keeps
+      `application-automation.properties` out of the image, so the key has no source there even if the profile were
+      activated; and the thesis cohort is never exempt.

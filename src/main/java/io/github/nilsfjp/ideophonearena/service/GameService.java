@@ -56,14 +56,14 @@ public class GameService {
     private final PlayerAnswerRepository playerAnswerRepository;
     private final GameMapper gameMapper;
     private final RoundShuffler roundShuffler;
-    private final LadderFloors ladderFloors;
+    private final LadderTrials ladderTrials;
     private final Map<GameMode, RoundSource> roundSources;
     private final SecureRandom shuffleSeedSource = new SecureRandom();
 
     public GameService(AppUserRepository appUserRepository, GameSessionRepository gameSessionRepository,
             TrialRepository trialRepository, PresentationRepository presentationRepository,
             PlayerAnswerRepository playerAnswerRepository, GameMapper gameMapper, RoundShuffler roundShuffler,
-            LadderFloors ladderFloors, List<RoundSource> roundSources) {
+            LadderTrials ladderTrials, List<RoundSource> roundSources) {
         this.appUserRepository = appUserRepository;
         this.gameSessionRepository = gameSessionRepository;
         this.trialRepository = trialRepository;
@@ -71,7 +71,7 @@ public class GameService {
         this.playerAnswerRepository = playerAnswerRepository;
         this.gameMapper = gameMapper;
         this.roundShuffler = roundShuffler;
-        this.ladderFloors = ladderFloors;
+        this.ladderTrials = ladderTrials;
         this.roundSources = new EnumMap<>(GameMode.class);
         for (RoundSource roundSource : roundSources) {
             this.roundSources.put(roundSource.mode(), roundSource);
@@ -272,13 +272,14 @@ public class GameService {
 
     // A ladder session must name a floor that has served trials (data-driven: a floor whose
     // trials are not yet seeded is rejected rather than serving an empty session), and never
-    // carries practice rounds (those are the CHOOSING warmup).
+    // carries practice rounds (those are the CHOOSING warmup). The served-floor question is
+    // LadderTrials' -- the same predicate LadderRoundSource serves from, so a floor cannot
+    // pass this check and then yield zero rounds.
     private void validateLadderStart(Modality floor, boolean includePractice) {
         if (floor == null) {
             throw new BadRequestException("A ladder session requires a floor");
         }
-        List<String> pairCodes = ladderFloors.pairCodesInOrder(floor);
-        if (pairCodes.isEmpty() || trialRepository.findScoredTrialsByPairCodes(pairCodes).isEmpty()) {
+        if (!ladderTrials.isServedFloor(floor)) {
             throw new BadRequestException("Unsupported ladder floor: " + floor);
         }
         if (includePractice) {
