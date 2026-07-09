@@ -27,11 +27,13 @@ import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.ProductionRepository;
 import io.github.nilsfjp.ideophonearena.repository.WordRepository;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,6 +54,8 @@ class ProductionServiceTests {
     private ProductionRepository productionRepository;
 
     private ProductionService productionService;
+
+    private static final long PRODUCIBLE_TOTAL = 94L;
 
     private final UserDetails userDetails =
             User.withUsername("minter").password("x").authorities("ROLE_USER").build();
@@ -99,6 +103,7 @@ class ProductionServiceTests {
         assertFalse(prompt.isCompleted());
         assertEquals(21L, prompt.getIdeophoneId());
         assertEquals("VISUAL", prompt.getModality());
+        assertEquals(PRODUCIBLE_TOTAL, prompt.getTotalProducible());
     }
 
     @Test
@@ -113,6 +118,23 @@ class ProductionServiceTests {
         assertNull(prompt.getIdeophoneId());
         assertNull(prompt.getGloss());
         assertNull(prompt.getModality());
+        // The status line has to survive the last round, so the sentinel still carries {n}.
+        assertEquals(PRODUCIBLE_TOTAL, prompt.getTotalProducible());
+    }
+
+    // {n} counts what the cycle can serve, not every trialed word: Modality also has TACTILE
+    // and MOTION, which PROMPT_CYCLE never visits. Were they counted, {i} could never reach
+    // {n} once such a word is trialed, and "word {i} of {n}" would stall one short forever.
+    @Test
+    void theProducibleCountIsFencedToTheCycleModalities() {
+        stubCandidate(Modality.AUDITORY, word(1L, "gosogoso", Modality.AUDITORY));
+
+        assertEquals(PRODUCIBLE_TOTAL, promptAfter(0).getTotalProducible());
+
+        ArgumentCaptor<Collection<Modality>> fence = ArgumentCaptor.captor();
+        verify(productionRepository).countProducible(fence.capture());
+        assertEquals(List.of(Modality.AUDITORY, Modality.VISUAL, Modality.HAPTIC,
+                Modality.INTEROCEPTIVE), List.copyOf(fence.getValue()));
     }
 
     // The one-shot promise: an unparseable form is rejected before the word is even looked
@@ -161,6 +183,7 @@ class ProductionServiceTests {
 
     private ProductionPromptResponse promptAfter(long produced) {
         when(productionRepository.countByUserId(7L)).thenReturn(produced);
+        when(productionRepository.countProducible(any())).thenReturn(PRODUCIBLE_TOTAL);
         return productionService.getNextPrompt(userDetails);
     }
 

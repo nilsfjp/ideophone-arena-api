@@ -62,16 +62,19 @@ public class ProductionService {
     @Transactional(readOnly = true)
     public ProductionPromptResponse getNextPrompt(UserDetails userDetails) {
         AppUser user = getCurrentUser(userDetails);
+        // Caller-invariant, so it is the same number on every branch. PROMPT_CYCLE itself is
+        // the fence, which is what keeps the count and the cycle from ever drifting apart.
+        long totalProducible = productionRepository.countProducible(PROMPT_CYCLE);
         long produced = productionRepository.countByUserId(user.getId());
         for (int offset = 0; offset < PROMPT_CYCLE.size(); offset++) {
             Modality modality = PROMPT_CYCLE.get((int) ((produced + offset) % PROMPT_CYCLE.size()));
             List<Word> candidates = productionRepository.findNextUnproducedByModality(
                     user.getId(), modality, PageRequest.of(0, 1));
             if (!candidates.isEmpty()) {
-                return productionMapper.toPromptResponse(candidates.get(0));
+                return productionMapper.toPromptResponse(candidates.get(0), totalProducible);
             }
         }
-        return productionMapper.toCompletedPromptResponse();
+        return productionMapper.toCompletedPromptResponse(totalProducible);
     }
 
     @Transactional

@@ -9,12 +9,18 @@ public class ProductionPromptResponse {
     private Long ideophoneId;
     private String gloss;
     private String modality;
+    // Size of the producible universe -- the {n} in Word Mint's "word {i} of {n}". Caller-
+    // invariant, and carried on the completed sentinel too so the status line survives the
+    // last round. The client must never derive this count itself.
+    private long totalProducible;
 
-    public ProductionPromptResponse(boolean completed, Long ideophoneId, String gloss, String modality) {
+    public ProductionPromptResponse(boolean completed, Long ideophoneId, String gloss, String modality,
+            long totalProducible) {
         this.completed = completed;
         this.ideophoneId = ideophoneId;
         this.gloss = gloss;
         this.modality = modality;
+        this.totalProducible = totalProducible;
     }
 
     public boolean isCompleted() {
@@ -31,5 +37,9 @@ public class ProductionPromptResponse {
 
     public String getModality() {
         return modality;
+    }
+
+    public long getTotalProducible() {
+        return totalProducible;
     }
 }

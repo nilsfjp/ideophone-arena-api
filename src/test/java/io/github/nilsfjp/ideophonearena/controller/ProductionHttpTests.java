@@ -35,6 +35,10 @@ class ProductionHttpTests {
     // The word the adjudicated Word Mint mockup scores pikapika against.
     private static final long DOKIDOKI = 60L;
 
+    // The seeded producible universe: words in >= 1 non-practice trial, across the four
+    // cycle modalities. This is the {n} of Word Mint's "word {i} of {n}".
+    private static final int PRODUCIBLE_TOTAL = 94;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -48,10 +52,23 @@ class ProductionHttpTests {
                 .andExpect(jsonPath("$.ideophoneId").value((int) FIRST_AUDITORY))
                 .andExpect(jsonPath("$.modality").value("AUDITORY"))
                 .andExpect(jsonPath("$.gloss").isNotEmpty())
+                .andExpect(jsonPath("$.totalProducible").value(PRODUCIBLE_TOTAL))
                 // The meaning is the whole prompt: no romaji, no kana, no audio pre-submit.
                 .andExpect(jsonPath("$.romaji").doesNotExist())
                 .andExpect(jsonPath("$.displayForm").doesNotExist())
                 .andExpect(jsonPath("$.stimulusUrl").doesNotExist());
+    }
+
+    // {n} is the universe, not the remainder: minting a word advances {i}, never shrinks {n}.
+    @Test
+    void theProducibleTotalIsCallerInvariantAcrossAMint() throws Exception {
+        String token = registerAndGetToken("prod_total_" + System.nanoTime());
+
+        produce(token, FIRST_AUDITORY, "gorogoro").andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/productions/next").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalProducible").value(PRODUCIBLE_TOTAL));
     }
 
     @Test

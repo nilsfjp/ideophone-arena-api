@@ -717,15 +717,21 @@ Get the next meaning to produce a word for (authenticated):
 GET /api/productions/next
 ```
 
-- `200 {"completed": false, "ideophoneId": 1, "gloss": "with a rustling sound", "modality": "AUDITORY"}`. No
-  romaji, no kana, no audio — the meaning is the whole prompt.
+- `200 {"completed": false, "ideophoneId": 1, "gloss": "with a rustling sound", "modality": "AUDITORY",
+  "totalProducible": 94}`. No romaji, no kana, no audio — the meaning is the whole prompt.
 - Once the caller has produced every word: `200 {"completed": true, "ideophoneId": null, "gloss": null,
-  "modality": null}` (the completion-sentinel precedent).
+  "modality": null, "totalProducible": 94}` (the completion-sentinel precedent).
 - Selection is deterministic and stateless: the caller's production count is the cycle cursor. The cycle is
   `AUDITORY -> VISUAL -> HAPTIC -> INTEROCEPTIVE`, lowest word id within a modality, skipping exhausted
   modalities. Candidates are the 94 seeded words that belong to at least one non-practice trial (practice is a
   trial fact, ADR-3), so practice words never appear. HAPTIC is in the cycle because the Touch floor is live
   (NIL-41) and its 8 words carry real audio, glosses, and scored trials.
+- `totalProducible` is the size of that candidate universe — the `{n}` of Word Mint's frozen `WORD {i} OF {n}`
+  status line (`SPEC-view-designs.md` §8.4; V14 forbids the client deriving or hardcoding it). It is
+  caller-invariant: minting a word advances `{i}`, never shrinks `{n}`. It is carried on the completed sentinel
+  too, so the status line survives the last round. The count is fenced to the four cycle modalities — `Modality`
+  also has `TACTILE` and `MOTION`, which the cycle never serves, and counting them would leave `{i}` forever
+  one short of `{n}`.
 
 Submit an invented word (authenticated):
 
@@ -827,6 +833,21 @@ one row per word that has **any** data — at least one guess, rating, or produc
 
 ## Changelog
 
+- 2026-07-09: **`totalProducible` on the production prompt (NIL-62 FE rider)** — additive field on
+  `GET /api/productions/next`, both the live and the completed branch. Word Mint's frozen status line is
+  `WORD {i} OF {n} · YOUR MEAN {m}` (`SPEC-view-designs.md` §8.4) and V14 forbids the client hardcoding or deriving
+  the counts, but nothing served `{n}`: the prompt returns one word, `GET /api/game/me/productions.totalElements`
+  counts only the caller's own rows (that is `{i}` and `{m}`), and `/api/research/triangulation` unions only words
+  that already carry data. `ProductionRepository.countProducible(Collection<Modality>)` is
+  `findNextUnproducedByModality`'s predicate minus the caller's `not exists` clause, widened from one modality to
+  the whole cycle. Two things are load-bearing: the **modality fence** (`Modality` has `TACTILE` and `MOTION`,
+  which `PROMPT_CYCLE` never serves — an unfenced count would leave `{i}` forever one short of `{n}` the day one
+  is trialed; `PROMPT_CYCLE` is passed in as the fence so the two cannot drift), and keeping trial membership an
+  **`exists` subquery rather than a join** (a word sits in many non-practice trials; a join would count it once
+  per trial). The count is caller-invariant, so it is computed once per request. Both clauses are guarded by
+  `CountProducibleTests` against the database — the service test mocks the repository and the seed has no
+  TACTILE/MOTION rows, so neither could see them; removing the fence fails two of its cases, and swapping the
+  `exists` for a join fails its duplication case. `./mvnw test` -> 168 tests, 0 failures.
 - 2026-07-09: **A10 exemption narrowed + ladder predicate unified (NIL-90 / NIL-91)** — no endpoint or DTO change.
   **NIL-90:** the automation exemption now lifts the guard for `browser_loop_` **only**; `thesis_p*` is rejected under
   every profile, including `automation`. That cohort is the one prefix whose rows are *read back as data*

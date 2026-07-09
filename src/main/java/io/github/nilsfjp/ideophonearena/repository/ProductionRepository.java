@@ -3,6 +3,7 @@ package io.github.nilsfjp.ideophonearena.repository;
 import io.github.nilsfjp.ideophonearena.model.Production;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.Modality;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +45,25 @@ public interface ProductionRepository extends JpaRepository<Production, Long> {
             """)
     List<Word> findNextUnproducedByModality(@Param("userId") Long userId,
             @Param("modality") Modality modality, Pageable pageable);
+
+    // The producible universe: findNextUnproducedByModality's predicate minus the caller's
+    // not-exists clause, widened from one modality to the whole cycle. It is the {n} in Word
+    // Mint's "word {i} of {n}", so it must count exactly what the cycle can ever serve --
+    // hence the modality fence. Modality also has TACTILE and MOTION, which the cycle never
+    // visits; an unfenced count would over-report the day one of them is trialed, and {i}
+    // could never reach {n}. Trial membership stays an exists subquery, not a join: a word
+    // sits in many non-practice trials and a join would count it once per trial.
+    @Query("""
+            select count(word) from Word word
+            where word.modality in :modalities
+              and exists (
+                  select 1 from Trial trial
+                  join trial.pairing pairing
+                  where trial.practice = false
+                    and (pairing.wordA = word or pairing.wordB = word)
+              )
+            """)
+    long countProducible(@Param("modalities") Collection<Modality> modalities);
 
     // Mean similarity per word (triangulation production side), word-keyed (ADR-0).
     // Carries the Rider A username fences for symmetry with the guess and rating

@@ -22,13 +22,13 @@ public class ProductionMapper {
     // Presentational only: the scorer keeps the full-precision ratio.
     private static final int RATIO_DISPLAY_SCALE = 2;
 
-    public ProductionPromptResponse toPromptResponse(Word word) {
+    public ProductionPromptResponse toPromptResponse(Word word, long totalProducible) {
         return new ProductionPromptResponse(false, word.getId(), word.getGloss(),
-                word.getModality() == null ? null : word.getModality().name());
+                word.getModality() == null ? null : word.getModality().name(), totalProducible);
     }
 
-    public ProductionPromptResponse toCompletedPromptResponse() {
-        return new ProductionPromptResponse(true, null, null, null);
+    public ProductionPromptResponse toCompletedPromptResponse(long totalProducible) {
+        return new ProductionPromptResponse(true, null, null, null, totalProducible);
     }
 
     public ProductionResponse toResponse(Production production, PhonologyFeatures yours,
