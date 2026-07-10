@@ -2,6 +2,7 @@ package io.github.nilsfjp.ideophonearena.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +18,7 @@ import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
+import io.github.nilsfjp.ideophonearena.service.ChoosingSample;
 import io.github.nilsfjp.ideophonearena.service.RoundShuffler;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +33,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * Seed-derived shuffle over the wire. The session is created through the
- * repository so its seed is known, then the two served practice rounds and all
- * 30 seeded scored rounds are played through the HTTP API. The served order,
+ * repository so its seed is known, then the two served practice rounds and every
+ * scored round the session serves -- ChoosingSample's stratified subset of the
+ * derivation (NIL-85) -- are played through the HTTP API. The served order,
  * sides, and target meanings must match the derivation, the stored answers must
  * carry the derived targets, and completion and duplicate semantics must be
  * unchanged.
@@ -53,6 +56,9 @@ class ShuffledSessionHttpTests {
     private RoundShuffler roundShuffler;
 
     @Autowired
+    private ChoosingSample choosingSample;
+
+    @Autowired
     private PlayerAnswerRepository playerAnswerRepository;
 
     @Autowired
@@ -68,8 +74,9 @@ class ShuffledSessionHttpTests {
         String token = registerAndGetToken(username);
         AppUser user = appUserRepository.findByUsername(username).orElseThrow();
 
-        // Seed-only fixtures: every session serves the SAME 30 scored trials
-        // (ids 1-30) and, with practice, the first 2 practice trials (31, 32).
+        // Seed-only fixtures: the scored pool is shared by every session, and this seed's
+        // session serves ChoosingSample's stratified subset of it (NIL-85), plus the first 2
+        // practice trials.
         List<Trial> scored = trialRepository.findScoredChoosingTrials();
         List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();
         List<Trial> servedPractice = practice.subList(0, 2);
@@ -79,7 +86,13 @@ class ShuffledSessionHttpTests {
         String sessionUuid = session.getSessionUuid();
 
         List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(SHUFFLE_SEED, servedPractice);
-        List<DerivedRound> derivedScored = roundShuffler.deriveScoredRounds(SHUFFLE_SEED, scored);
+        List<DerivedRound> fullDerivation = roundShuffler.deriveScoredRounds(SHUFFLE_SEED, scored);
+        List<DerivedRound> servedScored = choosingSample.sample(fullDerivation);
+
+        // Sampling really happens end-to-end: if ChoosingSample ever regressed to the
+        // identity, the loop below would still pass, so pin the relationship here.
+        assertTrue(servedScored.size() < fullDerivation.size(),
+                "a session must serve fewer rounds than the scored pool holds");
 
         for (DerivedRound expected : derivedPractice) {
             String roundJson = getNextRound(token, sessionUuid);
@@ -92,7 +105,7 @@ class ShuffledSessionHttpTests {
         }
 
         long answered = 0;
-        for (DerivedRound expected : derivedScored) {
+        for (DerivedRound expected : servedScored) {
             String roundJson = getNextRound(token, sessionUuid);
             assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.practice"));
             assertServedAsDerived(expected, roundJson);
@@ -120,20 +133,20 @@ class ShuffledSessionHttpTests {
         assertEquals(Boolean.TRUE, JsonPath.read(completionJson, "$.completed"));
         assertNotNull(gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getCompletedAt());
 
-        assertStoredTargetsMatchDerivation(session.getId(), derivedScored);
+        assertStoredTargetsMatchDerivation(session.getId(), servedScored);
     }
 
     // The EntityGraph on findBySessionId fetches trial and targetWord, so no
     // transaction is needed here. Answers are matched by trial id because
     // answered_at only has second precision.
-    private void assertStoredTargetsMatchDerivation(Long sessionId, List<DerivedRound> derivedScored) {
+    private void assertStoredTargetsMatchDerivation(Long sessionId, List<DerivedRound> servedScored) {
         List<PlayerAnswer> storedAnswers = playerAnswerRepository.findBySessionId(sessionId);
-        assertEquals(derivedScored.size(), storedAnswers.size());
+        assertEquals(servedScored.size(), storedAnswers.size());
         Map<Long, Long> storedTargetByTrialId = new HashMap<>();
         for (PlayerAnswer answer : storedAnswers) {
             storedTargetByTrialId.put(answer.getTrial().getId(), answer.getTargetWord().getId());
         }
-        for (DerivedRound derived : derivedScored) {
+        for (DerivedRound derived : servedScored) {
             assertEquals(derived.getTarget().getId(), storedTargetByTrialId.get(derived.getTrial().getId()),
                     "stored target must match the derivation for trial " + derived.getTrial().getId());
         }

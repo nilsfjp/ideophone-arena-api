@@ -152,8 +152,9 @@ The session response echoes `conditionName`, `gameMode`, `floor` (null for CHOOS
 
 `totalRounds` is the number of **scored** rounds this session will serve — the denominator of the client's
 "Round n / total". Practice rounds are excluded (they are not scored). It is mode-aware, derived through the same
-`RoundSource` seam that serves the rounds: a CHOOSING session reports the full scored pool (47 since NIL-60), a
-LADDER session reports only its floor's pair count. Clients must read it rather than assume a pool size.
+`RoundSource` seam that serves the rounds: a CHOOSING session reports its **sampled session length** (21 since
+NIL-85 — see "Session sampling" below), a LADDER session reports only its floor's pair count. Clients must read it
+rather than assume a pool size.
 
 Get next round:
 
@@ -199,7 +200,7 @@ Practice answers:
   already-passed practice round returns `409`, and practice answers against a session started without the flag
   return `400`.
 
-Practice rounds do not consume round numbers: "Round 1/47" still means the first scored round. Sessions started
+Practice rounds do not consume round numbers: "Round 1/21" still means the first scored round. Sessions started
 without the flag behave exactly as before; existing clients are unaffected.
 
 ## Deterministic per-session shuffle (2026-06-12)
@@ -232,6 +233,43 @@ brought the 17 A/V/I expansion pairs live (2026-07-08); a given seed therefore d
 did pre-NIL-60. This is compatible because no persisted in-progress live session exists (dev/demo DB is reloaded),
 and the thesis cohort's answers are keyed by `trial_id` — not by shuffle order — so they are untouched. Any future
 change to the base list once real sessions exist would break replay and is forbidden.
+
+### Session sampling (2026-07-10, NIL-85)
+
+A Meaning Match (`CHOOSING`) session serves **21 scored rounds — 7 auditory, 7 visual, 7 interoceptive** — not the
+whole 47-pair pool. The sample is a **filter over the derivation above, never a re-derivation**:
+
+1. Derive all 47 scored rounds exactly as specified (shuffle + three draws per round, `+0` stream). Unchanged.
+2. Walk that derived list in order and keep the first 7 rounds of each modality, preserving shuffle order.
+
+Because selection happens *after* the draws, each served round carries byte-identical `target` / `targetOnLeft` /
+`targetMeaningListedFirst` values to the ones the full derivation gave it. The served list is a **subsequence** of
+the full derivation. Two consequences the code depends on:
+
+- **The derivation spec above is untouched.** Shuffling a pre-truncated 21-element list would be a different
+  permutation with different draws; that is explicitly not what happens.
+- **Replay resolves every answer.** `/api/research/position-bias` re-derives the *full* 47 and looks answers up by
+  `trial_id`. A session only persists answers for rounds it served, and every served round is a member of the full
+  derivation — so no answer is ever stranded, whatever a session's sample was.
+
+Sampling is **stratified** rather than a plain prefix because modalities differ in difficulty (see
+`pairings.thesis_accuracy`): an unstratified prefix would make a player's score partly a function of which
+modalities their seed happened to draw. Every session faces the same 7/7/7 mix.
+
+Owned by `ChoosingSample` (the single predicate for "which derived rounds does a session serve", mirroring
+`LadderTrials`). It caps rather than throws when a modality is short, so the guarantee that a live session is
+really 7+7+7 is enforced against the seed by `IdeophoneSeedIntegrityTests`. Practice rounds are untouched (still
+2, `+1` stream); the ladder is untouched (`+4` stream, whole floor).
+
+**Knock-on:** the Rating Lab pool is built from words the player has *answered*, so one completed session now
+reveals ~40 ratable words instead of 86. The pool fills across sessions. No endpoint or DTO shape changed.
+
+**Leaderboard:** unchanged. It ranks completed CHOOSING sessions by raw correct count
+(`correctCount desc, answeredCount asc, username asc`). Once every completed session is 21 rounds, that ordering
+*is* accuracy ordering, and the `answeredCount` tiebreak (built for mixed lengths) goes inert but harmless. No
+normalization, epoch column, or reset was added: no real player session exists (deploy target W30), and every
+pre-NIL-85 47-answer row in the dev DB belongs to a test-harness account. `scripts/cleanup-test-accounts.sql`
+removes them.
 
 ### Consequences
 
@@ -833,6 +871,17 @@ one row per word that has **any** data — at least one guess, rating, or produc
 
 ## Changelog
 
+- 2026-07-10: **Meaning Match session sampling (NIL-85)** — **behavioural, no DTO or endpoint shape change.** A
+  `CHOOSING` session now serves 21 scored rounds (7 auditory / 7 visual / 7 interoceptive) sampled from the 47-pair
+  pool, instead of the whole pool. `GameSessionResponse.totalRounds` therefore reports `21` where it reported `47`;
+  the field already existed (NIL-89) and clients that read it need no change. Sampling is a *filter over the frozen
+  derivation*, so the derivation spec is untouched and every served round keeps the draws the full derivation gave
+  it — see "Session sampling" above. The new `ChoosingSample` component owns the predicate; `RoundShuffler`,
+  practice serving, the ladder, and the leaderboard query are all unchanged. Knock-on: one completed session now
+  reveals ~40 ratable words rather than 86 (the Rating Lab pool fills across sessions). Proof: `./mvnw test` ->
+  176 tests, 0 failures (+7 `ChoosingSampleTests`, +1 seed-integrity modality-quota guard); live session served 21
+  rounds with a 7/7/7 mix, announced `totalRounds` == rounds served, clean completion body; browser loop green at
+  1280 and 375 (2 practice + 21 scored, displayed denominator `Round 1 / 21`, 0 console errors).
 - 2026-07-09: **`totalProducible` on the production prompt (NIL-62 FE rider)** — additive field on
   `GET /api/productions/next`, both the live and the completed branch. Word Mint's frozen status line is
   `WORD {i} OF {n} · YOUR MEAN {m}` (`SPEC-view-designs.md` §8.4) and V14 forbids the client hardcoding or deriving

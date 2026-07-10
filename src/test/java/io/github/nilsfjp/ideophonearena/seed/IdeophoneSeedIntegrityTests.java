@@ -290,6 +290,34 @@ class IdeophoneSeedIntegrityTests {
         assertEquals(8, hapticWordIds.size(), "8 HAPTIC expansion words are now served");
     }
 
+    // NIL-85: a Meaning Match session serves ChoosingSample.ROUNDS_PER_MODALITY scored
+    // rounds of each non-HAPTIC modality. ChoosingSample caps rather than throws when a
+    // modality is short (so small mocked pools stay usable in unit tests), which means the
+    // guarantee that a live session is really 7+7+7 lives here, against the seed: if an
+    // A/V/I modality ever dropped below the quota, sessions would silently shorten.
+    @Test
+    void everyServedModalityCanSupplyAFullSessionQuota() {
+        Map<Long, PairingRow> pairingsById = new HashMap<>();
+        for (PairingRow pairing : pairings) {
+            pairingsById.put(pairing.id(), pairing);
+        }
+        Map<String, Long> scoredPerModality = new HashMap<>();
+        for (TrialRow trial : trials) {
+            if (trial.practice()) {
+                continue;
+            }
+            scoredPerModality.merge(pairingsById.get(trial.pairingId()).modality(), 1L, Long::sum);
+        }
+
+        assertEquals(16L, scoredPerModality.get("AUDITORY"));
+        assertEquals(16L, scoredPerModality.get("VISUAL"));
+        assertEquals(15L, scoredPerModality.get("INTEROCEPTIVE"));
+        for (String modality : List.of("AUDITORY", "VISUAL", "INTEROCEPTIVE")) {
+            assertTrue(scoredPerModality.get(modality) >= 7L,
+                    modality + " must seed at least the 7 scored trials a session samples from it");
+        }
+    }
+
     @Test
     void trialsAreFiftyOneScoredPlusFourPractice() {
         assertEquals(55, trials.size());

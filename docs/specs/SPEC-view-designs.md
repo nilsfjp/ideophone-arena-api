@@ -278,12 +278,17 @@ Nils ruled every group in chat. These strings are **frozen** — NIL-62-FE lands
 |---|---|
 | Reveal line | The real word is **{displayForm}**. |
 | Score label | SIMILARITY · 0–100 |
-| Band ≥85 | {score} — your instinct is almost the same word. |
-| Band 60–84 | {score} — your instinct shares most of its shape with the real word. |
-| Band 35–59 | {score} — your word and the real one share some bones. |
-| Band <35 | {score} — a different creature — which is also data. |
+| Band ≥85 | Your instinct is almost the same word. |
+| Band 60–84 | Your instinct shares most of its shape with the real word. |
+| Band 35–59 | Your word and the real one share some bones. |
+| Band <35 | A different creature, which is also data. |
 | Primary action | Next meaning |
 | Ghost action | Back to modes |
+
+**Amended 2026-07-10 (NIL-85).** The bands were frozen as `{score} — <tail>`, so the numeral opened the sentence
+and the caption repeated the large `.score-figure` beside it (§2.3.4). Nils ruled the numeral out of the caption
+and the em-dash out of the copy (project-wide ban); `MINT_BAND_DIFFERENT` lost its internal em-dash too. Each band
+is now a standalone sentence. `scoreBandTail` was renamed `scoreBandCaption` to match.
 
 ### 8.3 Feature chips (§2.3.5 table frozen as written)
 

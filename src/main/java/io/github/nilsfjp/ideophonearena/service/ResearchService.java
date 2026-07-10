@@ -230,6 +230,11 @@ public class ResearchService {
         // shuffle seed differs). The shuffle algorithm is byte-for-byte unchanged
         // (Rider B); only the joins moved to word grain. findScoredChoosingTrials
         // excludes the HAPTIC ladder trials, so this replay stays the frozen 47-pool.
+        // Deliberately the FULL derivation, not ChoosingSample's served subset (NIL-85):
+        // a session only ever persists answers for rounds it served, and a served round is
+        // a member of this derivation carrying identical draws, so looking answers up by
+        // trial id resolves every one. Sampling here would strand the answers of any session
+        // whose sample differed, which is every session with a different seed.
         List<Trial> scoredTrials = trialRepository.findScoredChoosingTrials();
         Map<Long, Map<Long, DerivedRound>> derivedBySession = new HashMap<>();
 

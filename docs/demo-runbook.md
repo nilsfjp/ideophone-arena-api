@@ -259,8 +259,8 @@ curl -i -X POST http://localhost:8081/api/game/sessions \
 
 The first two next-round responses carry `practice: true` and p-prefix stimuli
 (for example `/stimuli/audio/p0h-sotto.m4a`). Practice answers return feedback with `practice: true` but keep
-`totalAnswered`/`totalCorrect` at 0 and create no `player_answers` rows; the scored 47 rounds (30 thesis + 17
-A/V/I expansion, NIL-60) follow unchanged.
+`totalAnswered`/`totalCorrect` at 0 and create no `player_answers` rows; the session's 21 scored rounds
+(NIL-85: 7 auditory / 7 visual / 7 interoceptive, sampled from the 47-pair pool) follow unchanged.
 
 Practice audio proof:
 
@@ -433,8 +433,9 @@ curl -s -X POST $B/api/game/sessions -H "Authorization: Bearer $TOKEN" -H 'Conte
 # then walk GET .../rounds/next + POST .../answers (4 Touch pairs) to completion; floors[2].cleared -> true.
 ```
 
-Meaning Match is unchanged: a `CHOOSING` session (omit `gameMode`) still serves exactly 47 scored rounds — the
-Haptic pairs are served only through the ladder. A `LADDER` session never enters `GET /api/leaderboard`.
+Meaning Match is unaffected by the ladder: a `CHOOSING` session (omit `gameMode`) serves its 21 sampled scored
+rounds (NIL-85) drawn from the 47 A/V/I pairs — the Haptic pairs are served only through the ladder. A `LADDER`
+session never enters `GET /api/leaderboard`.
 
 Note: after the DDL change (game_mode/ladder_floor), re-init the local MySQL from the regenerated
 `src/main/resources/db/init/ideophone_arena.sql` (the reseed command above) before booting, since
@@ -459,14 +460,25 @@ container sets no `SPRING_PROFILES_ACTIVE`, so its active profile stays `local`;
 `application-automation.properties` out of the image, so `app.automation.allow-browser-loop-registration` has no
 source there even if someone activates the profile — the `@Value` default (`false`) then wins.
 
-## Cleaning up browser-loop test accounts
+## Cleaning up automation and test-harness accounts
 
-Local browser automation registers throwaway `browser_loop_*` users. They are not seed rows; remove them (and their
-sessions/answers) with the idempotent cleanup script whenever they clutter the leaderboard:
+Local browser automation registers throwaway `browser_loop_*` users, and every `./mvnw test` run leaves behind the
+accounts its HTTP tests registered (`practice_http_*`, `ratable_heal_*`, `shuffle_http_*`, ~50 prefixes). None are
+seed rows. **Run this before any leaderboard demo:** those harness sessions otherwise sit at the top of the board,
+and pre-NIL-85 runs left 47-answer sessions there that outrank any real 21-round player.
 
 ```sh
 "/mnt/c/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe" -u root -p"$PW" \
   --default-character-set=utf8mb4 < scripts/cleanup-test-accounts.sql
+```
+
+The script matches accounts by their `nanoTime`/`Date.now()` username suffix (a trailing run of >= 10 digits), so
+it needs no prefix list and cannot rot as tests are added. It keeps `arena_admin`, the `thesis_p01..36` cohort, and
+any real dev login. Check what would survive before running:
+
+```sh
+# expect: arena_admin, thesis_p01..thesis_p36, and your own accounts -- nothing else
+... -e "SELECT username FROM app_users WHERE username NOT REGEXP '_[0-9]{10,}\$';"
 ```
 
 Re-running it deletes nothing once the accounts are gone.

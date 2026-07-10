@@ -192,9 +192,13 @@ class GameLoopHttpTests {
     @Test
     void sessionStartReportsTheScoredRoundTotalSoTheClientNeedNotGuessIt() throws Exception {
         // The client renders "Round n / total" and cannot derive the denominator, so the
-        // session response carries it. Asserted against the live pool rather than a literal:
-        // the number moved 30 -> 47 with NIL-60 and belongs to the seed, not to this test.
-        int expectedScoredRounds = trialRepository.findScoredChoosingTrials().size();
+        // session response carries it. Since NIL-85 the denominator is the sampled session
+        // length (7 auditory + 7 visual + 7 interoceptive), not the size of the scored pool.
+        // The literal is the ruling; the inequality proves a session is a strict subset of
+        // the pool, so this test fails if sampling is ever silently disabled.
+        int expectedScoredRounds = 21;
+        assertTrue(expectedScoredRounds < trialRepository.findScoredChoosingTrials().size(),
+                "a session must serve a strict subset of the scored pool");
         String token = registerAndGetToken("session_total_" + System.nanoTime());
 
         mockMvc.perform(post("/api/game/sessions")
@@ -287,13 +291,15 @@ class GameLoopHttpTests {
                 .getResponse()
                 .getContentAsString();
         String sessionUuid = JsonPath.read(sessionJson, "$.sessionUuid");
+        int announcedTotal = ((Number) JsonPath.read(sessionJson, "$.totalRounds")).intValue();
 
-        // Play the whole condition-free session (47 scored rounds) to completion,
+        // Play the whole condition-free session (the sampled scored rounds) to completion,
         // answering each round with its own left choice. Remember the first
         // answered round so we can prove a replay is rejected after completion.
         Long firstRoundId = null;
         Long firstSelectedId = null;
         String completionJson = null;
+        int answeredRounds = 0;
         for (int i = 0; i < 60; i++) {
             String roundJson = mockMvc.perform(get("/api/game/sessions/{sessionUuid}/rounds/next", sessionUuid)
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
@@ -321,10 +327,18 @@ class GameLoopHttpTests {
                                     {"roundId":%d,"selectedIdeophoneId":%d,"responseTimeMs":456}
                                     """.formatted(roundId, selectedId)))
                     .andExpect(status().isOk());
+            answeredRounds++;
         }
 
         assertNotNull(completionJson, "session must reach an explicit completion body");
         assertNotNull(firstRoundId, "at least one scored round must have been served");
+
+        // The denominator announced at session start must be the number of scored rounds
+        // the session really served (NIL-89's relationship, now also guarding the NIL-85
+        // sample: a sample that served a different count than it announced would freeze the
+        // client's progress bar exactly as the old hardcoded total did).
+        assertEquals(announcedTotal, answeredRounds,
+                "startSession's totalRounds must equal the scored rounds actually served");
 
         assertEquals(Boolean.TRUE, JsonPath.read(completionJson, "$.completed"));
         assertEquals("Game session is complete", JsonPath.read(completionJson, "$.message"));

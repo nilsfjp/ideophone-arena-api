@@ -1522,3 +1522,93 @@ Next single task:
 NIL-62 frontend session: `ProductionLab` in the mode shell against the post-NIL-65/NIL-69 stack -- prompt card ->
 romaji input -> reveal card reusing the feedback-panel layout + `StimulusPlayback`, motion-reveal choreography
 (essence-review D1), only the frozen SPEC-view-designs section 8 strings, kana discipline per invariant 1.
+
+---
+
+Session goal:
+NIL-85 -- shorten live Meaning Match sessions by sampling deterministically from the expanded pool, without breaking
+the frozen shuffle derivation, leaderboard comparability, or documented contract shapes. Plus two small web riders
+(score-band captions, linguistic neutrality).
+
+Changed:
+- api: new `ChoosingSample` -- the single owner of "which of a session's derived rounds are served". It filters the
+  full 47-round derivation down to the first 7 rounds of each modality in shuffle order (21 = 7 auditory / 7 visual /
+  7 interoceptive). `ChoosingRoundSource` composes it after `RoundShuffler`. Nothing else moved: `RoundShuffler`,
+  practice serving (+1 stream), the ladder (+4 stream), every DTO, every endpoint, and the leaderboard query are
+  untouched. `GameSessionResponse.totalRounds` (NIL-89) already flowed off the `RoundSource` seam, so it reports 21
+  with no mapper or DTO change.
+- api: `ResearchService.getPositionBias` keeps deriving the FULL 47 and looking answers up by trial id. That was
+  incidental before and is load-bearing now -- comment says so, so nobody "fixes" it by routing through the sample.
+- api tests: `ChoosingSampleTests` (7) pins determinism, stratification, and the load-bearing property -- the served
+  list is a *subsequence of the full derivation with unchanged draws*. `IdeophoneSeedIntegrityTests` gains a
+  modality-quota guard (the sample caps rather than throws, so the "a live session is really 7/7/7" guarantee lives
+  against the seed). Four HTTP tests that assumed a full-pool session were reworked to ask what the session actually
+  served: `ShuffledSessionHttpTests`, `PracticeRoundHttpTests`, `GameLoopHttpTests`, `RatableWordsHttpTests`.
+- api: `scripts/cleanup-test-accounts.sql` now removes every harness account, not just `browser_loop_%`, matching on
+  the `nanoTime`/`Date.now()` username suffix so it needs no prefix list. Keeps `arena_admin`, `thesis_p01..36`, and
+  real dev logins.
+- web (rider 1): the four `MINT_BAND_*` score-band captions drop the leading numeral (the `.score-figure` beside
+  them already carried it) and every em-dash, including the one inside `MINT_BAND_DIFFERENT`. `scoreBandTail` ->
+  `scoreBandCaption`. `SPEC-view-designs.md` §8.2 amended.
+- web (rider 2): linguistic-neutrality sweep, INCLUDING the frozen instrument text, as Nils ruled. Amended
+  `LISTEN_INSTRUCTION`, `RATING_INTRO_AFTER_COUNT`, `RATING_LISTEN_LINE_1` (both frozen blocks now carry an
+  INSTRUMENT AMENDMENT note); neutralized chrome/mode copy in `modes.ts`, `ModeSelect`, `Instructions`, `AuthForm`,
+  `Landing` (hero, body, stat card, steps, scatter `alt`), `StyleGuide`. A new `experimentText.test.ts` guard walks
+  *every* export and fails if any names a language. Left alone: publication citations, the "Ideophones beyond
+  Japanese" cross-linguistic card (the contrast is the point), `lang="ja"`, font imports.
+- web: `Landing.tsx` said "the same 30 pairs" -- false since NIL-60 (pool is 47) and doubly so now. Fixed.
+- docs: `backend-contract.md` gains a "Session sampling" section + changelog entry; `demo-runbook.md` round counts
+  and cleanup section; `SPEC-view-designs.md` §8.2.
+
+Proof:
+- `./mvnw test` -> 176 tests, 0 failures (baseline 168; +7 `ChoosingSampleTests`, +1 seed guard). Verified the
+  baseline by stashing.
+- Live session (`local,automation`, :8081): announced `totalRounds` = 21, served 21, modality mix
+  `{VISUAL: 7, INTEROCEPTIVE: 7, AUDITORY: 7}`, 21 distinct trial ids, server `answered=21 correct=13` matching a
+  locally counted 13, then an explicit completion body (`roundId: null`). Ratable pool after one session: 40 (was
+  86) -- 21 pairs x 2 words minus 2 words shared across pairs.
+- Determinism: `ChoosingSampleTests` proves same seed -> same subset AND order, different seeds -> different trial
+  membership (not merely reordering), and that each served round carries the exact draws the full derivation gave
+  it. `RatableWordsHttpTests.crossConditionReplayHealsToOneRowPerWord` now pins both sessions to one seed and
+  asserts the replay serves the same trials.
+- Both web guards proven red before green: reinstating "Japanese" in `LISTEN_INSTRUCTION` and the old em-dash form
+  of `MINT_BAND_SOME` failed exactly the two new assertions, then passed on restore.
+- Web battery: `tsc --noEmit` clean, `vitest run` 256/256 across 32 files, `verify-presentation-logic.mjs` verified.
+- `verify-browser-loop.mjs` green at 1280 and 375: 23 answered = 2 practice + 21 scored, displayed denominator
+  `Round 1 / 21` (asserted as a relationship against rounds served, not a literal), 0 assertion failures, 0 console
+  errors.
+
+Result:
+A Meaning Match session is now 21 rounds instead of 47, drawn deterministically from the seed with a guaranteed
+7/7/7 modality mix. The frozen derivation contract did not have to change: because `deriveScoredRounds` shuffles the
+whole pool and *then* draws presentation per trial, serving a subsequence of that derived list preserves every
+round's target/side/meaning-order draw byte-for-byte. Sampling is a serving-layer filter, not a re-derivation --
+which is also what lets the position-bias replay resolve every persisted answer against the full 47.
+
+Commit:
+Not committed (Nils's). Proposed commits:
+- api: "NIL-85: sample Meaning Match sessions to a stratified 21 rounds from the seeded derivation"
+- web: "NIL-85: neutralize player copy and drop the score numeral from the mint captions"
+
+Blocker:
+None. Four notes:
+- The rating-task strings are no longer Gorilla-verbatim. Live ratings are now elicited under wording the thesis
+  cohort never saw, and the Observatory plots live vs thesis mean rating per word -- two arms that now differ
+  slightly in instrument (a dropped language name, not a changed task or scale). Recorded in the `experimentText.ts`
+  header; any write-up comparing the arms should say so rather than imply identical elicitation. Nils ruled this
+  deliberately, on the option flagged as requiring an invariant-1 amendment.
+- A session that already holds >= 21 answers can never satisfy `totalAnswered == totalRounds` and so never completes.
+  This is unreachable for real players (none exist) and reachable only for pre-change dev residue. `==` was left
+  alone rather than loosened to `>=`: S3 moved completion off the GET on purpose, and `>=` would not rescue the
+  "exactly 21 answered, client already told it is complete" case anyway. A reseed clears the residue.
+- The dev leaderboard is topped by 168 completed 47-answer sessions. Every one is harness-owned (`shuffle_http_`,
+  `ratable_*`, `complete_http_`, `practice_http_`), verified read-only -- zero real players, which is exactly what
+  Nils's "accept mixed lengths, no code change" ruling rests on. Run `scripts/cleanup-test-accounts.sql` before any
+  leaderboard demo. I did not run it (it deletes rows; Nils's call).
+- The em-dash ban was applied only to the score-band captions, as the rider scoped it. 78 other player-facing
+  strings still contain em-dashes (`ladderText`, `researchFlavor`, `modes`, plus Observatory's "-" null-marker,
+  which is a legitimate typographic use, not prose). A genuinely project-wide sweep is its own issue.
+
+Next single task:
+Decide whether the project-wide em-dash ban is real; if so, sweep the remaining 78 player-facing strings (exempting
+the Observatory null-marker) and record the rule in `UI-SYSTEM.md`, which does not currently state it.

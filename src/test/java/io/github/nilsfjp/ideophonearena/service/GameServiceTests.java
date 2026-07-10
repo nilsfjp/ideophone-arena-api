@@ -103,7 +103,7 @@ class GameServiceTests {
 
     private List<RoundSource> roundSources() {
         return List.of(
-                new ChoosingRoundSource(trialRepository, roundShuffler),
+                new ChoosingRoundSource(trialRepository, roundShuffler, new ChoosingSample()),
                 new LadderRoundSource(ladderTrials, roundShuffler)
         );
     }

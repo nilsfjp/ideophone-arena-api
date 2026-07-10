@@ -157,7 +157,7 @@ public class GameService {
         long totalCorrect = playerAnswerRepository.countBySessionIdAndCorrectTrue(session.getId());
 
         // Completion is per-mode: the mode's own scored-round count, not a global trial
-        // count (LADDER = the floor's size, CHOOSING = 47).
+        // count (LADDER = the floor's size, CHOOSING = the sampled 21).
         long totalRounds = scoredRounds.size();
         if (session.getCompletedAt() == null && totalAnswered == totalRounds) {
             session.complete();
@@ -215,8 +215,10 @@ public class GameService {
     }
 
     // The session's scored rounds, dispatched by mode through the RoundSource seam (ADR-2):
-    // CHOOSING serves the 47 A/V/I trials shuffled on the +0 stream; LADDER serves its
-    // floor's trials in fixed order on the +4 stream.
+    // CHOOSING shuffles the 47 A/V/I trials on the +0 stream and serves ChoosingSample's
+    // stratified 21 of them; LADDER serves its floor's trials in fixed order on the +4
+    // stream. This is also the count startSession reports as totalRounds, so the announced
+    // total is always the number of rounds the session will really serve.
     private List<DerivedRound> scoredRoundsForSession(GameSession session) {
         RoundSource roundSource = roundSources.get(session.getGameMode());
         if (roundSource == null) {

@@ -19,6 +19,7 @@ import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
 import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
 import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
+import io.github.nilsfjp.ideophonearena.service.ChoosingSample;
 import io.github.nilsfjp.ideophonearena.service.RoundShuffler;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,9 @@ class PracticeRoundHttpTests {
     @Autowired
     private RoundShuffler roundShuffler;
 
+    @Autowired
+    private ChoosingSample choosingSample;
+
     @Test
     void practiceSessionServesTwoPracticeRoundsThenScoredRoundsWithoutPersistingPracticeAnswers() throws Exception {
         String suffix = Long.toString(System.nanoTime());
@@ -78,7 +82,11 @@ class PracticeRoundHttpTests {
         List<Trial> scored = trialRepository.findScoredChoosingTrials();
         List<Trial> practice = trialRepository.findByPracticeTrueOrderByIdAsc();
         List<DerivedRound> derivedPractice = roundShuffler.derivePracticeRounds(KNOWN_SEED, practice.subList(0, 2));
-        List<DerivedRound> derivedScored = roundShuffler.deriveScoredRounds(KNOWN_SEED, scored);
+        // The session serves ChoosingSample's stratified subset of the derivation (NIL-85),
+        // not the whole scored pool -- ask the sample, or the loop below runs off the end of
+        // the session and reads a completion body.
+        List<DerivedRound> servedScored = choosingSample.sample(
+                roundShuffler.deriveScoredRounds(KNOWN_SEED, scored));
 
         // The two served practice rounds: feedback comes back but the scored
         // totals stay zero and no PlayerAnswer row is written, and the session
@@ -102,21 +110,21 @@ class PracticeRoundHttpTests {
                     "practice answers must not complete the session");
         }
 
-        // All scored rounds follow; answering them counts and the session
+        // All served scored rounds follow; answering them counts and the session
         // completes on the final scored answer even though practice ran first.
         Map<Long, Long> targetByTrialId = new HashMap<>();
-        for (DerivedRound derived : derivedScored) {
+        for (DerivedRound derived : servedScored) {
             targetByTrialId.put(derived.getTrial().getId(), derived.getTarget().getId());
         }
-        for (int i = 0; i < scored.size(); i++) {
+        for (int i = 0; i < servedScored.size(); i++) {
             String roundJson = getNextRound(token, sessionUuid);
             assertEquals(Boolean.FALSE, JsonPath.read(roundJson, "$.practice"));
             long roundId = ((Number) JsonPath.read(roundJson, "$.roundId")).longValue();
             submitAnswer(token, sessionUuid, roundId, targetByTrialId.get(roundId));
         }
 
-        assertEquals((long) scored.size(), playerAnswerRepository.countBySessionId(session.getId()),
-                "exactly the scored answers must be persisted");
+        assertEquals((long) servedScored.size(), playerAnswerRepository.countBySessionId(session.getId()),
+                "exactly the served scored answers must be persisted");
         assertNotNull(gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getCompletedAt(),
                 "the scored answers must complete the session regardless of practice rounds");
     }

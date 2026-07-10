@@ -9,9 +9,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import io.github.nilsfjp.ideophonearena.model.AppUser;
+import io.github.nilsfjp.ideophonearena.model.GameSession;
 import io.github.nilsfjp.ideophonearena.model.Trial;
 import io.github.nilsfjp.ideophonearena.model.Word;
 import io.github.nilsfjp.ideophonearena.model.enums.ConditionName;
+import io.github.nilsfjp.ideophonearena.repository.AppUserRepository;
+import io.github.nilsfjp.ideophonearena.repository.GameSessionRepository;
+import io.github.nilsfjp.ideophonearena.repository.PlayerAnswerRepository;
 import io.github.nilsfjp.ideophonearena.repository.TrialRepository;
 import io.github.nilsfjp.ideophonearena.repository.WordRepository;
 import java.util.ArrayList;
@@ -30,21 +35,21 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * The Rating Lab pool endpoint, played entirely through the real HTTP flow
- * against the seeded, condition-free trials (M2 word grain, ADR-0). Every
- * session serves the same 47 scored trials; answering a scored round makes both
- * members of its pair ratable, practice words never persist an answer, rated
- * words drop out, and the pool is scoped per user. The M2 grain-heal regression
- * (Test E) proves that answering the same words again under a different script
- * condition does not double-offer them: the pool heals to one row per word.
+ * against the seeded, condition-free trials (M2 word grain, ADR-0). Answering a
+ * scored round makes both members of its pair ratable, practice words never
+ * persist an answer, rated words drop out, and the pool is scoped per user. The
+ * M2 grain-heal regression (Test E) proves that answering the same words again
+ * under a different script condition does not double-offer them: the pool heals
+ * to one row per word.
+ *
+ * Since NIL-85 a session serves ChoosingSample's stratified subset of the scored
+ * pool, so a completed session reveals the words of the rounds it served -- not
+ * every scored word. The expectations below therefore read the revealed words
+ * back from the session's persisted answers rather than assuming the whole pool.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 class RatableWordsHttpTests {
-
-    // The seed has 47 scored trials (30 thesis + 17 A/V/I expansion), covering 86
-    // distinct words, so a completed session makes exactly that many words ratable.
-    // Derived from the live scored trials (expectedScoredWordIds) so it tracks the
-    // seed rather than a frozen literal.
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,6 +60,15 @@ class RatableWordsHttpTests {
     @Autowired
     private TrialRepository trialRepository;
 
+    @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private GameSessionRepository gameSessionRepository;
+
+    @Autowired
+    private PlayerAnswerRepository playerAnswerRepository;
+
     @Test
     void answeredRoundsFeedThePoolPracticeExcludedAndRatingRemovesWords() throws Exception {
         String suffix = Long.toString(System.nanoTime());
@@ -63,8 +77,13 @@ class RatableWordsHttpTests {
         String sessionUuid = startSession(token, ConditionName.CONDITION_1_SOKUON, true);
         playSessionToCompletion(token, sessionUuid);
 
-        Set<Long> expectedScoredIds = expectedScoredWordIds();
+        Set<Long> expectedScoredIds = revealedWordIds(sessionUuid);
         Set<Long> practiceIds = expectedPracticeWordIds();
+
+        // One sampled session reveals only the words of the rounds it served, so the pool is
+        // a strict subset of the scored words -- the Rating Lab now fills across sessions.
+        assertTrue(expectedScoredIds.size() < expectedScoredWordIds().size(),
+                "a sampled session must reveal fewer words than the whole scored pool holds");
 
         // The whole pool (paged past the size-50 cap): both members of every
         // answered scored pair, each word exactly once, practice never present.
@@ -112,10 +131,10 @@ class RatableWordsHttpTests {
         String suffix = Long.toString(System.nanoTime());
         String firstToken = registerAndGetToken("ratable_owner_" + suffix);
 
-        int scoredWords = expectedScoredWordIds().size();
         String sessionUuid = startSession(firstToken, ConditionName.CONDITION_1_SOKUON, false);
         playSessionToCompletion(firstToken, sessionUuid);
-        assertEquals(scoredWords, poolTotal(firstToken, "?size=50"));
+        int revealedWords = revealedWordIds(sessionUuid).size();
+        assertEquals(revealedWords, poolTotal(firstToken, "?size=50"));
 
         // A second user who has answered nothing sees an empty pool -- never the
         // first user's words.
@@ -127,10 +146,11 @@ class RatableWordsHttpTests {
                 .andExpect(jsonPath("$.entries").isEmpty());
 
         // The second user rating one of the first user's words must not change
-        // the first user's pool.
-        Long someWordId = expectedScoredWordIds().iterator().next();
+        // the first user's pool. Deliberately a word the first user really has, so the
+        // assertion cannot pass merely because the word was never in that pool.
+        Long someWordId = revealedWordIds(sessionUuid).iterator().next();
         rate(secondToken, someWordId, 3);
-        assertEquals(scoredWords, poolTotal(firstToken, "?size=50"),
+        assertEquals(revealedWords, poolTotal(firstToken, "?size=50"),
                 "another user's rating must not shrink this user's pool");
     }
 
@@ -148,16 +168,16 @@ class RatableWordsHttpTests {
         String sessionUuid = startSession(token, ConditionName.CONDITION_1_SOKUON, false);
         playSessionToCompletion(token, sessionUuid);
 
-        // page/size are honoured; with size=1, totalPages == totalElements == the
-        // full scored-word pool.
-        int scoredWords = expectedScoredWordIds().size();
+        // page/size are honoured; with size=1, totalPages == totalElements == the words the
+        // session revealed.
+        int revealedWords = revealedWordIds(sessionUuid).size();
         mockMvc.perform(get("/api/game/me/ratable-words?page=0&size=1")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.entries.length()").value(1))
                 .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.totalElements").value(scoredWords))
-                .andExpect(jsonPath("$.totalPages").value(scoredWords));
+                .andExpect(jsonPath("$.totalElements").value(revealedWords))
+                .andExpect(jsonPath("$.totalPages").value(revealedWords));
 
         // A negative page clamps to 0 and an oversized size clamps to the 50 cap,
         // exactly like /me/ratings.
@@ -170,31 +190,40 @@ class RatableWordsHttpTests {
 
     @Test
     void crossConditionReplayHealsToOneRowPerWord() throws Exception {
-        // M2 grain-heal (ADR-0): the same 47 scored trials are served in every
-        // script condition. A user who answers them under CONDITION_1_SOKUON and
-        // then again under CONDITION_2_SOKUON has answered each word twice through
-        // two different presentations -- yet, because the pool is keyed by word,
-        // every word still appears EXACTLY ONCE. The pre-M2 grain would have
-        // double-offered them.
+        // M2 grain-heal (ADR-0): trials are condition-free, so the same trials are served in
+        // every script condition. A user who answers them under CONDITION_1_SOKUON and then
+        // again under CONDITION_2_SOKUON has answered each word twice through two different
+        // presentations -- yet, because the pool is keyed by word, every word still appears
+        // EXACTLY ONCE. The pre-M2 grain would have double-offered them.
+        //
+        // Both sessions are created with the SAME shuffle seed, because since NIL-85 the
+        // served trials are a seed-dependent sample: two randomly seeded sessions would
+        // serve different trials and the replay would no longer be a replay.
+        long sharedSeed = 424242L;
         String suffix = Long.toString(System.nanoTime());
-        String token = registerAndGetToken("ratable_heal_" + suffix);
+        String username = "ratable_heal_" + suffix;
+        String token = registerAndGetToken(username);
 
-        int scoredWords = expectedScoredWordIds().size();
-        String firstSession = startSession(token, ConditionName.CONDITION_1_SOKUON, false);
+        String firstSession = startSeededSession(username, ConditionName.CONDITION_1_SOKUON, sharedSeed);
         playSessionToCompletion(token, firstSession);
-        assertEquals(scoredWords, poolTotal(token, "?size=50"));
+        Set<Long> revealed = revealedWordIds(firstSession);
+        int revealedWords = revealed.size();
+        assertEquals(revealedWords, poolTotal(token, "?size=50"));
 
-        String secondSession = startSession(token, ConditionName.CONDITION_2_SOKUON, false);
+        String secondSession = startSeededSession(username, ConditionName.CONDITION_2_SOKUON, sharedSeed);
         playSessionToCompletion(token, secondSession);
+        assertEquals(revealed, revealedWordIds(secondSession),
+                "the same seed must replay the same trials under the other condition");
 
         // Still one row per word after the cross-condition replay.
         List<Map<String, Object>> entries = collectAllPoolEntries(token);
         Set<Long> returnedIds = idsOf(entries);
-        assertEquals(scoredWords, poolTotal(token, "?size=50"),
+        assertEquals(revealedWords, poolTotal(token, "?size=50"),
                 "cross-condition double-offer must be closed by word grain");
-        assertEquals(scoredWords, returnedIds.size(), "every word appears exactly once");
-        assertEquals(expectedScoredWordIds(), returnedIds);
-        assertTrue(returnedIds.size() <= scoredWords, "distinct count never grows past the seeded scored words");
+        assertEquals(revealedWords, returnedIds.size(), "every word appears exactly once");
+        assertEquals(revealed, returnedIds);
+        assertTrue(returnedIds.size() <= expectedScoredWordIds().size(),
+                "distinct count never grows past the seeded scored words");
     }
 
     // --- helpers -----------------------------------------------------------
@@ -206,6 +235,31 @@ class RatableWordsHttpTests {
             ids.add(trial.getPairing().getWordB().getId());
         }
         return ids;
+    }
+
+    // The words a played session actually revealed: both members of every pair it served.
+    // Read back from the persisted answers rather than from the scored pool, because the
+    // session serves a seed-dependent stratified sample of that pool (NIL-85). Trials are
+    // re-fetched through the pairing EntityGraph so no transaction is needed here.
+    private Set<Long> revealedWordIds(String sessionUuid) {
+        Long sessionId = gameSessionRepository.findBySessionUuid(sessionUuid).orElseThrow().getId();
+        Set<Long> ids = new LinkedHashSet<>();
+        for (Long trialId : playerAnswerRepository.findAnsweredTrialIdsBySessionId(sessionId)) {
+            Trial trial = trialRepository.findByIdWithPairingWords(trialId).orElseThrow();
+            ids.add(trial.getPairing().getWordA().getId());
+            ids.add(trial.getPairing().getWordB().getId());
+        }
+        return ids;
+    }
+
+    // A session started through the repository so its seed is known. Two sessions built with
+    // the same seed serve the same trials, which is what lets the grain-heal test replay one
+    // trial set under two script conditions.
+    private String startSeededSession(String username, ConditionName condition, long shuffleSeed) {
+        AppUser user = appUserRepository.findByUsername(username).orElseThrow();
+        GameSession session = gameSessionRepository.save(
+                new GameSession(user, condition, false, shuffleSeed));
+        return session.getSessionUuid();
     }
 
     private Set<Long> expectedPracticeWordIds() {
