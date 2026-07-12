@@ -139,7 +139,7 @@ username: arena_admin
 password: arena-admin-dev
 ```
 
-This is a throwaway credential for the local toy database only — never reuse it anywhere real. Re-applying the seed
+This is a throwaway credential for the local toy database only - never reuse it anywhere real. Re-applying the seed
 drops and recreates `app_users`, so all registered users (and their sessions/answers) are wiped and the admin row is
 restored.
 
@@ -149,7 +149,7 @@ Registration always assigns `ROLE_USER`. To promote an existing user manually:
 UPDATE app_users SET role = 'ROLE_ADMIN' WHERE username = '<username>';
 ```
 
-The promotion takes effect on the user's next request with their existing token — no re-login needed, because the JWT
+The promotion takes effect on the user's next request with their existing token - no re-login needed, because the JWT
 filter reloads the user (and role) from the database on every request.
 
 Admin-only stats endpoint (`403` for `ROLE_USER`, `401` unauthenticated):
@@ -289,7 +289,7 @@ curl -i http://localhost:8081/api/game/me/ratings \
 Re-rating the same word returns `409`; `rating` outside `1..7` returns `400` with a `validationErrors.rating` entry;
 an unknown `ideophoneId` returns `404`; an unauthenticated `POST` returns `401`.
 
-Ratable words — the Rating Lab pool (2026-07-03; answer at least one scored round first, then):
+Ratable words - the Rating Lab pool (2026-07-03; answer at least one scored round first, then):
 
 ```sh
 curl -i http://localhost:8081/api/game/me/ratable-words \
@@ -301,7 +301,7 @@ words (`ideophoneId`, `canonicalForm`, `romaji`, `stimulusFile`, `modality`, `me
 answered scored round appear; practice words never do; rating a word (the `POST` above) removes it from the next
 fetch. Unauthenticated `GET` returns `401`.
 
-## Production — free-form entry (2026-07-09, NIL-62)
+## Production - free-form entry (2026-07-09, NIL-62)
 
 Schema note: `productions` is generator-owned. After pulling this change, regenerate and reload before running the
 app or the tests (`ddl-auto=validate` will not create the table for you):
@@ -319,7 +319,7 @@ curl -i http://localhost:8081/api/productions/next \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-Expected `200 {"completed":false,"ideophoneId":1,"gloss":"with a rustling sound","modality":"AUDITORY"}` — no
+Expected `200 {"completed":false,"ideophoneId":1,"gloss":"with a rustling sound","modality":"AUDITORY"}` - no
 romaji, no kana, no audio. Once every word is produced: `{"completed":true, ...}`.
 
 Submit an invented word. The adjudicated worked example (`pikapika` against word `60`, `dokidoki`) scores `78`:
@@ -359,7 +359,7 @@ curl -i 'http://localhost:8081/api/game/me/productions?page=0&size=999' \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-Triangulation — three measures per word, public, no auth:
+Triangulation - three measures per word, public, no auth:
 
 ```sh
 curl -s http://localhost:8081/api/research/triangulation | head -c 400
@@ -370,7 +370,7 @@ mean `null` when its count is `0`. It is a superset of `/api/research/divergence
 the shared measures; the extra rows are words with a production but no guess or rating (HAPTIC words, whose
 guesses only exist in the ladder).
 
-## Thesis data — Observatory thesis layer (2026-07-06, NIL-54)
+## Thesis data - Observatory thesis layer (2026-07-06, NIL-54)
 
 The thesis Gorilla export (36 participants) lives in the seed as `thesis_p##` accounts (`completed_at = NULL`,
 excluded from the live research aggregates by the reserved `thesis_p%` prefix). Regenerate + verify the seed:
@@ -391,8 +391,8 @@ curl -s http://localhost:8081/api/research/rating-distributions  # {"distributio
 curl -s http://localhost:8081/api/research/thesis/divergence     # 30 rows; guessCount/ratingCount == 36 each
 ```
 
-The thesis layer's guess-count-weighted per-modality accuracy reproduces the vendored figures — AUDITORY 68.6%
-(247/360), VISUAL 64.2% (231/360), INTEROCEPTIVE 59.7% (215/360), overall 693/1080 — and each row's `guessAccuracy`
+The thesis layer's guess-count-weighted per-modality accuracy reproduces the vendored figures - AUDITORY 68.6%
+(247/360), VISUAL 64.2% (231/360), INTEROCEPTIVE 59.7% (215/360), overall 693/1080 - and each row's `guessAccuracy`
 equals that pairing's `pairings.thesis_accuracy` (e.g. `gosogoso` -> `0.6944`). A direct SQL reconciliation:
 
 ```sh
@@ -411,10 +411,10 @@ WHERE u.username LIKE 'thesis\_p%' GROUP BY w.modality;"
 Each session derives its round order, target identities, sides, and meaning order from `game_sessions.shuffle_seed`
 (see the contract's "Deterministic per-session shuffle" section). Two quick demos:
 
-Different sessions differ — start two sessions with the same `$TOKEN` and condition, then fetch
+Different sessions differ - start two sessions with the same `$TOKEN` and condition, then fetch
 `GET .../rounds/next` for each: the first rounds (and the targets for the same `roundId`) will differ.
 
-Restart continuity — play a few rounds of a session, note the next-round response verbatim, restart the backend,
+Restart continuity - play a few rounds of a session, note the next-round response verbatim, restart the backend,
 and repeat the same `GET .../rounds/next`: the response body is identical, and previously answered rounds stay
 answered (verified 2026-06-12: identical `roundId`/`targetTranslation`/`left`/`right` across a kill+restart).
 
@@ -434,7 +434,7 @@ curl -s -X POST $B/api/game/sessions -H "Authorization: Bearer $TOKEN" -H 'Conte
 ```
 
 Meaning Match is unaffected by the ladder: a `CHOOSING` session (omit `gameMode`) serves its 21 sampled scored
-rounds (NIL-85) drawn from the 47 A/V/I pairs — the Haptic pairs are served only through the ladder. A `LADDER`
+rounds (NIL-85) drawn from the 47 A/V/I pairs - the Haptic pairs are served only through the ladder. A `LADDER`
 session never enters `GET /api/leaderboard`.
 
 Note: after the DDL change (game_mode/ladder_floor), re-init the local MySQL from the regenerated
@@ -458,7 +458,7 @@ silent corruption rather than noise.
 The plain `./mvnw spring-boot:run` boot and the `docker compose` container both keep the guard fully active. The
 container sets no `SPRING_PROFILES_ACTIVE`, so its active profile stays `local`; and `.dockerignore` keeps
 `application-automation.properties` out of the image, so `app.automation.allow-browser-loop-registration` has no
-source there even if someone activates the profile — the `@Value` default (`false`) then wins.
+source there even if someone activates the profile - the `@Value` default (`false`) then wins.
 
 ## Cleaning up automation and test-harness accounts
 

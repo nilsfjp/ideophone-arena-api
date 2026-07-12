@@ -45,6 +45,19 @@ class StaticResourceHttpTests {
                 .andExpect(status().isOk());
     }
 
+    // NIL-108: a nonexistent stimulus must be a 404, not a 500. Boot serves a missing
+    // static resource by throwing NoResourceFoundException (since 3.2); without a
+    // dedicated handler it falls through to the catch-all Exception handler and
+    // surfaces as an internal error.
+    @Test
+    void missingStimulusIsNotFoundNotServerError() throws Exception {
+        mockMvc.perform(get("/stimuli/audio/no-such-stimulus.m4a"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(head("/stimuli/audio/no-such-stimulus.m4a"))
+                .andExpect(status().isNotFound());
+    }
+
     @Test
     void keepsGameApiProtected() throws Exception {
         mockMvc.perform(post("/api/game/sessions")

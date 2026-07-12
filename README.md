@@ -1,61 +1,58 @@
-# Ideophone Arena — API
+# Ideophone Arena - API
 
 > Ideophone Arena is not "guess the Japanese word." It is *"explore how far iconicity carries
 > you before convention takes over."*
 
 The Spring Boot backend for **Ideophone Arena**: a gamified two-alternative forced-choice (2AFC)
 experiment grown out of an MA thesis on Japanese ideophones and script iconicity. Players hear two
-real, contrastive ideophones and pick which one matches an English meaning — under one of three
+real, contrastive ideophones and pick which one matches an English meaning - under one of three
 script-presentation conditions. The backend runs the game, stores every answer and rating, and
 exposes a public **Observatory**: a read-only research surface computed over both the live crowd and
 the thesis's own 36 participants.
 
-It began as a graded course project. It is becoming a portfolio piece and a live research
-instrument, and correctness of the experimental manipulation outranks every feature.
+It began as a graded course project and is now a **finished course instrument**: feature-frozen,
+defect fixes only. Correctness of the experimental manipulation outranked every feature while it
+was built, and the freeze locks that in. The design work continues in a successor project that
+reimagines the game around the same research core; this repository stays as the thesis-faithful
+reference implementation.
 
-<!-- NIL-84 (essence review): the "instrument / research surface" framing and the conceptual-spine
-     epigraph above are interpretive; the morning essence pass may revise the wording. Revise, do not rewrite. -->
-
-**At a glance** — Spring Boot 4.0.6 · Java 21 · MySQL · hand-rolled JWT · port `8081` ·
-`./mvnw test` → 97 tests green.
-Live modes: **Meaning Match**, **Rating Lab**, the **Observatory**. On the roadmap: Perception
-Ladder, Word Mint, Word Anatomy, cross-linguistic. Not yet deployed — a self-hosted W30 target
-(see [Current state & roadmap](#current-state--roadmap)).
+**At a glance** - Spring Boot 4.0.6 · Java 21 · MySQL · hand-rolled JWT · port `8081` ·
+`./mvnw test` → 177 tests green.
+All five surfaces are live in dev: **Meaning Match**, **Rating Lab**, **Perception Ladder**,
+**Word Mint**, and the public **Observatory**. Never publicly deployed, and frozen as-is
+(see [Current state](#current-state)).
 
 ---
 
 ## The research story
 
-<!-- NIL-84 (essence review): claims in this section are the thesis's; numbers trace to
-     docs/research/thesis-facts.md. Framing/emphasis may be revised in the essence pass. -->
-
-Ideophones are words whose *sound* resembles their *meaning* — Japanese has thousands of them
+Ideophones are words whose *sound* resembles their *meaning* - Japanese has thousands of them
 (きらきら *kirakira* "glittering", どきどき *dokidoki* "a racing heartbeat"). The thesis
 ([Paulsson 2025](#research--citations)) asked a simple question with a careful design: can people who
-have never studied Japanese guess what these words mean, better than chance, from sound alone — and
+have never studied Japanese guess what these words mean, better than chance, from sound alone - and
 does *seeing the kana* help or hurt?
 
 **36 participants** completed two tasks on the Gorilla platform: a 30-trial **Choosing Task** (guess
-which of two ideophones matches a target meaning — the pre-reflective measure) and a **Rating Task**
-("How much does this word sound like what it means?", 1–7 — the reflective measure). Stimuli were 30
+which of two ideophones matches a target meaning - the pre-reflective measure) and a **Rating Task**
+("How much does this word sound like what it means?", 1–7 - the reflective measure). Stimuli were 30
 contrastive pairs (60 words), 10 in each of three sensory modalities (auditory, visual,
 interoceptive). Between subjects, one of three conditions: audio-only, congruent script, incongruent
 script. Audio was Google Cloud TTS (`ja-JP-Wavenet-B`), identical across conditions.
 
 **The claim: iconicity is real, and it is ordered.** People guessed correctly **≈64%** of the time
-(19.25 / 30) against a 50% chance baseline — and accuracy fell in a clean line down the sensory
+(19.25 / 30) against a 50% chance baseline - and accuracy fell in a clean line down the sensory
 hierarchy: sound words easiest, inner-state words hardest.
 
 <p align="center">
   <img src="docs/images/observatory-dumbbell.png" alt="Dumbbell chart: guessing accuracy by modality, thesis mean versus live arena, with a 50% chance hairline" width="760">
   <br>
-  <em>The claim — accuracy by modality. Thesis means <strong>68.6 → 64.2 → 59.7%</strong>
+  <em>The claim - accuracy by modality. Thesis means <strong>68.6 → 64.2 → 59.7%</strong>
   (auditory → visual → interoceptive; 6.86 / 6.42 / 5.97 out of 10), chance hairline at 50%.
   Source: Paulsson (2025), the MA thesis this arena replicates (30 pairs, 36 participants).</em>
 </p>
 
 **The twist: script changed the *feeling*, not the score.** Seeing the kana had a negligible
-group-level effect on guessing accuracy (condition means 63.6 / 63.6 / 65.3% — if anything the
+group-level effect on guessing accuracy (condition means 63.6 / 63.6 / 65.3% - if anything the
 mismatched-script group did trivially better). But it *dampened felt iconicity*: audio-only
 participants rated words higher (M ≈ 4.50) than either script group (M ≈ 4.15). This is why the app
 frames the manipulation as **"presentation changes the experience," never "matched script helps."**
@@ -82,19 +79,19 @@ kept for the record.
 | **Word Anatomy** | phoneme-shape / template reading | structure | Specced, deferred |
 | **Polyglot Challenge** | cross-linguistic (5 languages) | transfer | Specced, deferred |
 
-*Script Lab is not a separate mode* — it is the condition selector inside Meaning Match (audio-only /
+*Script Lab is not a separate mode* - it is the condition selector inside Meaning Match (audio-only /
 congruent / incongruent), the thesis's own between-subjects manipulation offered as a within-player
 choice.
 
 Three things make the instrument honest under replay:
 
 - **Script display is data, not code.** What kana a player sees comes from the seeded
-  `presentations.display_form` string, rendered verbatim — never derived, transliterated, or detected
+  `presentations.display_form` string, rendered verbatim - never derived, transliterated, or detected
   at runtime. The audio channel is one shared file per word and is identical across all three
   conditions.
 - **A deterministic per-session shuffle.** Each session stores a server-generated `shuffle_seed`
   (`SecureRandom`, never exposed). From the seed alone the backend re-derives round order, which word
-  of each pair is the target, its left/right side, and meaning-line order — recomputed from scratch on
+  of each pair is the target, its left/right side, and meaning-line order - recomputed from scratch on
   every request, so a session replays identically across restarts. Target *identity* randomization is
   a deliberate extension beyond the thesis (which fixed targets by pairing parity), doubling the
   effective item pool.
@@ -110,22 +107,22 @@ Three things make the instrument honest under replay:
      guessing doesn't"; never "orthogonal", never "unrelated". Essence pass may sharpen the prose. -->
 
 The thesis's most game-worthy finding is that *guessing* and *rating* are not the same thing. The
-word people **felt** was most iconic — どきどき *dokidoki*, a racing heartbeat, rated ~5.8 of 7,
-the highest of all — was one they guessed only modestly well (~67%). The hardest word to guess,
+word people **felt** was most iconic - どきどき *dokidoki*, a racing heartbeat, rated ~5.8 of 7,
+the highest of all - was one they guessed only modestly well (~67%). The hardest word to guess,
 しょぼん *shobon* "downhearted", got only **36%** right, worse than a coin flip, yet rated
 middling. Across modalities the two rankings invert: interoceptive words rate most iconic (4.45) but
 guess worst; auditory words guess best but rate least iconic (4.08).
 
 The two measures are positively but only partially correlated. They **see different things**:
 *ratings detect ideophone-ness; guessing doesn't.* **Rating Lab** captures the reflective measure in
-the app — after a round reveals a word's meaning, that word becomes ratable on the same 1–7 scale,
+the app - after a round reveals a word's meaning, that word becomes ratable on the same 1–7 scale,
 one rating per word per user.
 
 <p align="center">
   <img src="docs/images/observatory-scatter.png" alt="Scatter of guessing accuracy versus rating z-score, one mark per word, over the McLean 304-item backdrop, the 30 thesis pairs, and the live arena" width="760">
   <br>
-  <em>The two measures — guessing (x) vs rating (y), one mark per word. Backdrop: McLean, Dunn &amp;
-  Dingemanse (2023), "Two measures are better than one" — the 304-item backdrop, data CC BY 4.0.
+  <em>The two measures - guessing (x) vs rating (y), one mark per word. Backdrop: McLean, Dunn &amp;
+  Dingemanse (2023), "Two measures are better than one" - the 304-item backdrop, data CC BY 4.0.
   Ink dots: the 30 thesis pairs. Vermillion: this arena's own record, growing with play.</em>
 </p>
 
@@ -135,21 +132,21 @@ one rating per word per user.
 
 <!-- NIL-84 (essence review): "research surface / Observatory" framing is interpretive; wording may be revised. -->
 
-The thesis's full dataset — 36 participants, 1,080 choosing answers, 1,080 ratings — is ingested as
+The thesis's full dataset - 36 participants, 1,080 choosing answers, 1,080 ratings - is ingested as
 generator-emitted seed (reserved `thesis_p%` usernames, sessions left `completed_at = NULL` so they
 can never touch the leaderboard). A family of public, read-only endpoints under `/api/research/**`
 aggregate this record; the frontend's **Observatory** renders them as a public research page. The
 live crowd layer and the thesis-cohort layer are computed separately, so the public view stays
 byte-stable as new players arrive.
 
-The thesis layer reproduces the study's headline figures exactly — its per-modality accuracies and
-the overall **693 / 1,080** correct — because it *is* the thesis's own data flowing through the same
+The thesis layer reproduces the study's headline figures exactly - its per-modality accuracies and
+the overall **693 / 1,080** correct - because it *is* the thesis's own data flowing through the same
 code the live game uses.
 
 <p align="center">
   <img src="docs/images/observatory-radar.png" alt="Radar chart of six perceptual-strength axes for two Japanese words, kirakira versus sukkiri" width="620">
   <br>
-  <em>The fingerprint — per-word modality profiles across six perceptual-strength axes (0–5),
+  <em>The fingerprint - per-word modality profiles across six perceptual-strength axes (0–5),
   default compare キラキラ kirakira vs すっきり sukkiri.
   Source: Iida &amp; Akita (2023), perceptual strength norms for 510 Japanese words.</em>
 </p>
@@ -159,7 +156,7 @@ code the live game uses.
 | Endpoint | What it returns |
 |---|---|
 | `GET /api/research/divergence` | Per word: live-crowd guess accuracy vs mean rating (one row per word with any data) |
-| `GET /api/research/thesis/divergence` | Same shape over the thesis cohort only — reproduces the thesis's per-modality accuracies |
+| `GET /api/research/thesis/divergence` | Same shape over the thesis cohort only - reproduces the thesis's per-modality accuracies |
 | `GET /api/research/rating-distributions` | Per-modality 1–7 rating histogram (dense grid + per-modality n) |
 | `GET /api/research/position-bias` | Signal-detection fairness check on the forced choice, replayed from the shuffle |
 
@@ -167,12 +164,12 @@ code the live game uses.
 
 ## Architecture
 
-A conventional, strictly layered Spring Boot service — and a data model that was recently normalized
+A conventional, strictly layered Spring Boot service - and a data model that was recently normalized
 to make the experiment's units first-class.
 
 **The story of the schema.** The original schema keyed everything on one row per *word × script
-condition*, which quietly let the same word be rated twice across conditions and gave the pair — the
-thesis's actual unit of difficulty — no home. The **M2 re-key** (shipped) split `ideophones` into
+condition*, which quietly let the same word be rated twice across conditions and gave the pair - the
+thesis's actual unit of difficulty - no home. The **M2 re-key** (shipped) split `ideophones` into
 `words` + `presentations`, collapsed the three per-condition round copies into one condition-free
 `trials` table, and gave pairs a `pairings` table and languages a `languages` table. Every public
 response shape was frozen and verified byte-for-byte across the change; the deterministic shuffle is
@@ -181,7 +178,7 @@ distinct planes:
 
 - **Content plane** (seed-owned, regenerable): `languages`, `words`, `presentations`, `pairings`,
   `trials`. Emitted by `scripts/generate_seed_sql.py`; `--check` is the integrity layer.
-- **Event plane** (player-owned, append-only): `player_answers`, `ratings` — re-keyed to word grain
+- **Event plane** (player-owned, append-only): `player_answers`, `ratings` - re-keyed to word grain
   with `UNIQUE(user_id, word_id)`, so "one rating per word per user" is enforced by the database, not
   by convention.
 - **Account plane**: `app_users`, `game_sessions`.
@@ -198,7 +195,7 @@ distinct planes:
 - Constructor injection; no Lombok; no new dependencies without approval.
 
 **Security.** JWT is *deliberately hand-rolled* in `JwtService` (HMAC-SHA256, constant-time compare)
-and covered by unit tests — a conscious "understand it, don't import it" choice. The signing secret
+and covered by unit tests - a conscious "understand it, don't import it" choice. The signing secret
 comes from properties with **no code default** (the app fails fast if it is absent). BCrypt for
 passwords; roles `ROLE_USER` / `ROLE_ADMIN`; CORS is explicit for the Vite origins; CSRF is disabled
 only because auth is stateless.
@@ -222,7 +219,7 @@ scripts/generate_seed_sql.py                     the single source of the seed (
 docs/                                            contract, guidelines, runbook, research, specs
 ```
 
-**Experiment invariants — do not modify without explicit approval.** Three script conditions
+**Experiment invariants - do not modify without explicit approval.** Three script conditions
 (`CONDITION_1/2/3_SOKUON`), `difficultyLevel` locked to `1`; `display_form` is the single source of
 truth for displayed kana; pairings are canonical per the thesis; audio is identical across
 conditions. Full text in [`AGENTS.md`](AGENTS.md) and [`docs/backend-contract.md`](docs/backend-contract.md).
@@ -233,7 +230,7 @@ conditions. Full text in [`AGENTS.md`](AGENTS.md) and [`docs/backend-contract.md
 
 <!-- NIL-45: embed the demo GIF here (docs/images/demo-loop.gif) once recorded. -->
 
-The reviewer path is **one command** — a seeded MySQL plus the API jar — so you can hit a running
+The reviewer path is **one command** - a seeded MySQL plus the API jar - so you can hit a running
 backend with no local Java/MySQL setup. The companion Vite frontend
 ([`ideophone-arena-web`](https://github.com/nilsfjp/ideophone-arena-web)) runs separately; Docker
 here is **backend + MySQL only**, by design.
@@ -253,14 +250,14 @@ curl -i http://localhost:8081/api/health
 ```
 
 Local secrets and DB credentials live in the git-ignored
-`src/main/resources/application-local.properties` — copy the tracked
+`src/main/resources/application-local.properties` - copy the tracked
 `application-local.example.properties` template. `spring.jpa.hibernate.ddl-auto=validate` in every
 profile; the schema is owned by the init SQL, never by Hibernate.
 
 **Test:**
 
 ```sh
-./mvnw test        # 97 tests: Spring context, security wiring, the authenticated game flow (MockMvc),
+./mvnw test        # 177 tests: Spring context, security wiring, the authenticated game flow (MockMvc),
                    # hand-rolled JWT, seed integrity, admin authz, leaderboard, ratings, and the Observatory
 ```
 
@@ -291,7 +288,7 @@ Interactive API docs (public for the demo): `http://localhost:8081/swagger-ui/in
 | **Auth** (public) | `POST /api/auth/register` · `POST /api/auth/login` |
 | **Game** (auth) | `POST /api/game/sessions` · `GET /api/game/sessions/{uuid}/rounds/next` · `POST /api/game/sessions/{uuid}/answers` · `GET /api/game/me/attempts` |
 | **Rating Lab** (auth) | `POST /api/ratings` · `GET /api/game/me/ratings` · `GET /api/game/me/ratable-words` |
-| **Leaderboard** (public) | `GET /api/leaderboard` — best *completed* session, paginated |
+| **Leaderboard** (public) | `GET /api/leaderboard` - best *completed* session, paginated |
 | **Observatory** (public) | `GET /api/research/divergence` · `/thesis/divergence` · `/rating-distributions` · `/position-bias` |
 | **Admin** (`ROLE_ADMIN`) | `GET /api/admin/stats` |
 | **Infra** (public) | `GET /api/health` · `GET /stimuli/**` · `GET /v3/api-docs` · `GET /swagger-ui/index.html` |
@@ -300,27 +297,23 @@ Interactive API docs (public for the demo): `http://localhost:8081/swagger-ui/in
 
 ---
 
-## Current state & roadmap
+## Current state
 
-**Live now:** Meaning Match (2AFC guessing + Script Lab conditions + optional practice rounds),
-Rating Lab, the Observatory (four public research endpoints + the thesis layer), the deterministic
-per-session shuffle, admin stats, a paginated best-completed-session leaderboard, and the
-word-grain schema (M2). 97 tests green.
+The Arena is complete and frozen. What shipped: Meaning Match (2AFC guessing + Script Lab
+conditions + optional practice rounds, sampled to a stratified 21 scored rounds per session),
+Rating Lab, Perception Ladder (the four-floor modality climb), Word Mint (the production measure,
+completing the choosing / rating / production triad), the Observatory (four public research
+endpoints + the thesis layer), the deterministic per-session shuffle, admin stats, a paginated
+best-completed-session leaderboard, and the word-grain schema (M2). 177 tests green.
 
-**On the roadmap:** Perception Ladder (W28), Word Mint (the production measure — the next greenfield
-build, completing the choosing / rating / production triad), Word Anatomy (phoneme-shape templates),
-and the cross-linguistic mode (5 languages). Their tables (`productions`, `word_features`,
-`stimulus_sources`) are designed in [`docs/specs/ARCHITECTURE.md`](docs/specs/ARCHITECTURE.md) but
-not yet built.
+**What was never built here, and will not be:** Word Anatomy (phoneme-shape templates) and the
+cross-linguistic mode. Their designs, with everything else this roadmap used to carry, passed to
+the successor project.
 
-**Deployment:** designed and costed, **not yet live**. The intended shape is the existing
-`docker compose` stack on a single self-hosted box (Hetzner CX32) behind Caddy for automatic HTTPS,
-with the built frontend served same-origin — no separate web container, EU/GDPR. A W30 target,
-gated on Nils's host ratification and on closing the participant-data privacy gate (the api half of
-which — untracking the `gorilla-tidy-*.csv` participant rows — is done; aggregates stay).
-
-<!-- NIL-84 (essence review): the deploy paragraph describes a Proposed plan (SPEC-hosting ADR-H1),
-     not a live deploy. Keep it in the conditional; do not claim a running public instance. -->
+**Deployment:** designed and costed (the `docker compose` stack behind Caddy on a single
+self-hosted box, frontend served same-origin; see
+[`docs/specs/SPEC-hosting.md`](docs/specs/SPEC-hosting.md)), never executed. The freeze retires
+that plan for this codebase.
 
 ---
 
@@ -331,12 +324,12 @@ figure captions carry their sources' own attribution. Data reused under CC BY is
 is a non-commercial research/portfolio project.
 
 - **Paulsson, N. (2025).** *Unimodal and Cross-Modal Iconicity in Japanese Ideophones: A
-  Cognitive-Semiotic Approach.* MA thesis, Cognitive Semiotics, Lund University — the thesis this
+  Cognitive-Semiotic Approach.* MA thesis, Cognitive Semiotics, Lund University - the thesis this
   arena replicates (30 pairs, 36 participants).
 - **McLean, B., Dunn, M., & Dingemanse, M. (2023).** *Two measures are better than one.* Language and
-  Cognition. — the 304-item backdrop; data CC BY 4.0.
-- **Iida & Akita (2023).** Perceptual strength norms for 510 Japanese words. — the radar's axes.
-- **Dingemanse (2012)** · **McLean (2021)**, *Linguistic Typology* — the implicational hierarchy
+  Cognition. - the 304-item backdrop; data CC BY 4.0.
+- **Iida & Akita (2023).** Perceptual strength norms for 510 Japanese words. - the radar's axes.
+- **Dingemanse (2012)** · **McLean (2021)**, *Linguistic Typology* - the implicational hierarchy
   (SOUND < MOVEMENT < FORM < TEXTURE < OTHER) the modality ordering follows.
 
 ---

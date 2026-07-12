@@ -490,12 +490,12 @@ S4: `GET /api/admin/stats` behind `hasRole("ADMIN")`.
 ## 2026-06-11
 
 Session goal:
-S4: make role-aware authorization real — `GET /api/admin/stats` behind `ROLE_ADMIN`, seeded dev admin, paginated leaderboard, springdoc.
+S4: make role-aware authorization real - `GET /api/admin/stats` behind `ROLE_ADMIN`, seeded dev admin, paginated leaderboard, springdoc.
 
 Changed:
 
 - `scripts/generate_seed_sql.py` now emits a dev-only `arena_admin` row (`ROLE_ADMIN`, frozen BCrypt hash; throwaway password documented in the runbook); seed regenerated and re-applied.
-- `SecurityConfig`: `/api/admin/**` requires `hasRole("ADMIN")`; `/v3/api-docs/**` + `/swagger-ui/**` public (demo convenience); ERROR dispatch to `/error` permitted so `sendError` 403s are not overwritten to 401 on real Tomcat (bug found during live proof — MockMvc does not error-dispatch, so only curl exposed it).
+- `SecurityConfig`: `/api/admin/**` requires `hasRole("ADMIN")`; `/v3/api-docs/**` + `/swagger-ui/**` public (demo convenience); ERROR dispatch to `/error` permitted so `sendError` 403s are not overwritten to 401 on real Tomcat (bug found during live proof - MockMvc does not error-dispatch, so only curl exposed it).
 - New admin stats slice: `ConditionSessionCountProjection`/`ConditionAnswerStatsProjection`/`ModalityAnswerStatsProjection`, JPQL aggregates in `GameSessionRepository`/`PlayerAnswerRepository`, `Admin*Response` DTOs, `AdminStatsMapper`, `AdminStatsService`, `AdminController` (`@Tag`/`@Operation`).
 - Leaderboard pagination: `findLeaderboard` returns `Page` with explicit `countQuery` and a `username` tiebreak; `LeaderboardPageResponse` wrapper (`entries` + `page`/`size`/`totalElements`/`totalPages`); `page`/`size` params (defaults 0/10, size capped at 50, clamped); projection-to-DTO mapping moved from `ScoreService` into `GameMapper`.
 - `pom.xml`: `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3` (pre-approved; the 3.0.x line targets Spring Boot 4) + `OpenApiConfig` (bearer scheme for the Swagger Authorize button).
@@ -507,7 +507,7 @@ Proof:
 Live flow against `./mvnw spring-boot:run -Dspring-boot.run.profiles=local`: login as `arena_admin` -> 200 with token; `GET /api/admin/stats` -> 200 `{"totals":{"users":16,"sessions":10,"completedSessions":1,"answers":3},...}`; same call as fresh `ROLE_USER` -> 403; unauthenticated -> 401. `GET /api/leaderboard?page=0&size=5` -> wrapper with 3 entries, `page:0,size:5,totalElements:3,totalPages:1`; `?size=500` -> `size:50`. `/swagger-ui/index.html` -> 200; `/v3/api-docs` lists all 9 paths including `/api/admin/stats`.
 
 Result:
-Role-aware authorization is enforced and proven (closes the last open course requirement); leaderboard response shape is now a wrapper — breaking for the Vite frontend until `getLeaderboard()` reads `.entries`.
+Role-aware authorization is enforced and proven (closes the last open course requirement); leaderboard response shape is now a wrapper - breaking for the Vite frontend until `getLeaderboard()` reads `.entries`.
 
 Commit:
 Not committed.
@@ -531,7 +531,7 @@ Changed:
 - `docs/backend-grading-checklist.md`: added `[x]` leaderboard pagination checklist item; updated leaderboard proof curl to paginated form; added 2026-06-11 leaderboard evidence; added 2026-06-11 build proof evidence (47 tests); annotated two stale historical blocks (2026-06-04 authorization evidence referencing "static frontend files" and "200 video/mp4 for a0hu-gosogoso.mp4"; 2026-06-07 build evidence referencing "served static frontend resources through MockMvc" and 24 tests) as "(superseded)" with current state noted.
 
 Proof:
-Grep sweep: `grep -rn "mini-frontend|static frontend|index\.html|arena\.js|arena\.css|\.mp4|video/mp4|account total" docs/backend-contract.md docs/backend-grading-checklist.md docs/demo-runbook.md README.md CLAUDE.md` — zero unresolved hits in active doc files after edits; all remaining hits are either correct current URLs (swagger-ui/index.html), correctly labelled legacy/removal notes, or research data CSVs (not active docs).
+Grep sweep: `grep -rn "mini-frontend|static frontend|index\.html|arena\.js|arena\.css|\.mp4|video/mp4|account total" docs/backend-contract.md docs/backend-grading-checklist.md docs/demo-runbook.md README.md CLAUDE.md` - zero unresolved hits in active doc files after edits; all remaining hits are either correct current URLs (swagger-ui/index.html), correctly labelled legacy/removal notes, or research data CSVs (not active docs).
 `./mvnw test` -> 47 tests, 0 failures (no code changed).
 
 Result:
@@ -554,7 +554,7 @@ Backend small batch: (1) practice rounds from the p-prefix stimuli, (2) cleanup 
 Changed:
 
 - `scripts/generate_seed_sql.py`: also reads the `display == "practice"` CSV rows (4 per condition, pairs p0-p3 per thesis Appendix B); practice ideophones/rounds are appended after all trial rows so trial ids 1-180 / round ids 1-90 are unchanged (practice: ideophones 181-204, rounds 91-102, `is_practice = 1`); schema gains `arena_rounds.is_practice`, `game_sessions.include_practice`, `game_sessions.practice_answered`.
-- `scripts/extract-audio.sh`: expected count 60 -> 68 (glob already covered the p-prefix); ran it — 8 new practice m4a files (ffmpeg stream copy from the u/d mp4s), copied into `ideophone-arena-web/dist/stimuli/audio/`.
+- `scripts/extract-audio.sh`: expected count 60 -> 68 (glob already covered the p-prefix); ran it - 8 new practice m4a files (ffmpeg stream copy from the u/d mp4s), copied into `ideophone-arena-web/dist/stimuli/audio/`.
 - `ArenaRound.practice`, `GameSession.includePractice`/`practiceAnswered` (+ constructor overloads, `recordPracticeAnswer()`).
 - `StartSessionRequest.includePractice` (optional, default false); `GameSessionResponse` echoes it; `RoundResponse` and `AnswerResultResponse` gained `practice`.
 - `GameService`: serves the first 2 practice rounds of the session's condition before scored rounds when the flag is set; practice answers are validated (in-order, 400/409 otherwise), evaluated for feedback, never persisted; main round list/completion count switched to practice-excluding repository methods.
@@ -576,7 +576,7 @@ Proof:
 - Cleanup script: registered `browser_loop_proof`, ran script -> `browser_loop_%` count 1 -> 0; second run clean (idempotent).
 
 Result:
-All three Session A items done. Practice answers are feedback-only by design (documented divergence from the thesis, which hid practice feedback). Leaderboard entry fields changed — BREAKING for the Vite frontend (needs a follow-up rider to read `bestSession*` fields).
+All three Session A items done. Practice answers are feedback-only by design (documented divergence from the thesis, which hid practice feedback). Leaderboard entry fields changed - BREAKING for the Vite frontend (needs a follow-up rider to read `bestSession*` fields).
 
 Commit:
 Not committed (proposed message below).
@@ -599,7 +599,7 @@ Changed:
 - New `model/DerivedRound` (round + derived target/other/side/meaning-order, never persisted) and `service/RoundShuffler` (@Component): scored rounds ordered by id asc -> `Collections.shuffle(list, new Random(seed))` -> per shuffled round, in order, `targetIsPairSecond`/`targetOnLeft`/`targetMeaningListedFirst` from the same stream; "pair second" = higher ideophone id; practice rounds keep fixed order with draws from `new Random(seed + 1)`. Spec documented verbatim in the contract as a compatibility contract.
 - `GameService`: `getNextRound` serves the first unanswered round of the derived order (recomputed per request, nothing persisted but the seed); `submitAnswer` judges against the derived target and stores it; practice answers judged against the practice-stream derivation. `arena_rounds.correct_ideophone_id`/`prompt` are no longer read in the serving path (kept as thesis-target documentation).
 - `GameMapper`: round/answer/practice mapping from `DerivedRound` (prompt/translations = derived target/other glosses, left/right = derived sides); `toAttemptResponse` replays the stored `targetIdeophone`. `PlayerAnswerRepository`: EntityGraphs and the modality-stats join switched from `round.correctIdeophone` to `targetIdeophone`.
-- `targetMeaningListedFirst` is reserved: drawn (stream consumption final) but the current frontend always lists the target meaning first (semantic `translations.target`/`other` fields, `TrialPlayer.tsx` renders target line first) — future frontend rider, no backend change needed.
+- `targetMeaningListedFirst` is reserved: drawn (stream consumption final) but the current frontend always lists the target meaning first (semantic `translations.target`/`other` fields, `TrialPlayer.tsx` renders target line first) - future frontend rider, no backend change needed.
 - Tests: new `RoundShufflerTests` (7: determinism across instances, seed divergence, permutation integrity, pair-second stability under swapped left/right columns, practice-stream independence, 200-seed both-identities/both-sides sweep) and `ShuffledSessionHttpTests` (full practice-on loop: served order/sides/meanings match the derivation, stored targets match, duplicate 409, completion unchanged); `GameServiceTests` reworked derivation-aware (+restart-continuity, +derived-distractor-incorrect); `PracticeRoundHttpTests`/`LeaderboardPaginationHttpTests` adapted.
 - Docs: contract (new "Deterministic per-session shuffle" section with the verbatim derivation spec + changelog), runbook (shuffle proofs section), grading checklist (Session B evidence), punch list.
 
@@ -626,15 +626,15 @@ Frontend rider: honor `targetMeaningListedFirst` (needs a small DTO addition dec
 ## 2026-06-20 ("Rating Lab slice")
 
 Session goal:
-Add a standalone `ratings` vertical slice (entity / repository / DTO / mapper / Bean Validation / service / controller / tests) capturing a 1-7 iconicity rating per word per user, keyed `UNIQUE(user_id, ideophone_id)` with a nullable `session_id`, so the guess-vs-rating divergence can be computed later (data only, not the statistic). Minimal standalone table from roadmap step 4 — NOT the Phase-2 model.
+Add a standalone `ratings` vertical slice (entity / repository / DTO / mapper / Bean Validation / service / controller / tests) capturing a 1-7 iconicity rating per word per user, keyed `UNIQUE(user_id, ideophone_id)` with a nullable `session_id`, so the guess-vs-rating divergence can be computed later (data only, not the statistic). Minimal standalone table from roadmap step 4 - NOT the Phase-2 model.
 
 Changed:
 
 - `scripts/generate_seed_sql.py` + regenerated `ideophone_arena.sql`: new `ratings` table (`UNIQUE(user_id, ideophone_id)`, nullable `session_id`, `rating SMALLINT NOT NULL`, `response_time_ms INT`, `rated_at TIMESTAMP`, FKs to `app_users`/`ideophones`/`game_sessions`); added the matching `DROP TABLE IF EXISTS ratings;`. Seed data rows unchanged (204 ideophones / 102 rounds).
 - New `model/Rating` (`@UniqueConstraint(user_id, ideophone_id)`, nullable `session` ManyToOne, `short rating`, `@CreationTimestamp ratedAt`).
 - New `repository/RatingRepository` (`existsByUserIdAndIdeophoneId`, `findByUserIdOrderByRatedAtDesc` with `@EntityGraph(ideophone)`).
-- New DTOs `RatingRequest` (`ideophoneId` `@NotNull @Positive`; `rating` `@NotNull @Min(1) @Max(7)`; `responseTimeMs` optional `@Min(0) @Max(600000)`; `sessionUuid` optional) and `RatingResponse` (`id`/`ideophoneId`/`rating`/`responseTimeMs`/`ratedAt` only — no `user_id`/`session_id`, no entity).
-- New `mapper/RatingMapper`, `service/RatingService` (`@Transactional` create: resolve user, 404 unknown ideophone, resolve optional session with 404 unknown / 403 unowned, pre-check duplicate -> 409, `saveAndFlush` + `DataIntegrityViolationException` -> 409 backstop; `@Transactional(readOnly = true)` getMyRatings), `controller/RatingController` (`POST /api/ratings` -> 201, `GET /api/game/me/ratings`; both `@Valid`/thin, authenticated via the existing `anyRequest().authenticated()` catch-all — no SecurityConfig change).
+- New DTOs `RatingRequest` (`ideophoneId` `@NotNull @Positive`; `rating` `@NotNull @Min(1) @Max(7)`; `responseTimeMs` optional `@Min(0) @Max(600000)`; `sessionUuid` optional) and `RatingResponse` (`id`/`ideophoneId`/`rating`/`responseTimeMs`/`ratedAt` only - no `user_id`/`session_id`, no entity).
+- New `mapper/RatingMapper`, `service/RatingService` (`@Transactional` create: resolve user, 404 unknown ideophone, resolve optional session with 404 unknown / 403 unowned, pre-check duplicate -> 409, `saveAndFlush` + `DataIntegrityViolationException` -> 409 backstop; `@Transactional(readOnly = true)` getMyRatings), `controller/RatingController` (`POST /api/ratings` -> 201, `GET /api/game/me/ratings`; both `@Valid`/thin, authenticated via the existing `anyRequest().authenticated()` catch-all - no SecurityConfig change).
 - New `RatingHttpTests` (3 tests). No changes to the guessing flow, conditions, difficulty, admin stats DTO, or any experiment invariant.
 - Docs: contract (new "Ratings" section + changelog), runbook (rating curl flow), grading checklist (Bean Validation + build/test evidence), punch list ticked.
 
@@ -771,7 +771,7 @@ Frontend rider: update the Vite app's `getMyRatings()` to read `.entries` (break
 
 Session goal:
 Close W27 on `dev`: (a) expose the already-drawn `targetMeaningListedFirst` on the round DTO so the frontend can
-honor the meaning-line draw — shuffler untouched, the stream consumption stays final; (b) move the Rating Lab's
+honor the meaning-line draw - shuffler untouched, the stream consumption stays final; (b) move the Rating Lab's
 word pool server-side as read-only `GET /api/game/me/ratable-words`, enforcing the thesis contamination rule in the
 backend and clearing the W30 multi-device blocker. No schema change, no seed change, no new dependencies.
 
@@ -786,18 +786,18 @@ Changed:
   tiebreak) so the pool is byte-identical across devices; `RatableWordProjection` (interface projection per the
   AdminStats precedent), `RatableWordResponse`/`RatableWordPageResponse` DTOs, `RatingMapper.toRatableWord*`,
   `RatingService.getMyRatableWords` (`@Transactional(readOnly = true)`), thin `RatingController` endpoint with
-  `@Operation`. The `round.practice = false` predicate is defensive only — practice answers are never persisted.
+  `@Operation`. The `round.practice = false` predicate is defensive only - practice answers are never persisted.
   `meaning` is the word's own gloss: exactly the mapping the round feedback revealed.
 - Tests: `RoundResponseSerializationTests` covers the new property; `ShuffledSessionHttpTests.assertServedAsDerived`
-  now asserts the served flag equals the seed derivation on every round; new `RatableWordsHttpTests` (4 tests —
+  now asserts the served flag equals the seed derivation on every round; new `RatableWordsHttpTests` (4 tests -
   pool contents/meanings + practice exclusion + duplicate-encounter dedup + rated-word removal through the real
   HTTP answer flow; per-user scoping including a foreign rating being a no-op; unauthenticated 401; pagination
   clamps).
 - `scripts/cleanup-test-accounts.sql`: browser-loop accounts rate a word since 27D, so the `app_users` delete
-  now hits the `ratings` FKs — added a leading `ratings` delete (by user; also unblocks `game_sessions` for
+  now hits the `ratings` FKs - added a leading `ratings` delete (by user; also unblocks `game_sessions` for
   pre-27E session-linked ratings). Not executed this session; the two `browser_loop_*` proof accounts from the
   27E runs are still in the dev DB.
-- Docs: `backend-contract.md` (derivation item 4 and both Consequences bullets updated — the flag is now exposed,
+- Docs: `backend-contract.md` (derivation item 4 and both Consequences bullets updated - the flag is now exposed,
   not reserved; new "Ratable words (2026-07-03)" section; changelog bullet), `backend-grading-checklist.md`
   (expected-contract line, authorization evidence, build/test evidence), `demo-runbook.md` (ratable-words curl).
 
@@ -819,7 +819,7 @@ and the round DTO exposes the full derivation. Clean, reviewable tree.
 
 Commit:
 Not committed (commits are the user's). Proposed message:
-"expose the meaning-order draw on the round DTO and serve the ratable-words pool (NIL-40)" — body: RoundResponse
+"expose the meaning-order draw on the round DTO and serve the ratable-words pool (NIL-40)" - body: RoundResponse
 gains seed-drawn targetMeaningListedFirst (GameMapper pass-through, shuffler untouched, false on the completion
 sentinel); new authed GET /api/game/me/ratable-words serves encountered-but-unrated words in the {entries,...}
 wrapper via one JPQL GROUP BY + NOT EXISTS, first-encounter order; RatableWordsHttpTests + per-round flag
@@ -898,7 +898,7 @@ enforces one-rating-per-word at the DB layer. Clean, reviewable tree (commits ar
 Commit:
 Not committed. Proposed message:
 "M2 re-key: normalize ideophones into words+presentations, collapse arena_rounds into trials, word-key the event
-plane (NIL-68)" — body: languages/words/presentations/pairings + trials (ADR-0/-1/-3/-6) via generate_seed_sql.py;
+plane (NIL-68)" - body: languages/words/presentations/pairings + trials (ADR-0/-1/-3/-6) via generate_seed_sql.py;
 player_answers/ratings re-keyed to word grain with UNIQUE(user_id, word_id); RoundShuffler id-vocabulary re-bind
 (algorithm byte-identical); serving path resolves presentation(word, condition); research aggregates word-grained
 + Rider A browser_loop/practice exclusion; ddl-auto=validate; 90 tests green; public shapes frozen.
@@ -1035,7 +1035,7 @@ api repo.
 Next single task:
 NIL-84 (essence review, Fable, morning).
 
-## 2026-07-08 ("NIL-86: stimulus-expansion pipeline — dark inventory + TTS route + foil_distance")
+## 2026-07-08 ("NIL-86: stimulus-expansion pipeline - dark inventory + TTS route + foil_distance")
 
 Session goal:
 Build the expansion pipeline in the api repo: ingest the signed-off expansion pairs from the sign-off
@@ -1060,7 +1060,7 @@ Changed:
   this session does NOT call GCP); docs/research/phonology-golden.json + scripts/generate_phonology_golden.py
   (ADR-8.2 Python side; Java PhonologyService parity owed to NIL-62). Docs: backend-contract changelog, AGENTS.md
   punch list.
-- Scope decision (Nils, in chat): defer H2/H3 (fuwafuwa/gotsugotsu, shittori/bosabosa — reuse VISUAL thesis words
+- Scope decision (Nils, in chat): defer H2/H3 (fuwafuwa/gotsugotsu, shittori/bosabosa - reuse VISUAL thesis words
   34/40 on the Haptic floor; flipping would break the same-modality invariant, crash ResearchService, and re-bucket
   72 thesis answers). 21 pairs this session; H2/H3 + full Haptic go-live ride NIL-57.
 
@@ -1093,12 +1093,12 @@ None. Open riders (handoff): (a) Nils runs scripts/generate_tts_audio.py --run t
 then a later session audits the audio and flips them live (add trials); (b) H2/H3 + full Haptic-floor go-live =
 NIL-57 (needs the gotsugotsu/bosabosa modality reclassification, a deliberate thesis-data change); (c) stimulus_sources
 (M5) is the eventual provenance home; (d) Java PhonologyService parity vs phonology-golden.json = NIL-62; (e) the
-launcher said "~180 existing audio files" but the repo has 68 per-word .m4a — manifest covers the 68.
+launcher said "~180 existing audio files" but the repo has 68 per-word .m4a - manifest covers the 68.
 
 Next single task:
 Nils runs the TTS batch (scripts/generate_tts_audio.py --run) with his GCP credentials.
 
-## 2026-07-08 ("NIL-60: A/V/I expansion go-live — audit 34 TTS clips + seed trials for 17 pairs")
+## 2026-07-08 ("NIL-60: A/V/I expansion go-live - audit 34 TTS clips + seed trials for 17 pairs")
 
 Session goal:
 Verify the 34 expansion TTS clips synthesized 2026-07-08 (ja-JP-Wavenet-B) sound and are correctly named, then
@@ -1159,7 +1159,7 @@ vite build regenerates dist/stimuli from source.
 Next single task:
 NIL-85: sampling design over the enlarged 47-round pool.
 
-## 2026-07-08 ("NIL-41: Perception Ladder backend — M1 game_mode + floors API + Touch go-live + essence riders")
+## 2026-07-08 ("NIL-41: Perception Ladder backend - M1 game_mode + floors API + Touch go-live + essence riders")
 
 Session goal:
 Build the Perception Ladder floor model and serving (mode LADDER): a floors endpoint in hierarchy order (Sound ->

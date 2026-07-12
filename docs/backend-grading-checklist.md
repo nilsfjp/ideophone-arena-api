@@ -183,13 +183,13 @@ rg -n "@Entity" src/main/java/io/github/nilsfjp/ideophonearena/dto
 
 2026-06-07 evidence: request DTOs use Bean Validation, including required session-start `conditionName`, required positive `difficultyLevel`, and positive answer IDs; DTO package grep found no JPA annotations; password fields appear only on login/register request DTOs, not responses.
 
-2026-06-20 evidence (ratings slice): `RatingRequest` uses Bean Validation — `ideophoneId` `@NotNull @Positive`,
+2026-06-20 evidence (ratings slice): `RatingRequest` uses Bean Validation - `ideophoneId` `@NotNull @Positive`,
 `rating` `@NotNull @Min(1) @Max(7)`, `responseTimeMs` optional `@Min(0) @Max(600000)`, `sessionUuid` optional. The
 controller (`RatingController`) carries `@Valid`; `RatingResponse` exposes only `id`/`ideophoneId`/`rating`/
 `responseTimeMs`/`ratedAt` (no `user_id`/`session_id`, no entity). `RatingHttpTests` proves `rating: 8` and
 `rating: 0` return `400` with a `validationErrors.rating` entry.
 
-2026-06-10 evidence: Bean Validation completed — `SubmitAnswerRequest.responseTimeMs` is now `@NotNull @Min(0) @Max(600000)`; redundant null presence checks were removed from `GameService.validateSupportedStartRequest` (business rules — supported condition set and difficulty value — remain in the service). `RoundResponse.completed(...)` static factory removed; completion and answer-result mapping live in `GameMapper`. `GameLoopHttpTests.submitAnswerRequiresResponseTimeWithinBounds` proves missing and out-of-range `responseTimeMs` return `400` with a `validationErrors.responseTimeMs` entry.
+2026-06-10 evidence: Bean Validation completed - `SubmitAnswerRequest.responseTimeMs` is now `@NotNull @Min(0) @Max(600000)`; redundant null presence checks were removed from `GameService.validateSupportedStartRequest` (business rules - supported condition set and difficulty value - remain in the service). `RoundResponse.completed(...)` static factory removed; completion and answer-result mapping live in `GameMapper`. `GameLoopHttpTests.submitAnswerRequiresResponseTimeWithinBounds` proves missing and out-of-range `responseTimeMs` return `400` with a `validationErrors.responseTimeMs` entry.
 
 ### Mappers
 
@@ -296,7 +296,7 @@ Proof:
 rg -n "SecurityFilterChain|requestMatchers|csrf|SessionCreationPolicy|anyRequest" src/main/java/io/github/nilsfjp/ideophonearena/config/SecurityConfig.java
 ```
 
-2026-06-04 evidence (superseded by 2026-06-10 evidence below): `SecurityConfig` permits `/api/auth/**`, `/api/leaderboard`, static frontend files, and `/stimuli/**`, then uses `anyRequest().authenticated()`. CSRF is disabled with stateless sessions for JWT. Live curl proof returned `401` for unauthenticated `POST /api/game/sessions` and `200 video/mp4` for `GET /stimuli/a0hu-gosogoso.mp4`. The static frontend files and mp4 stimulus references are legacy — see 2026-06-10 evidence for current public surface and audio/mp4 stimuli.
+2026-06-04 evidence (superseded by 2026-06-10 evidence below): `SecurityConfig` permits `/api/auth/**`, `/api/leaderboard`, static frontend files, and `/stimuli/**`, then uses `anyRequest().authenticated()`. CSRF is disabled with stateless sessions for JWT. Live curl proof returned `401` for unauthenticated `POST /api/game/sessions` and `200 video/mp4` for `GET /stimuli/a0hu-gosogoso.mp4`. The static frontend files and mp4 stimulus references are legacy - see 2026-06-10 evidence for current public surface and audio/mp4 stimuli.
 
 2026-06-10 evidence: stimulus references switched to per-word audio. `SecurityConfig` now permits both `GET` and `HEAD` on `/stimuli/**`. Live curl proof returned `200` with `Content-Type: audio/mp4` for both `GET` and `HEAD` on `http://localhost:8081/stimuli/audio/a0h-gosogoso.m4a`.
 
@@ -316,7 +316,7 @@ array shape and per-row invariants. `GET /api/game/me/ratings` stays authenticat
 `RatingPageResponse` (size clamped to 50). Live curl: unauthenticated `GET /api/research/divergence` -> `200` (87
 rows); `/v3/api-docs` lists the `Ratings` and `Research` tags and both paths.
 
-2026-07-03 evidence (ratable words, NIL-40): new `GET /api/game/me/ratable-words` needs no `SecurityConfig` change —
+2026-07-03 evidence (ratable words, NIL-40): new `GET /api/game/me/ratable-words` needs no `SecurityConfig` change -
 it falls under `anyRequest().authenticated()` like the other `/api/game/me/*` reads.
 `RatableWordsHttpTests.ratableWordsRequireAuthentication` proves an unauthenticated `GET` returns `401`;
 `ratableWordsAreScopedPerUser` proves a second user sees an empty pool, never the first user's words, and that
@@ -331,13 +331,13 @@ after 2 practice + 1 scored answer -> `200` wrapper with exactly the scored roun
 documented shapes and per-response invariants (dense 1-7 grids summing to `byModalityN`; left+right and
 top+bottom counts summing to `n`; rates/accuracies in `[0,1]` or `null`). `leftPickAndTargetPositionAre
 ReconstructedFromTheSeed` plays a real round and proves the left/right and target-position tallies move by the
-expected before/after deltas — the shuffle replay is correct end-to-end. `PositionBiasCalculatorTests` pins the
+expected before/after deltas - the shuffle replay is correct end-to-end. `PositionBiasCalculatorTests` pins the
 d'/criterion math (log-linear correction, null on an empty stimulus class). No schema change (`ddl-auto=validate`
 still passes). `./mvnw test` -> 88 tests, 0 failures.
 
 2026-07-06 evidence (thesis tidy-data ingestion, NIL-54): the thesis Gorilla export (36 participants) is ingested as
-generator-emitted seed rows via `generate_seed_sql.py` (`--check` clean) — 36 `thesis_p##` users, 36 `game_sessions`
-with `completed_at = NULL`, 1080 `player_answers`, 1080 `ratings` — with **no schema change** and no flag/`data_source`
+generator-emitted seed rows via `generate_seed_sql.py` (`--check` clean) - 36 `thesis_p##` users, 36 `game_sessions`
+with `completed_at = NULL`, 1080 `player_answers`, 1080 `ratings` - with **no schema change** and no flag/`data_source`
 column; provenance is the reserved `thesis_p%` username prefix. Rider A now also excludes `thesis_p%` from the live
 `divergence`/`rating-distributions`/`position-bias` aggregates (no shape change; `ThesisCohortExclusionTests` proves
 the algebraic identity `raw == rider + thesis + browser_loop` per word for both guesses and ratings). New public
@@ -351,7 +351,7 @@ excluded from the live layer) while `GET /api/research/thesis/divergence` = 200 
 68.6/64.2/59.7. `./mvnw test` -> 97 tests, 0 failures.
 
 2026-07-09 evidence (production / free-form entry, NIL-62): the third measure ships as a standalone vertical on the
-ratings pattern — `model/Production`, `repository/ProductionRepository`, `service/ProductionService`,
+ratings pattern - `model/Production`, `repository/ProductionRepository`, `service/ProductionService`,
 `mapper/ProductionMapper`, `controller/ProductionController`, seven DTOs, and `exception/UnparseableInputException`
 with a `GlobalExceptionHandler` handler that emits the Bean-Validation-shaped `{message:"Validation failed",
 validationErrors:{input:...}}`. Controllers stay thin (`ResponseEntity`, `@Valid`, `@AuthenticationPrincipal`, no
@@ -359,11 +359,11 @@ repository access); the service owns `@Transactional` and never returns entities
 `ProductionMapper`. The `productions` table is generator-emitted (`generate_seed_sql.py --check` clean, diff purely
 additive) and seeds empty; `ddl-auto=validate` boots against it unchanged. `service/PhonologyService` is pure (no
 repository access) and takes a `PhonologyProfile` on every method (ADR-8.1 seam, Japanese the only v1 profile).
-`GET /api/research/triangulation` needed its own `permitAll` line — there is no `/api/research/**` wildcard, and
+`GET /api/research/triangulation` needed its own `permitAll` line - there is no `/api/research/**` wildcard, and
 `ProductionHttpTests.allProductionEndpointsRequireAuthentication` proves the three authenticated endpoints return
 `401` anonymously. Proof: `PhonologyServiceTests` (20) asserts byte-for-byte parity against the whole committed
-`docs/research/phonology-golden.json` — 102 words (morae, all 7 features, heavy/light counts) and 21 `foil_distance`
-values — plus the SPEC section 10.1 goldens and the adjudicated `pikapika -> dokidoki = 78` worked example;
+`docs/research/phonology-golden.json` - 102 words (morae, all 7 features, heavy/light counts) and 21 `foil_distance`
+values - plus the SPEC section 10.1 goldens and the adjudicated `pikapika -> dokidoki = 78` worked example;
 `ProductionHttpTests` (12) covers the A->V->H->I cycle, exact-form `100`, duplicate `409`, parse-error `400` that
 does **not** consume the attempt, `404`/`403` session resolution, and the clamped wrapper; `TriangulationHttpTests`
 (3) proves the endpoint is public, null-for-zero-count per measure, and byte-identical to `divergence` on the shared
@@ -418,7 +418,7 @@ rg -n "@RestControllerAdvice|@ExceptionHandler|extends RuntimeException" src/mai
 
 2026-06-05 evidence: `GlobalExceptionHandler` maps validation, unreadable request bodies, bad request, auth failure, forbidden, not found, conflict, Spring authentication, and unexpected errors to JSON. The generic fallback returns `500` with `An unexpected error occurred`, without stack traces or internal exception details. Completion no longer uses the not-found exception path; `GET /api/game/sessions/{sessionUuid}/rounds/next` returns `200 OK` with `completed:true` and message `Game session is complete`.
 
-2026-06-10 evidence: a concurrent duplicate answer no longer surfaces as `500` — `GameService.submitAnswer` uses `saveAndFlush` and translates `DataIntegrityViolationException` (from `UNIQUE(session_id, round_id)`) into the existing `ConflictException` (`409`), with a `DataIntegrityViolationException -> 409` handler in `GlobalExceptionHandler` as backstop. `GameServiceTests.submitAnswerTranslatesConcurrentDuplicateInsertToConflict` and the duplicate `POST` in `GameLoopHttpTests.nextRoundReturnsExplicitCompletionBodyAfterFinalAnswer` (expects `409`) prove the path. Session completion is now set by the final `submitAnswer`; `getNextRound` is `@Transactional(readOnly = true)` and the completion DTO shape is unchanged. `totalAnswered`/`totalCorrect` are session-scoped (`countBySessionId`/`countBySessionIdAndCorrectTrue`).
+2026-06-10 evidence: a concurrent duplicate answer no longer surfaces as `500` - `GameService.submitAnswer` uses `saveAndFlush` and translates `DataIntegrityViolationException` (from `UNIQUE(session_id, round_id)`) into the existing `ConflictException` (`409`), with a `DataIntegrityViolationException -> 409` handler in `GlobalExceptionHandler` as backstop. `GameServiceTests.submitAnswerTranslatesConcurrentDuplicateInsertToConflict` and the duplicate `POST` in `GameLoopHttpTests.nextRoundReturnsExplicitCompletionBodyAfterFinalAnswer` (expects `409`) prove the path. Session completion is now set by the final `submitAnswer`; `getNextRound` is `@Transactional(readOnly = true)` and the completion DTO shape is unchanged. `totalAnswered`/`totalCorrect` are session-scoped (`countBySessionId`/`countBySessionIdAndCorrectTrue`).
 
 ## Game domain correctness
 
@@ -541,7 +541,7 @@ curl -i http://localhost:8081/api/game/me/attempts \
 
 2026-06-11 evidence (pagination): `GET /api/leaderboard` is now paginated; response is a wrapper object (`entries` list + `page`/`size`/`totalElements`/`totalPages`) instead of a bare array. `page` and `size` query params are accepted (defaults 0/10, size clamped to 1–50). Ordering: `totalCorrect` desc, `totalAnswered` desc, avg response time asc, `username` asc as tiebreak (superseded by the Session A best-session metric below). `LeaderboardPaginationHttpTests` covers defaults, size cap, explicit params, and clamping. Live proof: `?page=0&size=5` returned wrapper with 3 entries; `?size=500` clamped to `size:50`.
 
-2026-06-11 evidence (Session A, best-session metric): the leaderboard ranks each user by their best _completed_ session — most correct answers in a single session, ties broken by best-session accuracy (fewer answers) then `username`; incomplete sessions never count. Entry fields are `username`/`bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` (**breaking** for the Vite frontend; wrapper shape unchanged). Implemented as a paged JPQL query with explicit `countQuery` in `PlayerAnswerRepository.findLeaderboard` (derived-table aggregate + not-exists argmax, no native SQL); mapping in `GameMapper`. `LeaderboardPaginationHttpTests` covers best-of-several-sessions, incomplete-session exclusion, accuracy and username tiebreaks, plus the original pagination behavior. Live proof: a played-through 30-round session appeared as `bestSessionCorrect: 15, bestSessionAnswered: 30, bestSessionAccuracy: 0.5`. Companion cleanup: `scripts/cleanup-test-accounts.sql` idempotently deletes `browser_loop_%` users with their sessions/answers (proof: registered `browser_loop_proof`, ran script, row count 1 -> 0; second run clean).
+2026-06-11 evidence (Session A, best-session metric): the leaderboard ranks each user by their best _completed_ session - most correct answers in a single session, ties broken by best-session accuracy (fewer answers) then `username`; incomplete sessions never count. Entry fields are `username`/`bestSessionCorrect`/`bestSessionAnswered`/`bestSessionAccuracy` (**breaking** for the Vite frontend; wrapper shape unchanged). Implemented as a paged JPQL query with explicit `countQuery` in `PlayerAnswerRepository.findLeaderboard` (derived-table aggregate + not-exists argmax, no native SQL); mapping in `GameMapper`. `LeaderboardPaginationHttpTests` covers best-of-several-sessions, incomplete-session exclusion, accuracy and username tiebreaks, plus the original pagination behavior. Live proof: a played-through 30-round session appeared as `bestSessionCorrect: 15, bestSessionAnswered: 30, bestSessionAccuracy: 0.5`. Companion cleanup: `scripts/cleanup-test-accounts.sql` idempotently deletes `browser_loop_%` users with their sessions/answers (proof: registered `browser_loop_proof`, ran script, row count 1 -> 0; second run clean).
 
 ## Configuration and secrets
 
@@ -562,7 +562,7 @@ rg -n "spring\\.datasource|password=|username=|app\\.jwt\\.secret" src/main/reso
 
 2026-06-04 evidence: `application-local.properties` contains local credentials but is ignored and not tracked; `git ls-files` lists only `.gitignore`, `application.properties`, and `application-local.example.properties`; the tracked example uses placeholders. `./mvnw test` starts Spring contexts against local MySQL on port `8081`.
 
-2026-06-10 evidence: `app.jwt.secret` has no code default — `JwtService` uses `@Value("${app.jwt.secret}")` plus a blank-value guard, so startup fails fast with a clear error when the property is absent or blank (`JwtServiceTests.blankSecretFailsFastAtConstruction`). The local profile uses `spring.jpa.hibernate.ddl-auto=validate` (verified directly); the tracked example template now also ships `validate` per the all-profiles rule.
+2026-06-10 evidence: `app.jwt.secret` has no code default - `JwtService` uses `@Value("${app.jwt.secret}")` plus a blank-value guard, so startup fails fast with a clear error when the property is absent or blank (`JwtServiceTests.blankSecretFailsFastAtConstruction`). The local profile uses `spring.jpa.hibernate.ddl-auto=validate` (verified directly); the tracked example template now also ships `validate` per the all-profiles rule.
 
 ## Build and test proof
 
@@ -617,7 +617,7 @@ fail-fast guard is preserved (compose supplies `APP_JWT_SECRET`, no code default
 
 2026-07-03 evidence (NIL-40, current): `./mvnw test` -> 80 tests, 0 failures (was 76). The round DTO gained the
 additive seed-drawn boolean `targetMeaningListedFirst` (`GameMapper` passes it through from `DerivedRound`; the
-shuffler and draw order are untouched) — asserted per round against the derivation in
+shuffler and draw order are untouched) - asserted per round against the derivation in
 `ShuffledSessionHttpTests.assertServedAsDerived` and present in `RoundResponseSerializationTests`. New authenticated
 `GET /api/game/me/ratable-words` returns the caller's encountered-but-unrated words in the `{entries, ...}` wrapper
 (one JPQL `GROUP BY` + `NOT EXISTS` in `PlayerAnswerRepository.findRatableWordsByUserId`, interface projection,
@@ -633,7 +633,7 @@ wrapper with the scored round's 2 words (practice absent), `POST /api/ratings` f
 clamped to 50); `RatingController` gained `@Tag`/`@Operation`. New public read-only `GET /api/research/divergence`
 pairs per-ideophone guess accuracy (`player_answers.target_ideophone_id`) with mean rating (`ratings`) via two merged
 `GROUP BY` projections (`PlayerAnswerRepository.aggregateGuessStatsByIdeophone`,
-`RatingRepository.aggregateRatingStatsByIdeophone`) — no schema change, no cartesian join; zero-count sides encode as
+`RatingRepository.aggregateRatingStatsByIdeophone`) - no schema change, no cartesian join; zero-count sides encode as
 `null`. New `DivergenceHttpTests` (3: public access + per-row invariants, deterministic rated-word row, guessed-word
 row through the session/answer flow); `RatingHttpTests` gained a pagination/size-clamp test and moved its GET
 assertions to `.entries`. `python3 scripts/generate_seed_sql.py --check` clean (`204 ideophones, 102 rounds`). Live
@@ -689,7 +689,7 @@ Update this section after each architecture pass.
 - [x] Verified session start externally supports only the three sokuon conditions at difficulty `1`.
 - [x] Live browser click-through run outside MockMvc (2026-07-09, NIL-88): the sanctioned
       `scripts/verify-browser-loop.mjs` drives a real headless-Chromium session end to end against the dev backend on
-      `:8081` and Vite on `:5174` — register, session start, 49 answered rounds (47 scored + 2 practice), completion,
+      `:8081` and Vite on `:5174` - register, session start, 49 answered rounds (47 scored + 2 practice), completion,
       leaderboard, rating scale, and the Perception Ladder to its final rung. Green at 1280 and 375 px, 0 console
       errors, no horizontal overflow. Boot the backend with `-Dspring-boot.run.profiles=local,automation` so the loop's
       `browser_loop_*` account can register (see `docs/demo-runbook.md`); the guard is active in every other boot.

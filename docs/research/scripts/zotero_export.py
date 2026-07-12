@@ -189,16 +189,16 @@ def run_zotero_pass(args, rows, used_names, existing_hashes):
     storage_dir = args.zotero_dir / "storage"
 
     if not db_path.exists():
-        sys.exit(f"Can't find {db_path} — pass --zotero-dir if your Zotero data lives elsewhere.")
+        sys.exit(f"Can't find {db_path} - pass --zotero-dir if your Zotero data lives elsewhere.")
     if not storage_dir.exists():
-        sys.exit(f"Can't find {storage_dir} — expected the Zotero storage folder next to zotero.sqlite.")
+        sys.exit(f"Can't find {storage_dir} - expected the Zotero storage folder next to zotero.sqlite.")
 
     tmp_db = Path(tempfile.gettempdir()) / "zotero_export_readonly.sqlite"
     try:
         shutil.copy2(db_path, tmp_db)
     except PermissionError:
         sys.exit(
-            "Couldn't copy zotero.sqlite — it's likely still locked. "
+            "Couldn't copy zotero.sqlite - it's likely still locked. "
             "Make sure Zotero is fully closed (check the system tray / task manager) and try again."
         )
 

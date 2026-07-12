@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -82,6 +83,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleSpringAuthentication(AuthenticationException ex,
             HttpServletRequest request) {
         return build(HttpStatus.UNAUTHORIZED, "Authentication is required", request, null);
+    }
+
+    // A URL under a static-resource mapping (/stimuli/**) that matches no file. Boot
+    // reports a missing static resource by throwing (since 3.2); without this handler
+    // the catch-all below turns a missing stimulus into a 500 (NIL-108).
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(NoResourceFoundException ex,
+            HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "Resource not found", request, null);
     }
 
     @ExceptionHandler(Exception.class)

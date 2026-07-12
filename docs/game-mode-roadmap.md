@@ -1,30 +1,30 @@
 # Game-mode roadmap
 
-## Status — 2026-07-02 (F2 / NIL-56): four greenfield spec sheets exist
+## Status - 2026-07-02 (F2 / NIL-56): four greenfield spec sheets exist
 
 Engineering-grade specs for the four greenfield mode candidates live in the Cowork project folder, `docs/specs/` (Ideophone Arena project, outside this repo):
 
-- `SPEC-cross-linguistic.md` — `CROSS_LINGUISTIC`, 239 items / 5 languages from `triangulating_iconicity`, published-guessability anchors. Architecture driver for NIL-57; build after NIL-57 + licensing gate.
-- `SPEC-free-form-entry.md` — `PRODUCTION`, the third measure (production). Standalone `ratings`-pattern vertical; no NIL-57 dependency, no external gates. **← Build pick (F2, criteria: no new recordings · ≤1 backend + 1 frontend session · vision test). Build slot Jul 6–8 (F5).**
-- `SPEC-phoneme-shape.md` — `TEMPLATE_READING`, template-reading (redup / -Q / -ri; -N deferred; voicing excluded per the F1 null). Second in line, after NIL-57 D1 + pair sign-off round.
-- `SPEC-four-floor-ladder.md` — Touch floor for the Modality Ladder from the six approved haptic pairs. Gated on the audio-recording decision (10 new recordings) → fails build-pick criterion 1; W31+ contingent on the gate.
+- `SPEC-cross-linguistic.md` - `CROSS_LINGUISTIC`, 239 items / 5 languages from `triangulating_iconicity`, published-guessability anchors. Architecture driver for NIL-57; build after NIL-57 + licensing gate.
+- `SPEC-free-form-entry.md` - `PRODUCTION`, the third measure (production). Standalone `ratings`-pattern vertical; no NIL-57 dependency, no external gates. **← Build pick (F2, criteria: no new recordings · ≤1 backend + 1 frontend session · vision test). Build slot Jul 6–8 (F5).**
+- `SPEC-phoneme-shape.md` - `TEMPLATE_READING`, template-reading (redup / -Q / -ri; -N deferred; voicing excluded per the F1 null). Second in line, after NIL-57 D1 + pair sign-off round.
+- `SPEC-four-floor-ladder.md` - Touch floor for the Modality Ladder from the six approved haptic pairs. Gated on the audio-recording decision (10 new recordings) → fails build-pick criterion 1; W31+ contingent on the gate.
 
 Every spec carries a "Deferred to NIL-57" ledger; the shared decisions (mode dispatch D1, unified trials D2, lexeme identity D3, shared item-stats D4, seed-stream registry, `PhonologyService` as shared engine) resolve in the NIL-57 architecture session before any gated build.
 
-Still deferred as modes (unchanged): pseudo-word Foil Arena (gated on recorded audio; TTS ruled out 2026-07-02 — foil *method* lands invariant-safely as the NIL-58 difficulty engine instead), sentence-context mode, campaign / deck-builder / codex structures, Corpus Route.
+Still deferred as modes (unchanged): pseudo-word Foil Arena (gated on recorded audio; TTS ruled out 2026-07-02 - foil *method* lands invariant-safely as the NIL-58 difficulty engine instead), sentence-context mode, campaign / deck-builder / codex structures, Corpus Route.
 
-### Learnability / iconic-bootstrapping mode — designed, deferred (assessed 2026-07-02, OSF-mining session)
+### Learnability / iconic-bootstrapping mode - designed, deferred (assessed 2026-07-02, OSF-mining session)
 
-Paradigm: Lockwood, Dingemanse & Hagoort 2016 (*Collabra*; data mined from the OSF archive, CC BY 4.0). Teach word–meaning pairs, test retention; iconicity's fingerprint is the real-vs-opposite gap — verified from raw data at **86.7% vs 71.3%, Cohen's dz = 1.07, n = 29** (large and real). A "Memory Lab" mode would be the fourth measure: recognition (Choosing) / reflection (Rating) / generation (Production) / **retention**.
+Paradigm: Lockwood, Dingemanse & Hagoort 2016 (*Collabra*; data mined from the OSF archive, CC BY 4.0). Teach word–meaning pairs, test retention; iconicity's fingerprint is the real-vs-opposite gap - verified from raw data at **86.7% vs 71.3%, Cohen's dz = 1.07, n = 29** (large and real). A "Memory Lab" mode would be the fourth measure: recognition (Choosing) / reflection (Rating) / generation (Production) / **retention**.
 
 Why deferred, explicitly **not** a build-one candidate (the case is not overwhelming):
 
-1. The measure's power comes from the **opposite arm** — deliberately teaching players false meanings. That is a mode-killer for a research-honest public app (and un-teaching would need its own design).
-2. A real-only variant loses the contrast and hits ceiling (.867 mean) — low discriminative resolution, and it measures memory + iconicity confounded.
-3. Per-item learnability is empirically thin even in the source data (one condition arm per item, n = 19/arm; learn-acc ~ guessability rho = +.30/−.25, both n.s.) — no per-item difficulty scaffold to build on.
+1. The measure's power comes from the **opposite arm** - deliberately teaching players false meanings. That is a mode-killer for a research-honest public app (and un-teaching would need its own design).
+2. A real-only variant loses the contrast and hits ceiling (.867 mean) - low discriminative resolution, and it measures memory + iconicity confounded.
+3. Per-item learnability is empirically thin even in the source data (one condition arm per item, n = 19/arm; learn-acc ~ guessability rho = +.30/−.25, both n.s.) - no per-item difficulty scaffold to build on.
 4. Not salvageable as a free-form-entry mechanic: produce-then-recall measures the generation effect, not iconicity.
 
-Salvage that ships anyway: the clash-is-costly finding (with its P3/LPC ERP signature) is vetted research-flavor copy ("your brain fights a word whose sound points the wrong way" — F3 register, citation ready), and the 37-row opposite-gloss sheet (`osf-lockwoodstimuli/`) is a reference for antonymic contrast quality in pairing work. Revisit only if a delayed-retention hook ever matters (e.g. spaced-repetition retention curves as a long-horizon portfolio stat); it would still need an honest design that never teaches falsehoods.
+Salvage that ships anyway: the clash-is-costly finding (with its P3/LPC ERP signature) is vetted research-flavor copy ("your brain fights a word whose sound points the wrong way" - F3 register, citation ready), and the 37-row opposite-gloss sheet (`osf-lockwoodstimuli/`) is a reference for antonymic contrast quality in pairing work. Revisit only if a delayed-retention hook ever matters (e.g. spaced-repetition retention curves as a long-horizon portfolio stat); it would still need an honest design that never teaches falsehoods.
 
 ---
 
